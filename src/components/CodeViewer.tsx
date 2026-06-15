@@ -14,8 +14,10 @@ function sr(html: string, regex: RegExp, replacement: string): string {
 }
 
 // Klammern pro Verschachtelungstiefe einfärben (überspringt HTML-Tags im String)
+// {} immer grün (JSX-Expressions), () [] tiefen-basiert
 function colorizeBrackets(html: string): string {
   const COLORS = ['#ffd700', '#c586c0', '#9cdcfe']
+  const CURLY = '#4ade80'
   const stack: number[] = []
   let result = ''
   let i = 0
@@ -30,12 +32,12 @@ function colorizeBrackets(html: string): string {
     }
     const ch = html[i]
     if ('([{'.includes(ch)) {
-      const color = COLORS[stack.length % COLORS.length]
+      const color = ch === '{' ? CURLY : COLORS[stack.length % COLORS.length]
       stack.push(stack.length)
       result += `<span style="color:${color}">${ch}</span>`
     } else if (')]}'.includes(ch)) {
       const depth = stack.length > 0 ? stack.pop()! : 0
-      const color = COLORS[depth % COLORS.length]
+      const color = ch === '}' ? CURLY : COLORS[depth % COLORS.length]
       result += `<span style="color:${color}">${ch}</span>`
     } else {
       result += ch
@@ -82,8 +84,10 @@ function highlight(code: string, lang: string): string {
     '<span style="color:#569cd6">$1</span>')
   r = sr(r, /\b(string|number|boolean|void|never|any|unknown|ReactNode|ReactElement)\b/g,
     '<span style="color:#4ec9b0">$1</span>')
-  r = sr(r, /(&lt;\/?[A-Z][a-zA-Z]*)/g,
-    '<span style="color:#f97316">$1</span>')
+  // <a> und </a> → grün (vor dem allgemeinen lowercase-Tag-Pass)
+  r = sr(r, /(&lt;\/?a(?=[\s&]))/g,      '<span style="color:#4ade80">$1</span>')
+  // Uppercase-Komponenten und lowercase-HTML-Tags → orange
+  r = sr(r, /(&lt;\/?[A-Za-z][a-zA-Z0-9]*)/g, '<span style="color:#f97316">$1</span>')
 
   return colorizeBrackets(r)
 }
