@@ -6,6 +6,13 @@ interface CodeViewerProps {
   files: CodeFile[]
 }
 
+// Wendet Regex nur auf Textnodes an — überspringt bereits gesetzte HTML-Spans
+function sr(html: string, regex: RegExp, replacement: string): string {
+  return html.split(/(<[^>]*>)/).map(part =>
+    part.startsWith('<') ? part : part.replace(regex, replacement)
+  ).join('')
+}
+
 // Klammern pro Verschachtelungstiefe einfärben (überspringt HTML-Tags im String)
 function colorizeBrackets(html: string): string {
   const COLORS = ['#ffd700', '#c586c0', '#9cdcfe']
@@ -51,23 +58,25 @@ function highlight(code: string, lang: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
 
-  const highlighted = escaped
-    // Strings
-    .replace(/(`[^`]*`)/g, '<span style="color:#ce9178">$1</span>')
-    .replace(/('[^']*')/g, '<span style="color:#ce9178">$1</span>')
-    .replace(/("(?:[^"\\]|\\.)*")/g, '<span style="color:#ce9178">$1</span>')
-    // Kommentare
-    .replace(/(\/\/.*)/g, '<span style="color:#6a9955">$1</span>')
-    // Keywords
-    .replace(/\b(import|export|from|default|function|return|const|let|var|if|else|for|while|async|await|try|catch|finally|new|type|interface|extends|implements|class|null|undefined|true|false|typeof|instanceof)\b/g,
-      '<span style="color:#569cd6">$1</span>')
-    // Types
-    .replace(/\b(string|number|boolean|void|never|any|unknown|ReactNode|ReactElement)\b/g,
-      '<span style="color:#4ec9b0">$1</span>')
-    // JSX-Tags — orange statt teal
-    .replace(/(&lt;\/?[A-Z][a-zA-Z]*)/g, '<span style="color:#f97316">$1</span>')
+  // Backtick-Strings auf rohem Text — noch keine Spans vorhanden
+  let r = escaped.replace(/(`[^`]*`)/g, '<span style="color:#ce9178">$1</span>')
 
-  return colorizeBrackets(highlighted)
+  // Ab hier sr(): jede Regel überspringt bereits gesetzte <span>-Tags
+  r = sr(r, /('[^']*')/g,              '<span style="color:#ce9178">$1</span>')
+  r = sr(r, /("(?:[^"\\]|\\.)*")/g,   '<span style="color:#ce9178">$1</span>')
+  r = sr(r, /(\/\/.*)/g,              '<span style="color:#6a9955">$1</span>')
+  r = sr(r, /\bfunction\s+([A-Za-z_$][A-Za-z0-9_$]*)/g,
+    'function <span style="color:#e879f9">$1</span>')
+  r = sr(r, /\b(const|let)\s+([A-Z][A-Za-z0-9_$]*)\s*=/g,
+    '$1 <span style="color:#e879f9">$2</span> =')
+  r = sr(r, /\b(import|export|from|default|function|return|const|let|var|if|else|for|while|async|await|try|catch|finally|new|type|interface|extends|implements|class|null|undefined|true|false|typeof|instanceof)\b/g,
+    '<span style="color:#569cd6">$1</span>')
+  r = sr(r, /\b(string|number|boolean|void|never|any|unknown|ReactNode|ReactElement)\b/g,
+    '<span style="color:#4ec9b0">$1</span>')
+  r = sr(r, /(&lt;\/?[A-Z][a-zA-Z]*)/g,
+    '<span style="color:#f97316">$1</span>')
+
+  return colorizeBrackets(r)
 }
 
 // Sprach-Label für Tab

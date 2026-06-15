@@ -89,7 +89,9 @@ Wichtig: JSX ist kein echtes HTML. Attribute heißen anders (z.B. \`className\` 
           {
             name: 'App.tsx',
             language: 'tsx',
-            code: `function App() {
+            code: `import './App.css'
+
+function App() {
   const name = "Steven"          // JS-Variable
   const isLoggedIn = true        // Boolean
 
@@ -103,8 +105,8 @@ Wichtig: JSX ist kein echtes HTML. Attribute heißen anders (z.B. \`className\` 
       {/* Bedingter Ausdruck mit ternärem Operator */}
       <p>{isLoggedIn ? "Eingeloggt" : "Bitte anmelden"}</p>
 
-      {/* Inline-Style als JS-Objekt, nicht als String */}
-      <span style={{ color: 'blue', fontSize: '18px' }}>
+      {/* className statt inline style */}
+      <span className="highlight-text">
         Blauer Text
       </span>
 
@@ -113,6 +115,16 @@ Wichtig: JSX ist kein echtes HTML. Attribute heißen anders (z.B. \`className\` 
 }
 
 export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `
+.highlight-text {
+  color: blue;
+  font-size: 18px;
+}
+`,
           },
         ],
       },
@@ -269,6 +281,7 @@ In TypeScript nutzt du \`React.ReactNode\` als Typ für children.`,
             name: 'Box.tsx',
             language: 'tsx',
             code: `import { ReactNode } from 'react'  // ReactNode-Typ importieren
+import './Box.css'
 
 interface BoxProps {
   color?: string
@@ -277,7 +290,8 @@ interface BoxProps {
 
 function Box({ color = 'lightgray', children }: BoxProps) {
   return (
-    <div style={{ background: color, padding: '16px', borderRadius: '8px' }}>
+    // Dynamische Hintergrundfarbe als CSS-Variable übergeben
+    <div className="box" style={{ '--box-color': color } as React.CSSProperties}>
       {children}   {/* Hier wird der übergebene Inhalt gerendert */}
     </div>
   )
@@ -307,6 +321,17 @@ function App() {
 }
 
 export default App`,
+          },
+          {
+            name: 'Box.css',
+            language: 'css',
+            code: `
+.box {
+  background: var(--box-color, lightgray);
+  padding: 16px;
+  border-radius: 8px;
+}
+`,
           },
         ],
       },
@@ -576,7 +601,9 @@ Key hilft React beim effizienten Update des DOM — ohne key gibt es Warnungen u
           {
             name: 'ProductList.tsx',
             language: 'tsx',
-            code: `interface Product {
+            code: `import './ProductList.css'
+
+interface Product {
   id: number
   name: string
   price: number
@@ -595,7 +622,7 @@ function ProductList() {
     <ul>
       {products.map(product => (
         // key muss eindeutig unter Geschwistern sein
-        <li key={product.id} style={{ opacity: product.inStock ? 1 : 0.4 }}>
+        <li key={product.id} className={product.inStock ? '' : 'out-of-stock'}>
           <strong>{product.name}</strong> — {product.price}€
           {!product.inStock && <span> (Ausverkauft)</span>}
         </li>
@@ -605,6 +632,15 @@ function ProductList() {
 }
 
 export default ProductList`,
+          },
+          {
+            name: 'ProductList.css',
+            language: 'css',
+            code: `
+.out-of-stock {
+  opacity: 0.4;
+}
+`,
           },
         ],
       },
@@ -838,6 +874,7 @@ export function useTheme() {
             name: 'ThemedButton.tsx',
             language: 'tsx',
             code: `import { useTheme } from './ThemeContext'  // Custom Hook nutzen
+import './ThemedButton.css'
 
 function ThemedButton() {
   const { theme, toggleTheme } = useTheme()  // Direkt aus Context lesen
@@ -845,11 +882,7 @@ function ThemedButton() {
   return (
     <button
       onClick={toggleTheme}
-      style={{
-        background: theme === 'dark' ? '#333' : '#eee',
-        color: theme === 'dark' ? '#fff' : '#000',
-        padding: '8px 16px',
-      }}
+      className={theme === 'dark' ? 'btn-dark' : 'btn-light'}
     >
       Theme: {theme} — Wechseln
     </button>
@@ -878,6 +911,23 @@ function App() {
 }
 
 export default App`,
+          },
+          {
+            name: 'ThemedButton.css',
+            language: 'css',
+            code: `
+.btn-light {
+  background: #eee;
+  color: #000;
+  padding: 8px 16px;
+}
+
+.btn-dark {
+  background: #333;
+  color: #fff;
+  padding: 8px 16px;
+}
+`,
           },
         ],
       },
@@ -1155,6 +1205,7 @@ Für komplexe Formulare empfiehlt sich React Hook Form (\`npm install react-hook
             name: 'LoginForm.tsx',
             language: 'tsx',
             code: `import { useState } from 'react'
+import './LoginForm.css'
 
 interface FormData {
   email: string
@@ -1198,7 +1249,7 @@ function LoginForm() {
           placeholder="E-Mail"
           type="email"
         />
-        {errors.email && <span style={{ color: 'red' }}>{errors.email}</span>}
+        {errors.email && <span className="error-message">{errors.email}</span>}
       </div>
       <div>
         <input
@@ -1208,7 +1259,7 @@ function LoginForm() {
           placeholder="Passwort"
           type="password"
         />
-        {errors.password && <span style={{ color: 'red' }}>{errors.password}</span>}
+        {errors.password && <span className="error-message">{errors.password}</span>}
       </div>
       <button type="submit">Anmelden</button>
     </form>
@@ -1216,6 +1267,15 @@ function LoginForm() {
 }
 
 export default LoginForm`,
+          },
+          {
+            name: 'LoginForm.css',
+            language: 'css',
+            code: `
+.error-message {
+  color: red;
+}
+`,
           },
         ],
       },
@@ -1489,6 +1549,7 @@ Gut für: Produktions-Apps, API-Fehler, defekte 3rd-Party-Komponenten.`,
             name: 'ErrorBoundary.tsx',
             language: 'tsx',
             code: `import { Component, ReactNode, ErrorInfo } from 'react'
+import './ErrorBoundary.css'
 
 interface Props {
   children: ReactNode
@@ -1520,7 +1581,7 @@ class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return this.props.fallback ?? (
-        <div style={{ color: 'red', padding: '16px' }}>
+        <div className="error-boundary">
           <h2>Etwas ist schiefgelaufen.</h2>
           <p>{this.state.error?.message}</p>
         </div>
@@ -1547,6 +1608,16 @@ function App() {
 }
 
 export default App`,
+          },
+          {
+            name: 'ErrorBoundary.css',
+            language: 'css',
+            code: `
+.error-boundary {
+  color: red;
+  padding: 16px;
+}
+`,
           },
         ],
       },
@@ -1611,6 +1682,7 @@ Haupteinsatz: Modals, Tooltips, Dropdowns — diese müssen oft über anderen El
             language: 'tsx',
             code: `import { createPortal } from 'react-dom'
 import { ReactNode } from 'react'
+import './Modal.css'
 
 interface ModalProps {
   isOpen: boolean
@@ -1625,16 +1697,11 @@ function Modal({ isOpen, onClose, children }: ModalProps) {
   // — unabhängig von parent overflow/z-index Regeln
   return createPortal(
     <div
-      style={{
-        position: 'fixed', inset: 0,
-        background: 'rgba(0,0,0,0.5)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 1000,
-      }}
+      className="modal-overlay"
       onClick={onClose}  // Klick auf Backdrop = schließen
     >
       <div
-        style={{ background: '#fff', padding: '24px', borderRadius: '8px' }}
+        className="modal-content"
         onClick={e => e.stopPropagation()}  // Klick im Modal nicht weiterleiten
       >
         {children}
@@ -1646,6 +1713,27 @@ function Modal({ isOpen, onClose, children }: ModalProps) {
 }
 
 export default Modal`,
+          },
+          {
+            name: 'Modal.css',
+            language: 'css',
+            code: `
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+}
+`,
           },
         ],
       },
@@ -1896,6 +1984,7 @@ export default PrivateRoute`,
             language: 'tsx',
             code: `import { Link, useNavigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import './Layout.css'
 
 function Layout() {
   const { user, logout } = useAuth()
@@ -1907,23 +1996,18 @@ function Layout() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header style={{
-        background: '#1a1a2e', color: '#fff',
-        padding: '0 24px', height: '60px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-      }}>
-        <Link to="/dashboard" style={{ color: '#e94560', fontWeight: 'bold', textDecoration: 'none' }}>
+    <div className="layout-wrapper">
+      <header className="layout-header">
+        <Link to="/dashboard" className="layout-logo">
           ⚽ SportsDash
         </Link>
 
         {user && (
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <span style={{ color: '#aaa' }}>Hallo, {user.username}</span>
+          <div className="layout-nav">
+            <span className="layout-greeting">Hallo, {user.username}</span>
             <button
               onClick={handleLogout}
-              style={{ background: '#e94560', color: '#fff', border: 'none',
-                       padding: '6px 14px', borderRadius: '4px', cursor: 'pointer' }}
+              className="logout-button"
             >
               Abmelden
             </button>
@@ -1931,7 +2015,7 @@ function Layout() {
         )}
       </header>
 
-      <main style={{ flex: 1, padding: '24px', background: '#0f3460', color: '#fff' }}>
+      <main className="layout-main">
         <Outlet />   {/* Hier wird die aktuelle Seite gerendert */}
       </main>
     </div>
@@ -1939,6 +2023,59 @@ function Layout() {
 }
 
 export default Layout`,
+          },
+          {
+            name: 'Layout.css',
+            language: 'css',
+            code: `
+.layout-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-header {
+  background: #1a1a2e;
+  color: #fff;
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.layout-logo {
+  color: #e94560;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.layout-nav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.layout-greeting {
+  color: #aaa;
+}
+
+.logout-button {
+  background: #e94560;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.layout-main {
+  flex: 1;
+  padding: 24px;
+  background: #0f3460;
+  color: #fff;
+}
+`,
           },
         ],
       },
@@ -1961,12 +2098,7 @@ Fehler werden in einem lokalen Error-State angezeigt. Nach Erfolg wird zur Dashb
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import type { LoginData } from '../types'
-
-const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '10px', marginTop: '6px',
-  background: '#16213e', border: '1px solid #e94560',
-  borderRadius: '4px', color: '#fff', boxSizing: 'border-box',
-}
+import './AuthPages.css'
 
 function LoginPage() {
   const [form, setForm]   = useState<LoginData>({ email: '', password: '' })
@@ -1994,29 +2126,27 @@ function LoginPage() {
   }
 
   return (
-    <div style={{ maxWidth: '400px', margin: '60px auto' }}>
-      <h2 style={{ color: '#e94560', marginBottom: '24px' }}>⚽ SportsDash Login</h2>
+    <div className="auth-container">
+      <h2 className="auth-title">⚽ SportsDash Login</h2>
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '16px' }}>
+        <div className="auth-field">
           <label>E-Mail</label>
           <input name="email" type="email" value={form.email}
-                 onChange={handleChange} style={inputStyle} required />
+                 onChange={handleChange} className="auth-input" required />
         </div>
-        <div style={{ marginBottom: '16px' }}>
+        <div className="auth-field">
           <label>Passwort</label>
           <input name="password" type="password" value={form.password}
-                 onChange={handleChange} style={inputStyle} required />
+                 onChange={handleChange} className="auth-input" required />
         </div>
-        {error && <p style={{ color: '#e94560' }}>{error}</p>}
+        {error && <p className="auth-error">{error}</p>}
         <button type="submit" disabled={loading}
-          style={{ width: '100%', padding: '10px', background: '#e94560',
-                   color: '#fff', border: 'none', borderRadius: '4px',
-                   cursor: loading ? 'not-allowed' : 'pointer' }}>
+          className={\`auth-submit\${loading ? ' auth-submit--loading' : ''}\`}>
           {loading ? 'Anmelden...' : 'Anmelden'}
         </button>
       </form>
-      <p style={{ marginTop: '16px', color: '#aaa' }}>
-        Noch kein Account? <Link to="/register" style={{ color: '#e94560' }}>Registrieren</Link>
+      <p className="auth-footer">
+        Noch kein Account? <Link to="/register" className="auth-link">Registrieren</Link>
       </p>
     </div>
   )
@@ -2031,12 +2161,7 @@ export default LoginPage`,
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import type { RegisterData } from '../types'
-
-const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '10px', marginTop: '6px',
-  background: '#16213e', border: '1px solid #e94560',
-  borderRadius: '4px', color: '#fff', boxSizing: 'border-box',
-}
+import './AuthPages.css'
 
 function RegisterPage() {
   const [form, setForm]   = useState<RegisterData>({ username: '', email: '', password: '' })
@@ -2065,37 +2190,97 @@ function RegisterPage() {
   }
 
   return (
-    <div style={{ maxWidth: '400px', margin: '60px auto' }}>
-      <h2 style={{ color: '#e94560', marginBottom: '24px' }}>⚽ Registrieren</h2>
+    <div className="auth-container">
+      <h2 className="auth-title">⚽ Registrieren</h2>
       <form onSubmit={handleSubmit}>
         {(['username', 'email', 'password'] as const).map(field => (
-          <div key={field} style={{ marginBottom: '16px' }}>
-            <label style={{ textTransform: 'capitalize' }}>{field}</label>
+          <div key={field} className="auth-field">
+            <label className="auth-label-capitalize">{field}</label>
             <input
               name={field}
               type={field === 'password' ? 'password' : field === 'email' ? 'email' : 'text'}
               value={form[field]}
               onChange={handleChange}
-              style={inputStyle}
+              className="auth-input"
               required
             />
           </div>
         ))}
-        {error && <p style={{ color: '#e94560' }}>{error}</p>}
+        {error && <p className="auth-error">{error}</p>}
         <button type="submit" disabled={loading}
-          style={{ width: '100%', padding: '10px', background: '#e94560',
-                   color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          className="auth-submit">
           {loading ? 'Registrieren...' : 'Registrieren'}
         </button>
       </form>
-      <p style={{ marginTop: '16px', color: '#aaa' }}>
-        Schon registriert? <Link to="/login" style={{ color: '#e94560' }}>Anmelden</Link>
+      <p className="auth-footer">
+        Schon registriert? <Link to="/login" className="auth-link">Anmelden</Link>
       </p>
     </div>
   )
 }
 
 export default RegisterPage`,
+          },
+          {
+            name: 'AuthPages.css',
+            language: 'css',
+            code: `
+.auth-container {
+  max-width: 400px;
+  margin: 60px auto;
+}
+
+.auth-title {
+  color: #e94560;
+  margin-bottom: 24px;
+}
+
+.auth-field {
+  margin-bottom: 16px;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  background: #16213e;
+  border: 1px solid #e94560;
+  border-radius: 4px;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+.auth-error {
+  color: #e94560;
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 10px;
+  background: #e94560;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.auth-submit--loading {
+  cursor: not-allowed;
+}
+
+.auth-footer {
+  margin-top: 16px;
+  color: #aaa;
+}
+
+.auth-link {
+  color: #e94560;
+}
+
+.auth-label-capitalize {
+  text-transform: capitalize;
+}
+`,
           },
         ],
       },
@@ -2120,6 +2305,7 @@ import { useAuth } from '../context/AuthContext'
 import MatchCard from '../components/MatchCard'
 import useFetch from '../hooks/useFetch'
 import type { Match, ApiResponse } from '../types'
+import './DashboardPage.css'
 
 // Mock-Daten für den Fall ohne echten API-Key
 const MOCK_MATCHES: Match[] = [
@@ -2172,31 +2358,30 @@ function DashboardPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="dashboard-header">
         <div>
-          <h1 style={{ color: '#e94560', margin: 0 }}>⚽ Spielergebnisse</h1>
-          <p style={{ color: '#aaa', margin: '4px 0 0' }}>Willkommen, {user?.username}!</p>
+          <h1 className="dashboard-title">⚽ Spielergebnisse</h1>
+          <p className="dashboard-subtitle">Willkommen, {user?.username}!</p>
         </div>
         <button
           onClick={() => setUseMock(m => !m)}
-          style={{ background: '#16213e', color: '#e94560', border: '1px solid #e94560',
-                   padding: '6px 14px', borderRadius: '4px', cursor: 'pointer' }}
+          className="dashboard-toggle"
         >
           {useMock ? '🔴 Mock-Daten' : '🟢 Live-Daten'}
         </button>
       </div>
 
       {loading && <p>Lade Spiele...</p>}
-      {error   && <p style={{ color: '#e94560' }}>Fehler: {error}</p>}
+      {error   && <p className="dashboard-error">Fehler: {error}</p>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+      <div className="matches-grid">
         {matches.map(match => (
           <MatchCard key={match.fixture.id} match={match} />
         ))}
       </div>
 
       {!loading && matches.length === 0 && (
-        <p style={{ color: '#aaa' }}>Keine Spiele für heute gefunden.</p>
+        <p className="dashboard-empty">Keine Spiele für heute gefunden.</p>
       )}
     </div>
   )
@@ -2209,16 +2394,17 @@ export default DashboardPage`,
             language: 'tsx',
             code: `import type { Match } from '../types'
 import { memo } from 'react'
+import './MatchCard.css'
 
 interface MatchCardProps {
   match: Match
 }
 
-// Hilfsfunktion: Status-Badge Farbe
-function getStatusColor(status: string): string {
-  if (status === 'FT') return '#27ae60'   // Grün = Abgepfiffen
-  if (['1H', '2H', 'ET'].includes(status)) return '#e94560'  // Rot = Live
-  return '#888'  // Grau = Geplant
+// Hilfsfunktion: Status-Badge CSS-Klasse
+function getStatusClass(status: string): string {
+  if (status === 'FT') return 'status-badge status-badge--finished'
+  if (['1H', '2H', 'ET'].includes(status)) return 'status-badge status-badge--live'
+  return 'status-badge status-badge--scheduled'
 }
 
 const MatchCard = memo(function MatchCard({ match }: MatchCardProps) {
@@ -2226,37 +2412,30 @@ const MatchCard = memo(function MatchCard({ match }: MatchCardProps) {
   const isFinished = fixture.status.short === 'FT'
 
   return (
-    <div style={{
-      background: '#16213e', borderRadius: '8px', padding: '20px',
-      border: '1px solid #1a1a2e',
-    }}>
+    <div className="match-card">
       {/* Liga */}
-      <p style={{ color: '#888', fontSize: '12px', margin: '0 0 12px' }}>
+      <p className="match-league">
         {league.name} · {league.country}
       </p>
 
       {/* Ergebnis-Zeile */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="match-row">
         {/* Heimteam */}
-        <div style={{ textAlign: 'center', flex: 1 }}>
+        <div className="match-team">
           <img src={teams.home.logo} alt={teams.home.name}
-               style={{ width: '48px', height: '48px', objectFit: 'contain' }}
+               className="team-logo"
                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-          <p style={{ margin: '8px 0 0', fontSize: '13px' }}>{teams.home.name}</p>
+          <p className="team-name">{teams.home.name}</p>
         </div>
 
         {/* Ergebnis / Status */}
-        <div style={{ textAlign: 'center', padding: '0 16px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#e94560' }}>
+        <div className="match-score">
+          <div className="score-value">
             {isFinished || fixture.status.elapsed
               ? \`\${goals.home ?? '–'} : \${goals.away ?? '–'}\`
               : 'vs'}
           </div>
-          <span style={{
-            fontSize: '11px', padding: '2px 8px', borderRadius: '4px',
-            background: getStatusColor(fixture.status.short), color: '#fff',
-            marginTop: '4px', display: 'inline-block'
-          }}>
+          <span className={getStatusClass(fixture.status.short)}>
             {fixture.status.short === 'NS'
               ? new Date(fixture.date).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
               : fixture.status.short}
@@ -2264,11 +2443,11 @@ const MatchCard = memo(function MatchCard({ match }: MatchCardProps) {
         </div>
 
         {/* Auswärtsteam */}
-        <div style={{ textAlign: 'center', flex: 1 }}>
+        <div className="match-team">
           <img src={teams.away.logo} alt={teams.away.name}
-               style={{ width: '48px', height: '48px', objectFit: 'contain' }}
+               className="team-logo"
                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-          <p style={{ margin: '8px 0 0', fontSize: '13px' }}>{teams.away.name}</p>
+          <p className="team-name">{teams.away.name}</p>
         </div>
       </div>
     </div>
@@ -2313,6 +2492,123 @@ function useFetch<T>(url: string, headers: Record<string, string> = {}) {
 }
 
 export default useFetch`,
+          },
+          {
+            name: 'DashboardPage.css',
+            language: 'css',
+            code: `
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-title {
+  color: #e94560;
+  margin: 0;
+}
+
+.dashboard-subtitle {
+  color: #aaa;
+  margin: 4px 0 0;
+}
+
+.dashboard-toggle {
+  background: #16213e;
+  color: #e94560;
+  border: 1px solid #e94560;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.dashboard-error {
+  color: #e94560;
+}
+
+.matches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.dashboard-empty {
+  color: #aaa;
+}
+`,
+          },
+          {
+            name: 'MatchCard.css',
+            language: 'css',
+            code: `
+.match-card {
+  background: #16213e;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #1a1a2e;
+}
+
+.match-league {
+  color: #888;
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+
+.match-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.match-team {
+  text-align: center;
+  flex: 1;
+}
+
+.team-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.team-name {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.match-score {
+  text-align: center;
+  padding: 0 16px;
+}
+
+.score-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #e94560;
+}
+
+.status-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #fff;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.status-badge--finished {
+  background: #27ae60;
+}
+
+.status-badge--live {
+  background: #e94560;
+}
+
+.status-badge--scheduled {
+  background: #888;
+}
+`,
           },
         ],
       },
