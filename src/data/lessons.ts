@@ -20,6 +20,10 @@ Vite ist das Build-Tool: es startet einen Dev-Server und kompiliert TypeScript z
           'Vite = schnelles Build-Tool (ersetzt CRA)',
           'Komponenten = wiederverwendbare UI-Bausteine',
         ],
+        preview: `<div>
+  <h1>Hallo React!</h1>
+  <p>Das ist meine erste React-App mit Vite + TypeScript.</p>
+</div>`,
         files: [
           {
             name: 'main.tsx',
@@ -78,6 +82,11 @@ export default App`,
         explanation: `**JSX** ist eine Syntax-Erweiterung: du schreibst HTML-ähnlichen Code direkt in JavaScript/TypeScript.
 TypeScript kompiliert JSX zu normalen \`React.createElement()\`-Aufrufen — du siehst davon nichts.
 Wichtig: JSX ist kein echtes HTML. Attribute heißen anders (z.B. \`className\` statt \`class\`).`,
+        preview: `<div>
+  <h1>Hallo, Steven!</h1>
+  <p>Eingeloggt</p>
+  <span style="color:blue;font-size:18px">Blauer Text</span>
+</div>`,
         keyPoints: [
           'JSX = HTML-Syntax in JS/TS-Dateien',
           'className statt class (class ist JS-Keyword)',
@@ -135,6 +144,12 @@ export default App`,
         explanation: `Eine **Komponente** ist eine TypeScript-Funktion, die JSX zurückgibt.
 Name beginnt immer mit **Großbuchstabe** — React unterscheidet so zwischen HTML-Tags (\`div\`) und Komponenten (\`Button\`).
 Komponenten können andere Komponenten enthalten — so entsteht ein **Komponentenbaum**.`,
+        preview: `<header style="border-bottom:1px solid #e5e7eb;padding-bottom:12px;margin-bottom:12px">
+  <h1>Meine App</h1>
+  <nav><a href="#">Home</a><a href="#">Über uns</a></nav>
+</header>
+<main style="padding:4px 0 12px"><p>Hauptinhalt hier</p></main>
+<footer><p>© 2025 Meine App</p></footer>`,
         keyPoints: [
           'Funktion → gibt JSX zurück → Komponente',
           'Großbuchstabe am Anfang ist Pflicht',
@@ -204,6 +219,17 @@ export default App`,
         explanation: `**Props** (Properties) sind Parameter, die du einer Komponente von außen mitgibst — wie Funktionsargumente.
 Die Komponente empfängt Props als Objekt. Mit TypeScript definierst du ein **Interface** für die erlaubten Props.
 Props fließen immer **von oben nach unten** (Parent → Child) — niemals umgekehrt.`,
+        preview: `<div style="display:flex;gap:16px;flex-wrap:wrap">
+  <div style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;min-width:180px">
+    <h2>React lernen</h2>
+    <p>Schritt für Schritt</p>
+    <span style="background:#7c3aed;color:#fff;padding:2px 10px;border-radius:12px;font-size:12px">Neu</span>
+  </div>
+  <div style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;min-width:180px">
+    <h2>TypeScript</h2>
+    <p>Typen für JavaScript</p>
+  </div>
+</div>`,
         keyPoints: [
           'Props = Eingabe-Parameter einer Komponente',
           'Datenfluss: immer Parent → Child (Einbahnstraße)',
@@ -271,6 +297,15 @@ export default App`,
         explanation: `**children** ist ein spezielles Prop: alles was zwischen öffnendem und schließendem Tag steht.
 So baust du Layout-Komponenten (Container, Card, Modal), die beliebigen Inhalt umhüllen.
 In TypeScript nutzt du \`React.ReactNode\` als Typ für children.`,
+        preview: `<div style="display:flex;flex-direction:column;gap:12px">
+  <div style="background:lightblue;padding:16px;border-radius:8px">
+    <h2>Titel im Kasten</h2>
+    <p>Beliebiger Inhalt hier drin</p>
+  </div>
+  <div style="background:lightyellow;padding:16px;border-radius:8px">
+    <p>Anderer Inhalt — gleiche Komponente</p>
+  </div>
+</div>`,
         keyPoints: [
           'children = Inhalt zwischen den Tags der Komponente',
           'Typ: React.ReactNode (alles was React rendern kann)',
@@ -342,6 +377,17 @@ export default App`,
         explanation: `**useState** ist ein React Hook — eine Funktion die einer Komponente "Gedächtnis" gibt.
 Ohne State würde React nichts neu rendern wenn sich Daten ändern. State löst das.
 Immer über den Setter verändern (\`setCount\`), nie direkt die Variable — sonst kein Re-render.`,
+        preview: `<div>
+  <h1 style="margin-bottom:12px">State-Demo</h1>
+  <div style="display:inline-flex;flex-direction:column;align-items:center;gap:8px;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-right:12px">
+    <p>Zähler: <strong>0</strong></p>
+    <div style="display:flex;gap:8px"><button>+1</button><button>Reset</button></div>
+  </div>
+  <div style="display:inline-flex;flex-direction:column;align-items:center;gap:8px;border:1px solid #e5e7eb;border-radius:8px;padding:16px">
+    <p>Zähler: <strong>0</strong></p>
+    <div style="display:flex;gap:8px"><button>+1</button><button>Reset</button></div>
+  </div>
+</div>`,
         keyPoints: [
           'useState gibt [wert, setter]-Paar zurück',
           'Setter-Aufruf → React rendert Komponente neu',
@@ -405,6 +451,12 @@ export default App`,
         explanation: `State kann jeden Typ halten: Strings, Numbers, Objekte, Arrays.
 Bei Objekten und Arrays **niemals** direkt mutieren — immer neue Kopien erstellen (Spread-Operator \`...\`).
 React erkennt Änderungen über Referenzvergleich — nur eine neue Referenz löst Re-render aus.`,
+        preview: `<div style="display:flex;flex-direction:column;gap:10px;max-width:320px">
+  <input placeholder="Name" style="display:block">
+  <p>Name: <strong></strong></p>
+  <button style="align-self:flex-start">Tag hinzufügen</button>
+  <ul><li>Tag 1</li><li>Tag 2</li></ul>
+</div>`,
         keyPoints: [
           'Spread ... erstellt flache Kopie: { ...obj, key: newVal }',
           'Arrays: [...arr, newItem] statt arr.push()',

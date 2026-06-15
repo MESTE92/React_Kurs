@@ -105,7 +105,7 @@ function LessonView({ lesson, totalLessons, onPrev, onNext }: LessonViewProps) {
           <h3 style={{ fontSize: '14px', color: '#9d8bc0', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             💻 Code
           </h3>
-          <CodeViewer files={lesson.files} />
+          <CodeViewer files={lesson.files} preview={lesson.preview} />
         </div>
       )}
 
