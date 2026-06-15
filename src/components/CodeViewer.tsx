@@ -106,7 +106,7 @@ function CodeViewer({ files }: CodeViewerProps) {
         background: '#1a1a2e', padding: '20px', overflowX: 'auto', maxHeight: '480px',
         overflowY: 'auto',
       }}>
-        <pre style={{ margin: 0, fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: '13.5px', lineHeight: '1.7' }}>
+        <pre style={{ margin: 0, fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: '13.5px', lineHeight: '1.7', color: '#e2e8f0' }}>
           <code
             dangerouslySetInnerHTML={{
               __html: highlight(activeFile.code, activeFile.language),
