@@ -6,6 +6,38 @@ interface CodeViewerProps {
   files: CodeFile[]
 }
 
+// Klammern pro Verschachtelungstiefe einfärben (überspringt HTML-Tags im String)
+function colorizeBrackets(html: string): string {
+  const COLORS = ['#ffd700', '#c586c0', '#9cdcfe']
+  const stack: number[] = []
+  let result = ''
+  let i = 0
+
+  while (i < html.length) {
+    if (html[i] === '<') {
+      const end = html.indexOf('>', i)
+      if (end === -1) { result += html.slice(i); break }
+      result += html.slice(i, end + 1)
+      i = end + 1
+      continue
+    }
+    const ch = html[i]
+    if ('([{'.includes(ch)) {
+      const color = COLORS[stack.length % COLORS.length]
+      stack.push(stack.length)
+      result += `<span style="color:${color}">${ch}</span>`
+    } else if (')]}'.includes(ch)) {
+      const depth = stack.length > 0 ? stack.pop()! : 0
+      const color = COLORS[depth % COLORS.length]
+      result += `<span style="color:${color}">${ch}</span>`
+    } else {
+      result += ch
+    }
+    i++
+  }
+  return result
+}
+
 // Syntax-Highlighting: Farben pro Token-Typ
 function highlight(code: string, lang: string): string {
   if (lang === 'bash') {
@@ -19,7 +51,7 @@ function highlight(code: string, lang: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
 
-  return escaped
+  const highlighted = escaped
     // Strings
     .replace(/(`[^`]*`)/g, '<span style="color:#ce9178">$1</span>')
     .replace(/('[^']*')/g, '<span style="color:#ce9178">$1</span>')
@@ -32,8 +64,10 @@ function highlight(code: string, lang: string): string {
     // Types
     .replace(/\b(string|number|boolean|void|never|any|unknown|ReactNode|ReactElement)\b/g,
       '<span style="color:#4ec9b0">$1</span>')
-    // JSX-Tags
-    .replace(/(&lt;\/?[A-Z][a-zA-Z]*)/g, '<span style="color:#4ec9b0">$1</span>')
+    // JSX-Tags — orange statt teal
+    .replace(/(&lt;\/?[A-Z][a-zA-Z]*)/g, '<span style="color:#f97316">$1</span>')
+
+  return colorizeBrackets(highlighted)
 }
 
 // Sprach-Label für Tab
