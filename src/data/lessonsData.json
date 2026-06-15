@@ -1,0 +1,688 @@
+[
+  {
+    "title": "1. Grundlagen",
+    "lessons": [
+      {
+        "id": 1,
+        "title": "Was ist React?",
+        "category": "Grundlagen",
+        "explanation": "**React** ist eine JavaScript-Bibliothek von Meta zum Bauen von Benutzeroberflächen.\nReact zerlegt eine UI in kleine, wiederverwendbare **Komponenten** — ähnlich wie Python-Klassen, die du kombinierst.\nVite ist das Build-Tool: es startet einen Dev-Server und kompiliert TypeScript zu JavaScript.",
+        "keyPoints": [
+          "React = UI-Bibliothek, kein vollständiges Framework",
+          "TypeScript = JavaScript + statische Typen",
+          "Vite = schnelles Build-Tool (ersetzt CRA)",
+          "Komponenten = wiederverwendbare UI-Bausteine"
+        ],
+        "files": [
+          {
+            "name": "main.tsx",
+            "language": "tsx",
+            "code": "// Einstiegspunkt der App — wird einmal ausgeführt\nimport { StrictMode } from 'react'           // Aktiviert Entwicklungs-Warnungen\nimport { createRoot } from 'react-dom/client' // Verbindet React mit dem DOM\nimport App from './App.tsx'\nimport './index.css'\n\n// Hängt die React-App in das <div id=\"root\"> in index.html\ncreateRoot(document.getElementById('root')!).render(\n  <StrictMode>\n    <App />\n  </StrictMode>,\n)"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "// Root-Komponente — Startpunkt der UI\nfunction App() {\n  return (\n    <div>\n      <h1>Hallo React!</h1>\n      <p>Meine erste App mit Vite + TypeScript.</p>\n    </div>\n  )\n}\n\nexport default App"
+          },
+          {
+            "name": "index.html",
+            "language": "html",
+            "code": "<!DOCTYPE html>\n<html lang=\"de\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>React Kurs</title>\n  </head>\n  <body>\n    <!-- React rendert alles in dieses div -->\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"/src/main.tsx\"></script>\n  </body>\n</html>"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "JSX — JavaScript + HTML",
+        "category": "Grundlagen",
+        "explanation": "**JSX** ist eine Syntax-Erweiterung: du schreibst HTML-ähnlichen Code direkt in JavaScript/TypeScript.\nTypescript kompiliert JSX zu normalen `React.createElement()`-Aufrufen.\nWichtig: JSX ist kein echtes HTML — Attribute heißen anders (z.B. `className` statt `class`).",
+        "keyPoints": [
+          "JSX = HTML-Syntax in JS/TS-Dateien",
+          "className statt class (class ist ein JS-Keyword)",
+          "Ausdrücke in {} einbetten: {name}, {2 + 2}, {isLoggedIn ? 'Ja' : 'Nein'}",
+          "Jede Komponente muss genau ein Root-Element zurückgeben"
+        ],
+        "files": [
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "function App() {\n  const name = 'Steven'        // JS-Variable\n  const isLoggedIn = true      // Boolean\n\n  return (\n    <div className=\"container\">  {/* className statt class */}\n\n      {/* JS-Ausdruck in {} */}\n      <h1>Hallo, {name}!</h1>\n\n      {/* Ternärer Operator */}\n      <p>{isLoggedIn ? 'Eingeloggt' : 'Bitte anmelden'}</p>\n\n      {/* Inline-Style als JS-Objekt */}\n      <span style={{ color: 'blue', fontSize: '18px' }}>\n        Blauer Text\n      </span>\n\n    </div>\n  )\n}\n\nexport default App"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Komponenten — Funktionen als UI",
+        "category": "Grundlagen",
+        "explanation": "Eine **Komponente** ist eine TypeScript-Funktion, die JSX zurückgibt.\nName beginnt immer mit **Großbuchstabe** — React unterscheidet so zwischen HTML-Tags (`div`) und Komponenten (`Button`).\nKomponenten können andere Komponenten enthalten — so entsteht ein **Komponentenbaum**.",
+        "keyPoints": [
+          "Funktion → gibt JSX zurück → Komponente",
+          "Großbuchstabe am Anfang ist Pflicht",
+          "Komponenten sind composable — ineinander verschachtelbar",
+          "Eine Datei = eine Komponente (Konvention)"
+        ],
+        "files": [
+          {
+            "name": "Header.tsx",
+            "language": "tsx",
+            "code": "// Eigene Komponente — wiederverwendbarer UI-Block\nfunction Header() {\n  return (\n    <header>\n      <h1>Meine App</h1>\n      <nav>\n        <a href=\"/\">Home</a>\n        <a href=\"/about\">Über uns</a>\n      </nav>\n    </header>\n  )\n}\n\nexport default Header"
+          },
+          {
+            "name": "Footer.tsx",
+            "language": "tsx",
+            "code": "function Footer() {\n  return (\n    <footer>\n      <p>© 2025 Meine App</p>\n    </footer>\n  )\n}\n\nexport default Footer"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import Header from './Header'\nimport Footer from './Footer'\n\nfunction App() {\n  return (\n    // Fragment <> als Root ohne extra div\n    <>\n      <Header />    {/* Komponente als self-closing Tag */}\n      <main>\n        <p>Hauptinhalt</p>\n      </main>\n      <Footer />\n    </>\n  )\n}\n\nexport default App"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Props — Daten übergeben",
+        "category": "Grundlagen",
+        "explanation": "**Props** sind Parameter, die du einer Komponente von außen mitgibst — wie Funktionsargumente.\nDie Komponente empfängt Props als Objekt. Mit TypeScript definierst du ein **Interface** für erlaubte Props.\nProps fließen immer **von oben nach unten** (Parent → Child) — niemals umgekehrt.",
+        "keyPoints": [
+          "Props = Eingabe-Parameter einer Komponente",
+          "Datenfluss: immer Parent → Child (Einbahnstraße)",
+          "Interface definiert erlaubte Props + Typen",
+          "Optionale Props mit ? markieren",
+          "Props sind readonly — nie direkt verändern"
+        ],
+        "files": [
+          {
+            "name": "Card.tsx",
+            "language": "tsx",
+            "code": "// Interface definiert erlaubte Props und Typen\ninterface CardProps {\n  title: string           // Pflicht\n  description: string     // Pflicht\n  badge?: string          // Optional (?)\n}\n\n// Props-Objekt wird destrukturiert empfangen\nfunction Card({ title, description, badge }: CardProps) {\n  return (\n    <div className=\"card\">\n      <h2>{title}</h2>\n      <p>{description}</p>\n      {/* Badge nur rendern wenn übergeben */}\n      {badge && <span>{badge}</span>}\n    </div>\n  )\n}\n\nexport default Card"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import Card from './Card'\n\nfunction App() {\n  return (\n    <div>\n      {/* Props wie HTML-Attribute */}\n      <Card\n        title=\"React lernen\"\n        description=\"Schritt für Schritt\"\n        badge=\"Neu\"\n      />\n\n      {/* Ohne optionales badge — kein Fehler */}\n      <Card\n        title=\"TypeScript\"\n        description=\"Typen für JavaScript\"\n      />\n    </div>\n  )\n}\n\nexport default App"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Props — children",
+        "category": "Grundlagen",
+        "explanation": "`children` ist ein spezielles Prop: alles was zwischen öffnendem und schließendem Tag steht.\nSo baust du Layout-Komponenten (Container, Card, Modal), die beliebigen Inhalt umhüllen.\nIn TypeScript nutzt du `React.ReactNode` als Typ für children.",
+        "keyPoints": [
+          "children = Inhalt zwischen den Tags der Komponente",
+          "Typ: ReactNode (alles was React rendern kann)",
+          "Ermöglicht flexible Wrapper-Komponenten"
+        ],
+        "files": [
+          {
+            "name": "Box.tsx",
+            "language": "tsx",
+            "code": "import { ReactNode } from 'react'\n\ninterface BoxProps {\n  color?: string\n  children: ReactNode   // Alles zwischen <Box>...</Box>\n}\n\nfunction Box({ color = 'lightgray', children }: BoxProps) {\n  return (\n    <div style={{ background: color, padding: '16px', borderRadius: '8px' }}>\n      {children}   {/* Übergebener Inhalt wird hier gerendert */}\n    </div>\n  )\n}\n\nexport default Box"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import Box from './Box'\n\nfunction App() {\n  return (\n    <div>\n      <Box color=\"lightblue\">\n        <h2>Titel im Kasten</h2>\n        <p>Beliebiger Inhalt</p>\n      </Box>\n\n      <Box color=\"lightyellow\">\n        <p>Anderer Inhalt — gleiche Komponente</p>\n      </Box>\n    </div>\n  )\n}\n\nexport default App"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "useState — Zustand",
+        "category": "Grundlagen",
+        "explanation": "**useState** ist ein React Hook — eine Funktion die einer Komponente \"Gedächtnis\" gibt.\nOhne State würde React nichts neu rendern wenn sich Daten ändern.\nImmer über den Setter verändern (`setCount`), nie direkt — sonst kein Re-render.",
+        "keyPoints": [
+          "useState gibt [wert, setter]-Paar zurück",
+          "Setter-Aufruf → React rendert Komponente neu",
+          "TypeScript: Typ wird aus initialem Wert abgeleitet",
+          "Direkte Mutation des State = Fehler, immer Setter nutzen"
+        ],
+        "files": [
+          {
+            "name": "Counter.tsx",
+            "language": "tsx",
+            "code": "import { useState } from 'react'\n\nfunction Counter() {\n  // useState(0) → initialer Wert 0\n  // count = aktueller Wert, setCount = Funktion zum Ändern\n  const [count, setCount] = useState<number>(0)\n\n  function handleIncrement() {\n    setCount(count + 1)  // Setter aufrufen → Re-render\n  }\n\n  return (\n    <div>\n      <p>Zähler: {count}</p>\n      <button onClick={handleIncrement}>+1</button>\n      <button onClick={() => setCount(0)}>Reset</button>\n    </div>\n  )\n}\n\nexport default Counter"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import Counter from './Counter'\n\nfunction App() {\n  return (\n    <div>\n      {/* Jede Counter-Instanz hat eigenen State */}\n      <Counter />\n      <Counter />\n    </div>\n  )\n}\n\nexport default App"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "useState — Objekte & Arrays",
+        "category": "Grundlagen",
+        "explanation": "State kann jeden Typ halten: Strings, Numbers, Objekte, Arrays.\nBei Objekten und Arrays **niemals** direkt mutieren — immer neue Kopien erstellen (Spread `...`).\nReact erkennt Änderungen über Referenzvergleich — nur eine neue Referenz löst Re-render aus.",
+        "keyPoints": [
+          "Spread ... erstellt flache Kopie: { ...obj, key: newVal }",
+          "Arrays: [...arr, newItem] statt arr.push()",
+          "Objekte: { ...obj, name: 'neu' } statt obj.name = 'neu'"
+        ],
+        "files": [
+          {
+            "name": "Form.tsx",
+            "language": "tsx",
+            "code": "import { useState } from 'react'\n\ninterface User {\n  name: string\n  email: string\n}\n\nfunction Form() {\n  const [user, setUser] = useState<User>({ name: '', email: '' })\n  const [tags, setTags] = useState<string[]>([])\n\n  function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {\n    // Spread: kopiert alle Felder, überschreibt nur name\n    setUser({ ...user, name: e.target.value })\n  }\n\n  function addTag() {\n    setTags([...tags, 'Tag ' + (tags.length + 1)])\n  }\n\n  return (\n    <div>\n      <input value={user.name} onChange={handleNameChange} placeholder=\"Name\" />\n      <p>Name: {user.name}</p>\n      <button onClick={addTag}>Tag hinzufügen</button>\n      <ul>\n        {tags.map((tag, i) => <li key={i}>{tag}</li>)}\n      </ul>\n    </div>\n  )\n}\n\nexport default Form"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Event Handling",
+        "category": "Grundlagen",
+        "explanation": "Events in React funktionieren wie in JavaScript — aber mit camelCase (`onClick` statt `onclick`).\nHandler-Funktionen erhalten ein **Event-Objekt** mit Infos über das Event.\nTypeScript erwartet den richtigen Event-Typ — VS Code schlägt ihn beim Hover vor.",
+        "keyPoints": [
+          "camelCase: onClick, onChange, onSubmit, onKeyDown",
+          "Handler als Referenz übergeben: onClick={handleClick} (kein ())",
+          "Arrow-Function inline wenn nötig: onClick={() => setOpen(true)}",
+          "e.preventDefault() unterbindet Standard-Browser-Verhalten"
+        ],
+        "files": [
+          {
+            "name": "EventDemo.tsx",
+            "language": "tsx",
+            "code": "import { useState } from 'react'\n\nfunction EventDemo() {\n  const [text, setText] = useState('')\n\n  // ChangeEvent: für Input-Felder\n  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {\n    setText(e.target.value)  // e.target.value = Eingabewert\n  }\n\n  // FormEvent: für Formulare\n  function handleSubmit(e: React.FormEvent) {\n    e.preventDefault()   // Verhindert Seiten-Reload\n    alert('Abgeschickt: ' + text)\n  }\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <input value={text} onChange={handleChange} placeholder=\"Eingabe...\" />\n      <button type=\"submit\">Abschicken</button>\n    </form>\n  )\n}\n\nexport default EventDemo"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Conditional Rendering",
+        "category": "Grundlagen",
+        "explanation": "React rendert nur was du zurückgibst — du kannst mit normalen JS-Bedingungen steuern was angezeigt wird.\nDie drei gängigen Muster: **ternärer Operator**, **&&-Kurzschluss**, **early return**.\n`null` oder `undefined` rendern nichts — nützlich um Elemente auszublenden.",
+        "keyPoints": [
+          "Ternär: condition ? <A /> : <B />",
+          "Kurzschluss: condition && <A /> (false = nichts)",
+          "Early return: if (!data) return <Loading />",
+          "null zurückgeben = Element verstecken"
+        ],
+        "files": [
+          {
+            "name": "UserStatus.tsx",
+            "language": "tsx",
+            "code": "interface Props {\n  isLoggedIn: boolean\n  isAdmin: boolean\n  name?: string\n}\n\nfunction UserStatus({ isLoggedIn, isAdmin, name }: Props) {\n\n  // Early return — wenn nicht eingeloggt, sofort zurück\n  if (!isLoggedIn) return <p>Bitte melde dich an.</p>\n\n  return (\n    <div>\n      {/* Ternärer Operator */}\n      <p>Willkommen, {name ? name : 'Gast'}!</p>\n\n      {/* &&-Kurzschluss: nur wenn isAdmin true */}\n      {isAdmin && <button>Admin-Panel</button>}\n\n      <p>Rolle: {isAdmin ? 'Administrator' : 'Normaler User'}</p>\n    </div>\n  )\n}\n\nexport default UserStatus"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import UserStatus from './UserStatus'\n\nfunction App() {\n  return (\n    <div>\n      <UserStatus isLoggedIn={false} isAdmin={false} />\n      <UserStatus isLoggedIn={true} isAdmin={false} name=\"Steven\" />\n      <UserStatus isLoggedIn={true} isAdmin={true} name=\"Admin\" />\n    </div>\n  )\n}\n\nexport default App"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Lists & .map() — Listen rendern",
+        "category": "Grundlagen",
+        "explanation": "Arrays in JSX renderst du mit `.map()` — jedes Element wird in JSX umgewandelt.\nJedes Element in einer Liste braucht ein **key**-Prop: ein eindeutiger String oder Number.\nKey hilft React beim effizienten Update des DOM — ohne key gibt es Warnungen und mögliche Bugs.",
+        "keyPoints": [
+          ".map() → Array von JSX-Elementen",
+          "key={item.id} — eindeutig und stabil aus den Daten",
+          "Array-Index als key nur wenn keine stabile ID vorhanden"
+        ],
+        "files": [
+          {
+            "name": "ProductList.tsx",
+            "language": "tsx",
+            "code": "interface Product {\n  id: number\n  name: string\n  price: number\n  inStock: boolean\n}\n\nconst products: Product[] = [\n  { id: 1, name: 'React Buch', price: 29.99, inStock: true },\n  { id: 2, name: 'TypeScript Kurs', price: 49.99, inStock: false },\n  { id: 3, name: 'VS Code Theme', price: 0, inStock: true },\n]\n\nfunction ProductList() {\n  return (\n    <ul>\n      {products.map(product => (\n        // key muss eindeutig unter Geschwistern sein\n        <li key={product.id} style={{ opacity: product.inStock ? 1 : 0.4 }}>\n          <strong>{product.name}</strong> — {product.price}€\n          {!product.inStock && <span> (Ausverkauft)</span>}\n        </li>\n      ))}\n    </ul>\n  )\n}\n\nexport default ProductList"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "2. Hooks",
+    "lessons": [
+      {
+        "id": 11,
+        "title": "useEffect — Seiteneffekte",
+        "category": "Hooks",
+        "explanation": "**useEffect** führt Code aus, nachdem React die Komponente gerendert hat.\nTypische Einsatzbereiche: API-Aufrufe, Event-Listener registrieren, Timer setzen.\nDas **Dependency Array** `[]` bestimmt wann der Effekt erneut läuft.",
+        "keyPoints": [
+          "[] = nur einmal beim Mounten",
+          "[value] = bei jedem value-Wechsel",
+          "Ohne Array = nach jedem Render (Vorsicht: Endlosschleife möglich)",
+          "Cleanup-Funktion: return () => {} — wird beim Unmount ausgeführt"
+        ],
+        "files": [
+          {
+            "name": "Timer.tsx",
+            "language": "tsx",
+            "code": "import { useState, useEffect } from 'react'\n\nfunction Timer() {\n  const [seconds, setSeconds] = useState(0)\n  const [running, setRunning] = useState(false)\n\n  useEffect(() => {\n    if (!running) return  // Effekt nur wenn running = true\n\n    // Interval starten — Seiteneffekt\n    const id = setInterval(() => {\n      setSeconds(prev => prev + 1)  // Funktionsform für aktuellen State\n    }, 1000)\n\n    // Cleanup: Interval stoppen wenn running wechselt oder Unmount\n    return () => clearInterval(id)\n\n  }, [running])  // Effekt neu ausführen wenn running sich ändert\n\n  return (\n    <div>\n      <p>Zeit: {seconds}s</p>\n      <button onClick={() => setRunning(r => !r)}>\n        {running ? 'Stop' : 'Start'}\n      </button>\n      <button onClick={() => { setRunning(false); setSeconds(0) }}>\n        Reset\n      </button>\n    </div>\n  )\n}\n\nexport default Timer"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "useEffect — API-Daten laden",
+        "category": "Hooks",
+        "explanation": "API-Aufrufe gehören in `useEffect` — nicht direkt in die Komponente.\n`async/await` direkt im useEffect ist nicht erlaubt — deshalb eine innere async-Funktion definieren.\nLoading- und Error-States verbessern die UX erheblich.",
+        "keyPoints": [
+          "useEffect-Callback darf nicht async sein → innere Funktion nutzen",
+          "Immer Loading + Error State implementieren",
+          "[] als Dependency → Fetch nur einmal beim Mount",
+          "Fetch-Fehler mit try/catch abfangen"
+        ],
+        "files": [
+          {
+            "name": "UserFetch.tsx",
+            "language": "tsx",
+            "code": "import { useState, useEffect } from 'react'\n\ninterface User {\n  id: number\n  name: string\n  email: string\n}\n\nfunction UserFetch() {\n  const [user, setUser]       = useState<User | null>(null)\n  const [loading, setLoading] = useState(true)\n  const [error, setError]     = useState<string | null>(null)\n\n  useEffect(() => {\n    // Innere async-Funktion — sofort aufgerufen\n    async function fetchUser() {\n      try {\n        const res = await fetch('https://jsonplaceholder.typicode.com/users/1')\n        if (!res.ok) throw new Error('HTTP ' + res.status)\n        const data: User = await res.json()\n        setUser(data)\n      } catch (err) {\n        setError(err instanceof Error ? err.message : 'Fehler')\n      } finally {\n        setLoading(false)  // Immer ausgeführt\n      }\n    }\n    fetchUser()\n  }, [])  // [] = nur beim Mount\n\n  if (loading) return <p>Laden...</p>\n  if (error)   return <p>Fehler: {error}</p>\n  if (!user)   return null\n\n  return (\n    <div>\n      <h2>{user.name}</h2>\n      <p>{user.email}</p>\n    </div>\n  )\n}\n\nexport default UserFetch"
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "useRef — DOM-Zugriff",
+        "category": "Hooks",
+        "explanation": "**useRef** gibt eine veränderliche Box (`.current`) die zwischen Renders erhalten bleibt — aber kein Re-render auslöst.\nHaupteinsatz 1: Direkter Zugriff auf DOM-Elemente (z.B. Input fokussieren).\nHaupteinsatz 2: Werte speichern ohne Re-render (z.B. Timer-IDs).",
+        "keyPoints": [
+          "ref.current = direkte DOM-Referenz nach dem Mount",
+          "Wertänderung löst KEIN Re-render aus (Unterschied zu useState)",
+          "ref={myRef} an JSX-Element hängen um DOM-Node zu erhalten"
+        ],
+        "files": [
+          {
+            "name": "FocusInput.tsx",
+            "language": "tsx",
+            "code": "import { useRef } from 'react'\n\nfunction FocusInput() {\n  // Ref für HTMLInputElement — initial null (DOM existiert noch nicht)\n  const inputRef = useRef<HTMLInputElement>(null)\n\n  function handleFocus() {\n    inputRef.current?.focus()  // ?. wegen möglichem null\n  }\n\n  function handleClear() {\n    if (inputRef.current) {\n      inputRef.current.value = ''\n      inputRef.current.focus()\n    }\n  }\n\n  return (\n    <div>\n      {/* ref verbindet die Variable mit dem DOM-Element */}\n      <input ref={inputRef} placeholder=\"Klick den Button...\" />\n      <button onClick={handleFocus}>Fokus setzen</button>\n      <button onClick={handleClear}>Leeren</button>\n    </div>\n  )\n}\n\nexport default FocusInput"
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "useContext — globaler State",
+        "category": "Hooks",
+        "explanation": "**Context** löst das \"Prop Drilling\" Problem: Props durch viele Ebenen nach unten reichen.\nDu erstellst einen Context, wickelst Komponenten in einen **Provider**, und jede Kind-Komponente kann den Wert direkt lesen.\nGut für: Theme, Sprache, eingeloggter User.",
+        "keyPoints": [
+          "createContext() → Context-Objekt erstellen",
+          "<Context.Provider value={...}> → Wert bereitstellen",
+          "useContext(MyContext) → Wert lesen in Kindkomponente",
+          "Kein Prop Drilling mehr durch Zwischenschichten"
+        ],
+        "files": [
+          {
+            "name": "ThemeContext.tsx",
+            "language": "tsx",
+            "code": "import { createContext, useContext, useState, ReactNode } from 'react'\n\ninterface ThemeContextType {\n  theme: 'light' | 'dark'\n  toggleTheme: () => void\n}\n\n// Context erstellen mit Default-Wert\nconst ThemeContext = createContext<ThemeContextType>({\n  theme: 'light',\n  toggleTheme: () => {},\n})\n\n// Provider — verwaltet State und stellt ihn bereit\nexport function ThemeProvider({ children }: { children: ReactNode }) {\n  const [theme, setTheme] = useState<'light' | 'dark'>('light')\n\n  function toggleTheme() {\n    setTheme(prev => prev === 'light' ? 'dark' : 'light')\n  }\n\n  return (\n    <ThemeContext.Provider value={{ theme, toggleTheme }}>\n      {children}\n    </ThemeContext.Provider>\n  )\n}\n\n// Custom Hook für bequemen Zugriff\nexport function useTheme() {\n  return useContext(ThemeContext)\n}"
+          },
+          {
+            "name": "ThemedButton.tsx",
+            "language": "tsx",
+            "code": "import { useTheme } from './ThemeContext'\n\nfunction ThemedButton() {\n  const { theme, toggleTheme } = useTheme()  // Direkt aus Context\n\n  return (\n    <button\n      onClick={toggleTheme}\n      style={{\n        background: theme === 'dark' ? '#333' : '#eee',\n        color: theme === 'dark' ? '#fff' : '#000',\n      }}\n    >\n      Theme: {theme} — Wechseln\n    </button>\n  )\n}\n\nexport default ThemedButton"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import { ThemeProvider } from './ThemeContext'\nimport ThemedButton from './ThemedButton'\n\nfunction App() {\n  return (\n    // Provider umhüllt alle Komponenten die Zugriff brauchen\n    <ThemeProvider>\n      <div>\n        <h1>Context Demo</h1>\n        <ThemedButton />\n      </div>\n    </ThemeProvider>\n  )\n}\n\nexport default App"
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "useMemo & useCallback",
+        "category": "Hooks",
+        "explanation": "**useMemo** cached das Ergebnis einer Berechnung — wird nur neu berechnet wenn Abhängigkeiten sich ändern.\n**useCallback** cached eine Funktion — verhindert dass bei jedem Render eine neue Funktion erstellt wird.\nBeide sind Optimierungen — erst einsetzen wenn Performance-Probleme auftreten.",
+        "keyPoints": [
+          "useMemo: teure Berechnungen cachen",
+          "useCallback: Funktionsreferenzen stabil halten",
+          "Dependency Array wie bei useEffect",
+          "Erst bei messbarem Performance-Problem einsetzen"
+        ],
+        "files": [
+          {
+            "name": "ExpensiveList.tsx",
+            "language": "tsx",
+            "code": "import { useState, useMemo, useCallback } from 'react'\n\nconst numbers = Array.from({ length: 10000 }, (_, i) => i + 1)\n\nfunction ExpensiveList() {\n  const [filter, setFilter] = useState('')\n  const [count, setCount] = useState(0)\n\n  // useMemo: nur neu berechnen wenn filter sich ändert\n  const filteredNumbers = useMemo(() => {\n    return numbers.filter(n => n.toString().includes(filter))\n  }, [filter])\n\n  // useCallback: Funktion immer dieselbe Referenz\n  const handleFilter = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {\n    setFilter(e.target.value)\n  }, [])\n\n  return (\n    <div>\n      <input onChange={handleFilter} placeholder=\"Filtern...\" />\n      <button onClick={() => setCount(c => c + 1)}>Re-render ({count})</button>\n      <p>{filteredNumbers.length} Ergebnisse</p>\n    </div>\n  )\n}\n\nexport default ExpensiveList"
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Custom Hooks",
+        "category": "Hooks",
+        "explanation": "**Custom Hooks** sind eigene Funktionen die mit \"use\" beginnen und andere Hooks nutzen.\nSie extrahieren wiederverwendbare Logik aus Komponenten — Komponente bleibt sauber, Logik ist testbar.\nJede Komponente die den Hook nutzt, hat ihre eigene State-Kopie.",
+        "keyPoints": [
+          "Name beginnt mit 'use' — Pflicht für React-Regeln",
+          "Kann useState, useEffect usw. intern nutzen",
+          "Gibt State und Handler zurück wie eine Bibliothek"
+        ],
+        "files": [
+          {
+            "name": "useLocalStorage.ts",
+            "language": "tsx",
+            "code": "import { useState, useEffect } from 'react'\n\n// Custom Hook: State der im localStorage gespeichert wird\nfunction useLocalStorage<T>(key: string, initialValue: T) {\n  const [value, setValue] = useState<T>(() => {\n    // Initializer: liest beim ersten Render aus localStorage\n    const stored = localStorage.getItem(key)\n    return stored ? JSON.parse(stored) : initialValue\n  })\n\n  useEffect(() => {\n    // Bei jeder Wertänderung speichern\n    localStorage.setItem(key, JSON.stringify(value))\n  }, [key, value])\n\n  return [value, setValue] as const\n}\n\nexport default useLocalStorage"
+          },
+          {
+            "name": "useFetch.ts",
+            "language": "tsx",
+            "code": "import { useState, useEffect } from 'react'\n\n// Generic Custom Hook: für beliebige API-Aufrufe\nfunction useFetch<T>(url: string) {\n  const [data, setData]       = useState<T | null>(null)\n  const [loading, setLoading] = useState(true)\n  const [error, setError]     = useState<string | null>(null)\n\n  useEffect(() => {\n    async function load() {\n      try {\n        const res = await fetch(url)\n        if (!res.ok) throw new Error('HTTP ' + res.status)\n        const json: T = await res.json()\n        setData(json)\n      } catch (e) {\n        setError(e instanceof Error ? e.message : 'Fehler')\n      } finally {\n        setLoading(false)\n      }\n    }\n    if (url) load()\n  }, [url])\n\n  return { data, loading, error }\n}\n\nexport default useFetch"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import useLocalStorage from './useLocalStorage'\nimport useFetch from './useFetch'\n\ninterface Post { id: number; title: string }\n\nfunction App() {\n  const [name, setName] = useLocalStorage('username', '')\n  const { data, loading } = useFetch<Post[]>(\n    'https://jsonplaceholder.typicode.com/posts?_limit=3'\n  )\n\n  return (\n    <div>\n      <input\n        value={name}\n        onChange={e => setName(e.target.value)}\n        placeholder=\"Name (wird gespeichert)\"\n      />\n      <p>Hallo {name || 'Unbekannt'}!</p>\n      {loading && <p>Laden...</p>}\n      {data?.map(post => <p key={post.id}>{post.title}</p>)}\n    </div>\n  )\n}\n\nexport default App"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "3. Fortgeschritten",
+    "lessons": [
+      {
+        "id": 17,
+        "title": "React Router — Navigation",
+        "category": "Fortgeschritten",
+        "explanation": "**React Router** ermöglicht clientseitige Navigation ohne Seiten-Reload.\nDie URL ändert sich, aber nur die passende Komponente wird ausgetauscht — das ist eine **Single Page Application (SPA)**.\nInstallation: `npm install react-router-dom`",
+        "keyPoints": [
+          "BrowserRouter: umhüllt die App, aktiviert Routing",
+          "Routes + Route: URL → Komponente Zuordnungen",
+          "Link: Navigation ohne Seiten-Reload",
+          "useNavigate: programmatische Navigation",
+          "useParams: URL-Parameter auslesen (/user/:id)"
+        ],
+        "files": [
+          {
+            "name": "main.tsx",
+            "language": "tsx",
+            "code": "import { StrictMode } from 'react'\nimport { createRoot } from 'react-dom/client'\nimport { BrowserRouter } from 'react-router-dom'  // Router aktivieren\nimport App from './App.tsx'\n\ncreateRoot(document.getElementById('root')!).render(\n  <StrictMode>\n    <BrowserRouter>\n      <App />\n    </BrowserRouter>\n  </StrictMode>\n)"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import { Routes, Route, Link } from 'react-router-dom'\nimport Home from './pages/Home'\nimport About from './pages/About'\nimport User from './pages/User'\n\nfunction App() {\n  return (\n    <div>\n      <nav>\n        <Link to=\"/\">Home</Link> |{' '}\n        <Link to=\"/about\">About</Link> |{' '}\n        <Link to=\"/user/42\">User 42</Link>\n      </nav>\n\n      <Routes>\n        <Route path=\"/\"          element={<Home />} />\n        <Route path=\"/about\"     element={<About />} />\n        <Route path=\"/user/:id\" element={<User />} />  {/* :id = Parameter */}\n        <Route path=\"*\"          element={<p>404 Not Found</p>} />\n      </Routes>\n    </div>\n  )\n}\n\nexport default App"
+          },
+          {
+            "name": "pages/User.tsx",
+            "language": "tsx",
+            "code": "import { useParams, useNavigate } from 'react-router-dom'\n\nfunction User() {\n  const { id } = useParams<{ id: string }>()  // URL-Parameter lesen\n  const navigate = useNavigate()               // Programmatisch navigieren\n\n  return (\n    <div>\n      <h1>User #{id}</h1>\n      <button onClick={() => navigate(-1)}>Zurück</button>\n      <button onClick={() => navigate('/')}>Home</button>\n    </div>\n  )\n}\n\nexport default User"
+          }
+        ]
+      },
+      {
+        "id": 18,
+        "title": "Formulare — kontrolliert",
+        "category": "Fortgeschritten",
+        "explanation": "**Kontrollierte Inputs** — React State ist die einzige Datenquelle, DOM wird gesteuert.\nBei jedem Tastendruck: onChange → setState → Re-render → Input zeigt neuen Wert.\nFür komplexe Formulare empfiehlt sich React Hook Form.",
+        "keyPoints": [
+          "Kontrolliert: value={state} + onChange={setter}",
+          "Generischer Handler mit e.target.name für mehrere Felder",
+          "Validierung vor Submit: Felder prüfen, Fehler in State speichern",
+          "e.preventDefault() verhindert Seiten-Reload beim Submit"
+        ],
+        "files": [
+          {
+            "name": "LoginForm.tsx",
+            "language": "tsx",
+            "code": "import { useState } from 'react'\n\ninterface FormData {\n  email: string\n  password: string\n}\n\nfunction LoginForm() {\n  const [form, setForm]     = useState<FormData>({ email: '', password: '' })\n  const [errors, setErrors] = useState<Partial<FormData>>({})\n\n  // Generischer Handler — nutzt name-Attribut des Inputs\n  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {\n    const { name, value } = e.target\n    setForm(prev => ({ ...prev, [name]: value }))  // [name] = computed key\n  }\n\n  function validate(): boolean {\n    const errs: Partial<FormData> = {}\n    if (!form.email.includes('@'))  errs.email = 'Ungültige E-Mail'\n    if (form.password.length < 6)   errs.password = 'Min. 6 Zeichen'\n    setErrors(errs)\n    return Object.keys(errs).length === 0\n  }\n\n  function handleSubmit(e: React.FormEvent) {\n    e.preventDefault()\n    if (validate()) console.log('Login:', form)\n  }\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <input name=\"email\" type=\"email\" value={form.email} onChange={handleChange} />\n      {errors.email && <span>{errors.email}</span>}\n\n      <input name=\"password\" type=\"password\" value={form.password} onChange={handleChange} />\n      {errors.password && <span>{errors.password}</span>}\n\n      <button type=\"submit\">Anmelden</button>\n    </form>\n  )\n}\n\nexport default LoginForm"
+          }
+        ]
+      },
+      {
+        "id": 19,
+        "title": "useReducer — komplexer State",
+        "category": "Fortgeschritten",
+        "explanation": "**useReducer** ist Alternative zu useState für komplexen State mit mehreren Aktionen.\nKonzept: eine **Reducer-Funktion** empfängt aktuellen State + Aktion und gibt neuen State zurück.\nKommt aus dem Redux-Pattern — gut wenn State-Logik zu komplex für useState wird.",
+        "keyPoints": [
+          "useReducer(reducer, initialState) → [state, dispatch]",
+          "dispatch({ type: 'ACTION', payload: data }) → Reducer aufrufen",
+          "Reducer: reine Funktion — kein API-Call, kein Side Effect",
+          "Gut wenn viele States zusammengehören"
+        ],
+        "files": [
+          {
+            "name": "cartReducer.ts",
+            "language": "tsx",
+            "code": "interface CartItem { id: number; name: string; quantity: number }\ninterface CartState { items: CartItem[]; total: number }\n\n// Discriminated Union — jede Aktion hat ihren Typ\ntype CartAction =\n  | { type: 'ADD_ITEM';    payload: CartItem }\n  | { type: 'REMOVE_ITEM'; payload: number }  // payload = id\n  | { type: 'CLEAR' }\n\n// Reducer: reine Funktion (currentState, action) → newState\nexport function cartReducer(state: CartState, action: CartAction): CartState {\n  switch (action.type) {\n    case 'ADD_ITEM':\n      return { ...state, items: [...state.items, action.payload], total: state.total + 1 }\n    case 'REMOVE_ITEM':\n      return { ...state, items: state.items.filter(i => i.id !== action.payload), total: state.total - 1 }\n    case 'CLEAR':\n      return { items: [], total: 0 }\n    default:\n      return state\n  }\n}\n\nexport const initialCartState: CartState = { items: [], total: 0 }"
+          },
+          {
+            "name": "Cart.tsx",
+            "language": "tsx",
+            "code": "import { useReducer } from 'react'\nimport { cartReducer, initialCartState } from './cartReducer'\n\nfunction Cart() {\n  const [state, dispatch] = useReducer(cartReducer, initialCartState)\n\n  function addItem() {\n    dispatch({\n      type: 'ADD_ITEM',\n      payload: { id: Date.now(), name: 'Artikel ' + (state.items.length + 1), quantity: 1 }\n    })\n  }\n\n  return (\n    <div>\n      <h2>Warenkorb ({state.total})</h2>\n      <button onClick={addItem}>Hinzufügen</button>\n      <button onClick={() => dispatch({ type: 'CLEAR' })}>Leeren</button>\n      <ul>\n        {state.items.map(item => (\n          <li key={item.id}>\n            {item.name}\n            <button onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: item.id })}>✕</button>\n          </li>\n        ))}\n      </ul>\n    </div>\n  )\n}\n\nexport default Cart"
+          }
+        ]
+      },
+      {
+        "id": 20,
+        "title": "TypeScript — Generics in Komponenten",
+        "category": "Fortgeschritten",
+        "explanation": "**Generics** ermöglichen typsichere wiederverwendbare Komponenten für beliebige Datentypen.\nDu definierst einen Typ-Parameter `<T>` der beim Aufruf festgelegt wird.\nSo schreibst du eine Select-Komponente die für Countries, Users, Products usw. funktioniert.",
+        "keyPoints": [
+          "Interface für Props — immer, auch bei wenigen Props",
+          "Generics: <T,> in Komponenten (Komma nötig in TSX)",
+          "TypeScript prüft: übergebene Funktionen müssen zum Typ passen"
+        ],
+        "files": [
+          {
+            "name": "Select.tsx",
+            "language": "tsx",
+            "code": "// Generische Select-Komponente — funktioniert für beliebige Typen\ninterface SelectProps<T> {\n  options: T[]\n  getValue: (option: T) => string\n  getLabel: (option: T) => string\n  selected: T | null\n  onChange: (value: T) => void\n}\n\n// <T,> mit Komma — sonst denkt TypeScript es ist JSX\nfunction Select<T,>({ options, getValue, getLabel, selected, onChange }: SelectProps<T>) {\n  return (\n    <select\n      value={selected ? getValue(selected) : ''}\n      onChange={e => {\n        const found = options.find(o => getValue(o) === e.target.value)\n        if (found) onChange(found)\n      }}\n    >\n      <option value=\"\">— Auswählen —</option>\n      {options.map(option => (\n        <option key={getValue(option)} value={getValue(option)}>\n          {getLabel(option)}\n        </option>\n      ))}\n    </select>\n  )\n}\n\nexport default Select"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import { useState } from 'react'\nimport Select from './Select'\n\ninterface Country { code: string; name: string }\n\nconst countries: Country[] = [\n  { code: 'de', name: 'Deutschland' },\n  { code: 'at', name: 'Österreich' },\n  { code: 'ch', name: 'Schweiz' },\n]\n\nfunction App() {\n  const [selected, setSelected] = useState<Country | null>(null)\n\n  return (\n    <div>\n      <Select<Country>\n        options={countries}\n        getValue={c => c.code}\n        getLabel={c => c.name}\n        selected={selected}\n        onChange={setSelected}\n      />\n      {selected && <p>Gewählt: {selected.name}</p>}\n    </div>\n  )\n}\n\nexport default App"
+          }
+        ]
+      },
+      {
+        "id": 21,
+        "title": "React.memo — Performance",
+        "category": "Fortgeschritten",
+        "explanation": "**React.memo** ist ein Higher-Order Component — es merkt sich Props und rendert nur neu wenn sie sich ändern.\nOhne memo: Jedes Render des Parents rendert ALLE Children neu.\nMit memo: Children re-rendern nur wenn ihre Props sich wirklich geändert haben.",
+        "keyPoints": [
+          "React.memo(Component) — Komponente merkt sich Props",
+          "Shallow Comparison — Objekte/Arrays brauchen stabile Referenzen",
+          "useCallback für Handler-Props nötig",
+          "Nur einsetzen wenn Profiler Performance-Probleme zeigt"
+        ],
+        "files": [
+          {
+            "name": "Child.tsx",
+            "language": "tsx",
+            "code": "import { memo } from 'react'\n\ninterface ChildProps {\n  name: string\n  onClick: () => void\n}\n\n// memo: rendert nur wenn name oder onClick sich ändern\nconst Child = memo(function Child({ name, onClick }: ChildProps) {\n  console.log('Child rendert:', name)\n  return (\n    <div>\n      <p>Kind: {name}</p>\n      <button onClick={onClick}>Klick</button>\n    </div>\n  )\n})\n\nexport default Child"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import { useState, useCallback } from 'react'\nimport Child from './Child'\n\nfunction App() {\n  const [count, setCount] = useState(0)\n  const [text, setText]   = useState('')\n\n  // useCallback: handleClick ist immer dieselbe Referenz\n  // Ohne useCallback: neue Funktion bei jedem Render → Child rendert immer\n  const handleClick = useCallback(() => {\n    console.log('Geklickt!')\n  }, [])\n\n  return (\n    <div>\n      <input value={text} onChange={e => setText(e.target.value)} />\n      <button onClick={() => setCount(c => c + 1)}>Count: {count}</button>\n\n      {/* Child rendert NUR wenn Props sich ändern */}\n      <Child name=\"Festes Kind\" onClick={handleClick} />\n    </div>\n  )\n}\n\nexport default App"
+          }
+        ]
+      },
+      {
+        "id": 22,
+        "title": "Error Boundaries",
+        "category": "Fortgeschritten",
+        "explanation": "**Error Boundaries** fangen JavaScript-Fehler in Kindkomponenten ab und zeigen Fallback-UI.\nSie müssen als **Klassen-Komponenten** geschrieben werden — Hooks unterstützen diese Funktion nicht.\nGut für: Produktions-Apps, API-Fehler, defekte 3rd-Party-Komponenten.",
+        "keyPoints": [
+          "Nur Klassen-Komponenten können Error Boundaries sein",
+          "getDerivedStateFromError → Fallback-State setzen",
+          "componentDidCatch → Fehler loggen",
+          "Async-Fehler (fetch) werden NICHT gefangen"
+        ],
+        "files": [
+          {
+            "name": "ErrorBoundary.tsx",
+            "language": "tsx",
+            "code": "import { Component, ReactNode, ErrorInfo } from 'react'\n\ninterface Props  { children: ReactNode; fallback?: ReactNode }\ninterface State  { hasError: boolean; error?: Error }\n\n// Klassen-Komponente — für Error Boundaries Pflicht\nclass ErrorBoundary extends Component<Props, State> {\n  constructor(props: Props) {\n    super(props)\n    this.state = { hasError: false }\n  }\n\n  // Wird bei Fehler im Kindbaum aufgerufen\n  static getDerivedStateFromError(error: Error): State {\n    return { hasError: true, error }\n  }\n\n  // Für Logging\n  componentDidCatch(error: Error, info: ErrorInfo) {\n    console.error('ErrorBoundary:', error, info.componentStack)\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return this.props.fallback ?? (\n        <div style={{ color: 'red', padding: '16px' }}>\n          <h2>Etwas ist schiefgelaufen.</h2>\n          <p>{this.state.error?.message}</p>\n        </div>\n      )\n    }\n    return this.props.children\n  }\n}\n\nexport default ErrorBoundary"
+          },
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import ErrorBoundary from './ErrorBoundary'\n\n// Diese Komponente wirft einen Fehler\nfunction BrokenComponent() {\n  throw new Error('Etwas ist kaputt!')\n  return <p>Wird nie angezeigt</p>\n}\n\nfunction App() {\n  return (\n    <ErrorBoundary fallback={<p>Sektion nicht verfügbar.</p>}>\n      <BrokenComponent />\n    </ErrorBoundary>\n  )\n}\n\nexport default App"
+          }
+        ]
+      },
+      {
+        "id": 23,
+        "title": "Lazy Loading & Suspense",
+        "category": "Fortgeschritten",
+        "explanation": "**React.lazy()** lädt eine Komponente erst wenn sie gebraucht wird — Code-Splitting.\n**Suspense** zeigt Fallback-UI während die Komponente noch geladen wird.\nErgebnis: Kleineres initiales Bundle, schnellere erste Ladezeit.",
+        "keyPoints": [
+          "React.lazy(() => import('./Heavy')) — dynamischer Import",
+          "<Suspense fallback={<Loader />}> — während Laden",
+          "Häufiger Einsatz: Routen lazy loaden",
+          "Vite unterstützt Code-Splitting automatisch"
+        ],
+        "files": [
+          {
+            "name": "App.tsx",
+            "language": "tsx",
+            "code": "import { lazy, Suspense } from 'react'\n\n// lazy: Komponente wird erst beim ersten Render geladen\nconst HeavyChart = lazy(() => import('./HeavyChart'))\nconst AdminPanel = lazy(() => import('./AdminPanel'))\n\nfunction App() {\n  return (\n    <div>\n      {/* Suspense zeigt Fallback bis lazy-Komponente geladen ist */}\n      <Suspense fallback={<p>Chart wird geladen...</p>}>\n        <HeavyChart />\n      </Suspense>\n\n      <Suspense fallback={<div>Lädt...</div>}>\n        <AdminPanel />\n      </Suspense>\n    </div>\n  )\n}\n\nexport default App"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "4. Praxisprojekt: SportsDash",
+    "lessons": [
+      {
+        "id": 24,
+        "title": "Projektübersicht & Architektur",
+        "category": "Praxisprojekt",
+        "explanation": "Wir bauen **SportsDash** — eine App mit Login/Register und Fußball-Ergebnissen via API.\nDatenfluss: `AuthContext` → Router → geschützte Seiten → API-Komponenten.\nInstallation: `npm install react-router-dom`",
+        "keyPoints": [
+          "Ordnerstruktur: src/components, src/pages, src/context, src/hooks, src/types",
+          "AuthContext: verwaltet eingeloggten User global",
+          "PrivateRoute: leitet nicht-eingeloggte User zum Login um",
+          "Mock-Daten als Fallback ohne API-Key"
+        ],
+        "files": [
+          {
+            "name": "Ordnerstruktur",
+            "language": "bash",
+            "code": "src/\n├── components/\n│   ├── Layout.tsx          # Nav + Wrapper\n│   ├── PrivateRoute.tsx    # Routen-Schutz\n│   └── MatchCard.tsx       # Spielergebnis-Karte\n├── context/\n│   └── AuthContext.tsx     # Globaler Auth-State\n├── hooks/\n│   └── useFetch.ts         # Generic Fetch Hook\n├── pages/\n│   ├── LoginPage.tsx       # Login-Formular\n│   ├── RegisterPage.tsx    # Registrierung\n│   └── DashboardPage.tsx   # Fußball-Ergebnisse\n├── types/\n│   └── index.ts            # Alle TypeScript-Interfaces\n├── App.tsx                 # Router-Setup\n└── main.tsx                # Einstiegspunkt"
+          }
+        ]
+      },
+      {
+        "id": 25,
+        "title": "Projekt: Types & AuthContext",
+        "category": "Praxisprojekt",
+        "explanation": "Alle TypeScript-Typen zentral definieren — so haben alle Komponenten dieselben Definitionen.\nDer **AuthContext** verwaltet den eingeloggten User global. Wir simulieren Login/Register lokal.\nDer User wird im localStorage gespeichert — bleibt auch nach Seiten-Reload erhalten.",
+        "keyPoints": [
+          "Zentrale types/index.ts verhindert doppelte Definitionen",
+          "localStorage: User-Session persistieren",
+          "Provider wraps die ganze App in main.tsx",
+          "Custom Hook useAuth() wirft Fehler wenn außerhalb Provider genutzt"
+        ],
+        "files": [
+          {
+            "name": "src/types/index.ts",
+            "language": "tsx",
+            "code": "export interface User {\n  id: string\n  username: string\n  email: string\n}\n\nexport interface LoginData    { email: string; password: string }\nexport interface RegisterData { username: string; email: string; password: string }\n\nexport interface AuthContextType {\n  user: User | null\n  login: (data: LoginData) => Promise<void>\n  register: (data: RegisterData) => Promise<void>\n  logout: () => void\n  isLoading: boolean\n}\n\n// Fussball API\nexport interface Team    { id: number; name: string; logo: string }\nexport interface Goals   { home: number | null; away: number | null }\nexport interface Match {\n  fixture: { id: number; date: string; status: { short: string; long: string; elapsed: number | null } }\n  teams:   { home: Team; away: Team }\n  goals:   Goals\n  league:  { name: string; country: string; logo: string }\n}\n\nexport interface ApiResponse<T> { response: T[] }"
+          },
+          {
+            "name": "src/context/AuthContext.tsx",
+            "language": "tsx",
+            "code": "import { createContext, useContext, useState, useEffect, ReactNode } from 'react'\nimport type { User, LoginData, RegisterData, AuthContextType } from '../types'\n\nconst AuthContext = createContext<AuthContextType | null>(null)\n\nexport function AuthProvider({ children }: { children: ReactNode }) {\n  const [user, setUser]         = useState<User | null>(null)\n  const [isLoading, setLoading] = useState(true)\n\n  // Gespeicherten User aus localStorage laden\n  useEffect(() => {\n    const stored = localStorage.getItem('auth_user')\n    if (stored) setUser(JSON.parse(stored))\n    setLoading(false)\n  }, [])\n\n  async function register(data: RegisterData): Promise<void> {\n    const newUser: User = { id: crypto.randomUUID(), username: data.username, email: data.email }\n    localStorage.setItem('auth_user', JSON.stringify(newUser))\n    setUser(newUser)\n  }\n\n  async function login(data: LoginData): Promise<void> {\n    const stored = localStorage.getItem('auth_user')\n    if (!stored) throw new Error('Kein Account gefunden — bitte registrieren')\n    const savedUser: User = JSON.parse(stored)\n    if (savedUser.email !== data.email) throw new Error('E-Mail stimmt nicht')\n    setUser(savedUser)\n  }\n\n  function logout() {\n    localStorage.removeItem('auth_user')\n    setUser(null)\n  }\n\n  return (\n    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>\n      {children}\n    </AuthContext.Provider>\n  )\n}\n\nexport function useAuth(): AuthContextType {\n  const ctx = useContext(AuthContext)\n  if (!ctx) throw new Error('useAuth muss innerhalb AuthProvider genutzt werden')\n  return ctx\n}"
+          }
+        ]
+      },
+      {
+        "id": 26,
+        "title": "Projekt: PrivateRoute & Layout",
+        "category": "Praxisprojekt",
+        "explanation": "**PrivateRoute** schützt Seiten die nur eingeloggte User sehen dürfen — leitet sonst zum Login um.\n**Layout** stellt den gemeinsamen Header/Nav für alle Seiten bereit.\n`Outlet` rendert die aktuelle Kind-Route an der richtigen Stelle.",
+        "keyPoints": [
+          "Navigate component: programmatische Umleitung",
+          "replace: ersetzt History-Eintrag (kein Zurück zur geschützten Seite)",
+          "Outlet: rendert die aktuelle Kind-Route im Layout"
+        ],
+        "files": [
+          {
+            "name": "src/components/PrivateRoute.tsx",
+            "language": "tsx",
+            "code": "import { Navigate, Outlet } from 'react-router-dom'\nimport { useAuth } from '../context/AuthContext'\n\nfunction PrivateRoute() {\n  const { user, isLoading } = useAuth()\n\n  if (isLoading) return <div>Laden...</div>  // Auth-State wird geladen\n  if (!user)     return <Navigate to=\"/login\" replace />  // Nicht eingeloggt\n\n  return <Outlet />  // Eingeloggt: Kind-Route rendern\n}\n\nexport default PrivateRoute"
+          },
+          {
+            "name": "src/components/Layout.tsx",
+            "language": "tsx",
+            "code": "import { Link, useNavigate, Outlet } from 'react-router-dom'\nimport { useAuth } from '../context/AuthContext'\n\nfunction Layout() {\n  const { user, logout } = useAuth()\n  const navigate = useNavigate()\n\n  function handleLogout() {\n    logout()\n    navigate('/login')\n  }\n\n  return (\n    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>\n      <header style={{\n        background: '#1a1a2e', color: '#fff',\n        padding: '0 24px', height: '60px',\n        display: 'flex', alignItems: 'center', justifyContent: 'space-between'\n      }}>\n        <Link to=\"/dashboard\" style={{ color: '#e94560', fontWeight: 'bold', textDecoration: 'none' }}>\n          ⚽ SportsDash\n        </Link>\n        {user && (\n          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>\n            <span style={{ color: '#aaa' }}>Hallo, {user.username}</span>\n            <button onClick={handleLogout}\n              style={{ background: '#e94560', color: '#fff', border: 'none',\n                       padding: '6px 14px', borderRadius: '4px', cursor: 'pointer' }}>\n              Abmelden\n            </button>\n          </div>\n        )}\n      </header>\n      <main style={{ flex: 1, padding: '24px', background: '#0f3460', color: '#fff' }}>\n        <Outlet />  {/* Aktuelle Seite wird hier gerendert */}\n      </main>\n    </div>\n  )\n}\n\nexport default Layout"
+          }
+        ]
+      },
+      {
+        "id": 27,
+        "title": "Projekt: Login & Register",
+        "category": "Praxisprojekt",
+        "explanation": "Login und Register sind kontrollierte Formulare die den AuthContext nutzen.\nFehler werden in einem lokalen Error-State angezeigt. Nach Erfolg wird zur Dashboard-Seite navigiert.\nDer `try/catch` fängt Fehler die aus den `login()`/`register()`-Funktionen geworfen werden.",
+        "keyPoints": [
+          "try/catch um login()/register() — fängt Fehler aus AuthContext",
+          "navigate('/dashboard') nach erfolgreichem Login",
+          "isLoading-State verhindert Doppel-Klicks",
+          "Link zu /register für User ohne Account"
+        ],
+        "files": [
+          {
+            "name": "src/pages/LoginPage.tsx",
+            "language": "tsx",
+            "code": "import { useState } from 'react'\nimport { Link, useNavigate } from 'react-router-dom'\nimport { useAuth } from '../context/AuthContext'\nimport type { LoginData } from '../types'\n\nfunction LoginPage() {\n  const [form, setForm]       = useState<LoginData>({ email: '', password: '' })\n  const [error, setError]     = useState<string | null>(null)\n  const [loading, setLoading] = useState(false)\n  const { login } = useAuth()\n  const navigate  = useNavigate()\n\n  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {\n    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))\n  }\n\n  async function handleSubmit(e: React.FormEvent) {\n    e.preventDefault()\n    setError(null)\n    setLoading(true)\n    try {\n      await login(form)\n      navigate('/dashboard')  // Nach Login zur Dashboard-Seite\n    } catch (err) {\n      setError(err instanceof Error ? err.message : 'Login fehlgeschlagen')\n    } finally {\n      setLoading(false)\n    }\n  }\n\n  return (\n    <div style={{ maxWidth: '400px', margin: '60px auto' }}>\n      <h2>⚽ SportsDash Login</h2>\n      <form onSubmit={handleSubmit}>\n        <input name=\"email\" type=\"email\" value={form.email} onChange={handleChange}\n               placeholder=\"E-Mail\" required style={{ display: 'block', margin: '8px 0', width: '100%', padding: '10px' }} />\n        <input name=\"password\" type=\"password\" value={form.password} onChange={handleChange}\n               placeholder=\"Passwort\" required style={{ display: 'block', margin: '8px 0', width: '100%', padding: '10px' }} />\n        {error && <p style={{ color: 'red' }}>{error}</p>}\n        <button type=\"submit\" disabled={loading} style={{ width: '100%', padding: '10px', background: '#e94560', color: '#fff', border: 'none' }}>\n          {loading ? 'Anmelden...' : 'Anmelden'}\n        </button>\n      </form>\n      <p>Noch kein Account? <Link to=\"/register\">Registrieren</Link></p>\n    </div>\n  )\n}\n\nexport default LoginPage"
+          },
+          {
+            "name": "src/pages/RegisterPage.tsx",
+            "language": "tsx",
+            "code": "import { useState } from 'react'\nimport { Link, useNavigate } from 'react-router-dom'\nimport { useAuth } from '../context/AuthContext'\nimport type { RegisterData } from '../types'\n\nfunction RegisterPage() {\n  const [form, setForm]       = useState<RegisterData>({ username: '', email: '', password: '' })\n  const [error, setError]     = useState<string | null>(null)\n  const [loading, setLoading] = useState(false)\n  const { register } = useAuth()\n  const navigate = useNavigate()\n\n  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {\n    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))\n  }\n\n  async function handleSubmit(e: React.FormEvent) {\n    e.preventDefault()\n    if (form.password.length < 6) { setError('Passwort min. 6 Zeichen'); return }\n    setLoading(true)\n    try {\n      await register(form)\n      navigate('/dashboard')\n    } catch (err) {\n      setError(err instanceof Error ? err.message : 'Fehler')\n    } finally {\n      setLoading(false)\n    }\n  }\n\n  return (\n    <div style={{ maxWidth: '400px', margin: '60px auto' }}>\n      <h2>⚽ Registrieren</h2>\n      <form onSubmit={handleSubmit}>\n        <input name=\"username\" value={form.username} onChange={handleChange}\n               placeholder=\"Benutzername\" required style={{ display: 'block', margin: '8px 0', width: '100%', padding: '10px' }} />\n        <input name=\"email\" type=\"email\" value={form.email} onChange={handleChange}\n               placeholder=\"E-Mail\" required style={{ display: 'block', margin: '8px 0', width: '100%', padding: '10px' }} />\n        <input name=\"password\" type=\"password\" value={form.password} onChange={handleChange}\n               placeholder=\"Passwort (min. 6 Zeichen)\" required style={{ display: 'block', margin: '8px 0', width: '100%', padding: '10px' }} />\n        {error && <p style={{ color: 'red' }}>{error}</p>}\n        <button type=\"submit\" disabled={loading} style={{ width: '100%', padding: '10px', background: '#e94560', color: '#fff', border: 'none' }}>\n          {loading ? 'Registrieren...' : 'Registrieren'}\n        </button>\n      </form>\n      <p>Schon registriert? <Link to=\"/login\">Anmelden</Link></p>\n    </div>\n  )\n}\n\nexport default RegisterPage"
+          }
+        ]
+      },
+      {
+        "id": 28,
+        "title": "Projekt: Dashboard & MatchCard",
+        "category": "Praxisprojekt",
+        "explanation": "Das Dashboard lädt Fußballdaten und zeigt sie als Karten-Grid an.\nEin Toggle-Button wechselt zwischen Mock-Daten (ohne API-Key) und Live-Daten.\nMatchCard ist mit `React.memo` optimiert — rendert nur neu wenn das match-Prop sich ändert.",
+        "keyPoints": [
+          "Mock-Daten als Fallback für Entwicklung ohne API-Key",
+          "api-football.com: kostenlosen Key nach Registrierung erhalten",
+          "CSS Grid mit auto-fill und minmax: responsives Layout ohne Media Queries",
+          "onError auf img: Bild ausblenden wenn Logo nicht lädt"
+        ],
+        "files": [
+          {
+            "name": "src/pages/DashboardPage.tsx",
+            "language": "tsx",
+            "code": "import { useState } from 'react'\nimport { useAuth } from '../context/AuthContext'\nimport MatchCard from '../components/MatchCard'\nimport type { Match } from '../types'\n\nconst MOCK_MATCHES: Match[] = [\n  {\n    fixture: { id: 1, date: '2025-06-01T18:00:00Z', status: { short: 'FT', long: 'Finished', elapsed: 90 } },\n    teams: { home: { id: 157, name: 'Bayern München', logo: 'https://media.api-sports.io/football/teams/157.png' },\n             away: { id: 165, name: 'Borussia Dortmund', logo: 'https://media.api-sports.io/football/teams/165.png' } },\n    goals: { home: 2, away: 1 },\n    league: { name: 'Bundesliga', country: 'Germany', logo: '' }\n  },\n  {\n    fixture: { id: 2, date: '2025-06-01T20:30:00Z', status: { short: 'FT', long: 'Finished', elapsed: 90 } },\n    teams: { home: { id: 529, name: 'FC Barcelona', logo: 'https://media.api-sports.io/football/teams/529.png' },\n             away: { id: 541, name: 'Real Madrid', logo: 'https://media.api-sports.io/football/teams/541.png' } },\n    goals: { home: 3, away: 3 },\n    league: { name: 'La Liga', country: 'Spain', logo: '' }\n  },\n  {\n    fixture: { id: 3, date: '2025-06-01T15:00:00Z', status: { short: 'FT', long: 'Finished', elapsed: 90 } },\n    teams: { home: { id: 40, name: 'Liverpool', logo: 'https://media.api-sports.io/football/teams/40.png' },\n             away: { id: 33, name: 'Manchester United', logo: 'https://media.api-sports.io/football/teams/33.png' } },\n    goals: { home: 4, away: 0 },\n    league: { name: 'Premier League', country: 'England', logo: '' }\n  }\n]\n\nfunction DashboardPage() {\n  const { user } = useAuth()\n  const [useMock, setUseMock] = useState(true)\n  const matches = useMock ? MOCK_MATCHES : []\n\n  return (\n    <div>\n      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>\n        <div>\n          <h1 style={{ color: '#e94560', margin: 0 }}>⚽ Spielergebnisse</h1>\n          <p style={{ color: '#aaa' }}>Willkommen, {user?.username}!</p>\n        </div>\n        <button onClick={() => setUseMock(m => !m)}\n          style={{ background: '#16213e', color: '#e94560', border: '1px solid #e94560',\n                   padding: '6px 14px', borderRadius: '4px', cursor: 'pointer' }}>\n          {useMock ? 'Mock-Daten' : 'Live-Daten'}\n        </button>\n      </div>\n      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>\n        {matches.map(match => <MatchCard key={match.fixture.id} match={match} />)}\n      </div>\n    </div>\n  )\n}\n\nexport default DashboardPage"
+          },
+          {
+            "name": "src/components/MatchCard.tsx",
+            "language": "tsx",
+            "code": "import { memo } from 'react'\nimport type { Match } from '../types'\n\nconst MatchCard = memo(function MatchCard({ match }: { match: Match }) {\n  const { teams, goals, fixture, league } = match\n  const isLive     = ['1H','2H','ET','HT'].includes(fixture.status.short)\n  const isFinished = fixture.status.short === 'FT'\n\n  return (\n    <div style={{ background: '#16213e', borderRadius: '8px', padding: '20px',\n                  border: '1px solid #1a1a2e' }}>\n      <p style={{ color: '#888', fontSize: '12px', margin: '0 0 12px' }}>\n        {league.name} · {league.country}\n      </p>\n\n      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>\n        {/* Heimteam */}\n        <div style={{ textAlign: 'center', flex: 1 }}>\n          <img src={teams.home.logo} alt={teams.home.name}\n               style={{ width: '48px', height: '48px', objectFit: 'contain' }}\n               onError={e => (e.currentTarget.style.display = 'none')} />\n          <p style={{ margin: '8px 0 0', fontSize: '13px' }}>{teams.home.name}</p>\n        </div>\n\n        {/* Ergebnis */}\n        <div style={{ textAlign: 'center', padding: '0 16px' }}>\n          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#e94560' }}>\n            {(isFinished || isLive) ? `${goals.home ?? '-'} : ${goals.away ?? '-'}` : 'vs'}\n          </div>\n          <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px',\n                         background: isLive ? '#e94560' : isFinished ? '#27ae60' : '#555',\n                         color: '#fff', marginTop: '4px', display: 'inline-block' }}>\n            {fixture.status.short}\n          </span>\n        </div>\n\n        {/* Auswärtsteam */}\n        <div style={{ textAlign: 'center', flex: 1 }}>\n          <img src={teams.away.logo} alt={teams.away.name}\n               style={{ width: '48px', height: '48px', objectFit: 'contain' }}\n               onError={e => (e.currentTarget.style.display = 'none')} />\n          <p style={{ margin: '8px 0 0', fontSize: '13px' }}>{teams.away.name}</p>\n        </div>\n      </div>\n    </div>\n  )\n})\n\nexport default MatchCard"
+          }
+        ]
+      },
+      {
+        "id": 29,
+        "title": "Projekt: App.tsx — Alles zusammen",
+        "category": "Praxisprojekt",
+        "explanation": "Jetzt verbinden wir alles: Router, Auth-Provider, Layout, Private Routes und Seiten.\nDiese Datei zeigt die komplette Struktur der App — alle Konzepte aus dem Kurs in Aktion.",
+        "keyPoints": [
+          "Verschachtelte Routes: Layout als Wrapper für alle Seiten",
+          "PrivateRoute schützt /dashboard",
+          "Navigate: Root-URL leitet zum Login",
+          "AuthProvider in main.tsx wraps die ganze App"
+        ],
+        "files": [
+          {
+            "name": "src/main.tsx",
+            "language": "tsx",
+            "code": "import { StrictMode } from 'react'\nimport { createRoot } from 'react-dom/client'\nimport { BrowserRouter } from 'react-router-dom'\nimport { AuthProvider } from './context/AuthContext'\nimport App from './App.tsx'\nimport './index.css'\n\ncreateRoot(document.getElementById('root')!).render(\n  <StrictMode>\n    <BrowserRouter>\n      <AuthProvider>   {/* Auth für die gesamte App */}\n        <App />\n      </AuthProvider>\n    </BrowserRouter>\n  </StrictMode>\n)"
+          },
+          {
+            "name": "src/App.tsx",
+            "language": "tsx",
+            "code": "import { Routes, Route, Navigate } from 'react-router-dom'\nimport Layout        from './components/Layout'\nimport PrivateRoute  from './components/PrivateRoute'\nimport LoginPage     from './pages/LoginPage'\nimport RegisterPage  from './pages/RegisterPage'\nimport DashboardPage from './pages/DashboardPage'\n\nfunction App() {\n  return (\n    <Routes>\n      <Route element={<Layout />}>\n\n        {/* Öffentliche Routen */}\n        <Route path=\"/login\"    element={<LoginPage />} />\n        <Route path=\"/register\" element={<RegisterPage />} />\n\n        {/* Geschützte Routen */}\n        <Route element={<PrivateRoute />}>\n          <Route path=\"/dashboard\" element={<DashboardPage />} />\n        </Route>\n\n        {/* Fallback → Login */}\n        <Route path=\"/\"  element={<Navigate to=\"/login\" replace />} />\n        <Route path=\"*\"  element={<Navigate to=\"/login\" replace />} />\n\n      </Route>\n    </Routes>\n  )\n}\n\nexport default App"
+          },
+          {
+            "name": "npm install",
+            "language": "bash",
+            "code": "# Projekt erstellen\nnpm create vite@latest sports-dash -- --template react-ts\ncd sports-dash\n\n# Abhängigkeiten installieren\nnpm install\nnpm install react-router-dom\n\n# Dev-Server starten\nnpm run dev\n\n# Build für Produktion\nnpm run build"
+          }
+        ]
+      }
+    ]
+  }
+]
