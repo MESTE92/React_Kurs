@@ -13,21 +13,30 @@ function sr(html: string, regex: RegExp, replacement: string): string {
   ).join('')
 }
 
-// Klammern pro Verschachtelungstiefe einfärben (überspringt HTML-Tags im String)
+// Klammern pro Verschachtelungstiefe einfärben
 // {} immer grün (JSX-Expressions), () [] tiefen-basiert
+// Inhalt innerhalb bereits gesetzter <span>-Tags wird übersprungen
 function colorizeBrackets(html: string): string {
   const COLORS = ['#ffd700', '#c586c0', '#9cdcfe']
   const CURLY = '#4ade80'
   const stack: number[] = []
   let result = ''
   let i = 0
+  let spanDepth = 0
 
   while (i < html.length) {
     if (html[i] === '<') {
       const end = html.indexOf('>', i)
       if (end === -1) { result += html.slice(i); break }
-      result += html.slice(i, end + 1)
+      const tag = html.slice(i, end + 1)
+      if (tag.startsWith('<span')) spanDepth++
+      else if (tag.startsWith('</span')) spanDepth--
+      result += tag
       i = end + 1
+      continue
+    }
+    if (spanDepth > 0) {
+      result += html[i++]
       continue
     }
     const ch = html[i]
@@ -69,8 +78,14 @@ function highlight(code: string, lang: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
 
+  // JSX-Kommentare {/* ... */} zuerst — verhindert dass Keywords darin eingefärbt werden
+  let r = escaped.replace(
+    /\{(\/\*[\s\S]*?\*\/)\}/g,
+    '<span style="color:#6a9955">{$1}</span>'
+  )
+
   // Backtick-Strings auf rohem Text — noch keine Spans vorhanden
-  let r = escaped.replace(/(`[^`]*`)/g, '<span style="color:#ce9178">$1</span>')
+  r = r.replace(/(`[^`]*`)/g, '<span style="color:#ce9178">$1</span>')
 
   // Ab hier sr(): jede Regel überspringt bereits gesetzte <span>-Tags
   r = sr(r, /('[^']*')/g,              '<span style="color:#ce9178">$1</span>')

@@ -97,15 +97,15 @@ function App() {
 
   return (
     // Kein echtes HTML — wird zu JS kompiliert
-    <div className="container">  {/* className statt class */}
+    <div className="container">  {/* React: className — HTML: class (class ist JS-Keyword) */}
 
-      {/* Ausdrücke in {} eingebettet */}
+      {/* {} einbetten: alles in {} wird als JS ausgeführt */}
       <h1>Hallo, {name}!</h1>
 
-      {/* Bedingter Ausdruck mit ternärem Operator */}
+      {/* Ternärer Operator: Bedingung ? wahr : falsch */}
       <p>{isLoggedIn ? "Eingeloggt" : "Bitte anmelden"}</p>
 
-      {/* className statt inline style */}
+      {/* CSS-Klasse statt inline-style — Styles leben in .css Datei */}
       <span className="highlight-text">
         Blauer Text
       </span>
