@@ -53,6 +53,15 @@ function highlight(code: string, lang: string): string {
       .replace(/(#.+)/g, '<span style="color:#6a9955">$1</span>')
   }
 
+  if (lang === 'css') {
+    const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    let r = escaped.replace(/(\/\*[\s\S]*?\*\/)/g, '<span style="color:#6a9955">$1</span>')
+    r = sr(r, /(\.[a-zA-Z][a-zA-Z0-9_-]*)/g,  '<span style="color:#ffd700">$1</span>')
+    r = sr(r, /(@[a-zA-Z-]+)/g,               '<span style="color:#569cd6">$1</span>')
+    r = sr(r, /\b([a-z][a-z0-9-]+)(?=\s*:)/g, '<span style="color:#9cdcfe">$1</span>')
+    return colorizeBrackets(r)
+  }
+
   const escaped = code
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
