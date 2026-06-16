@@ -666,13 +666,14 @@ Immer über den Setter verändern (\`setCount\`), nie direkt die Variable — so
           'useState gibt [wert, setter]-Paar zurück',
           'Setter-Aufruf → React rendert Komponente neu',
           'TypeScript: Typ wird aus initialem Wert abgeleitet',
-          'Direkte Mutation des State = Fehler, immer Setter nutzen',
+          'Nie `count = count + 1` — nur über `setCount()`, sonst bemerkt React die Änderung nicht',
         ],
         files: [
           {
             name: 'Counter.tsx',
             language: 'tsx',
             code: `import { useState } from 'react'  // Hook importieren
+import './Counter.css'
 
 function Counter() {
   // useState(0) → initialer Wert 0
@@ -683,15 +684,22 @@ function Counter() {
     setCount(count + 1)  // Setter aufrufen → Re-render
   }
 
+  function handleDecrement() {
+    setCount(count - 1)  // Gleiche Logik, nur minus
+  }
+
   function handleReset() {
     setCount(0)          // Zurück auf Startwert
   }
 
   return (
-    <div>
-      <p>Zähler: {count}</p>
-      <button onClick={handleIncrement}>+1</button>
-      <button onClick={handleReset}>Reset</button>
+    <div className="counter">
+      <span className="counter-value">{count}</span>
+      <div className="counter-buttons">
+        <button className="btn-decrement" onClick={handleDecrement}>-1</button>
+        <button className="btn-increment" onClick={handleIncrement}>+1</button>
+        <button className="btn-reset" onClick={handleReset}>Reset</button>
+      </div>
     </div>
   )
 }
@@ -705,16 +713,89 @@ export default Counter`,
 
 function App() {
   return (
-    <div>
+    <div className="app">
       <h1>State-Demo</h1>
-      {/* Jede Counter-Instanz hat eigenen State */}
-      <Counter />
       <Counter />
     </div>
   )
 }
 
 export default App`,
+          },
+          {
+            name: 'Counter.css',
+            language: 'css',
+            code: `.app h1 {
+  font-size: 20px;
+  color: #2d1b4e;
+  margin-bottom: 16px;
+}
+
+.counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 36px;
+  border: 1px solid #e6ddf3;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+}
+
+.counter-value {
+  font-size: 52px;
+  font-weight: 700;
+  color: #7c3aed;
+  line-height: 1;
+}
+
+.counter-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-decrement {
+  background: #ea580c;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-decrement:hover {
+  background: #c2410c;
+}
+
+.btn-increment {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-increment:hover {
+  background: #6d28d9;
+}
+
+.btn-reset {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-reset:hover {
+  background: #e5e7eb;
+}`,
           },
         ],
       },
@@ -1030,6 +1111,191 @@ function Timer() {
 }
 
 export default Timer`,
+          },
+          {
+            name: 'Stopwatch.tsx',
+            language: 'tsx',
+            code: `import { useState, useEffect } from 'react'
+import './Stopwatch.css'
+
+function Stopwatch() {
+  const [running, setRunning] = useState(false)
+  // elapsed: vergangene Zeit in ms während die Uhr läuft
+  const [elapsed, setElapsed] = useState(0)
+  // stoppedAt: gespeicherte Zeit beim Drücken von Stop
+  const [stoppedAt, setStoppedAt] = useState<number | null>(null)
+
+  // Effekt läuft neu wenn running wechselt
+  // Cleanup-Funktion stoppt das Interval automatisch
+  useEffect(() => {
+    if (!running) return
+    const id = setInterval(() => {
+      setElapsed(prev => prev + 100)  // Funktionsform: kein stale Closure
+    }, 100)
+    return () => clearInterval(id)  // Cleanup beim Stop oder Unmount
+  }, [running])
+
+  function handleStart() {
+    setElapsed(0)
+    setStoppedAt(null)
+    setRunning(true)
+  }
+
+  function handleStop() {
+    setRunning(false)
+    setStoppedAt(elapsed)  // Wert einfrieren
+  }
+
+  const display = (elapsed / 1000).toFixed(1) + 's'
+
+  return (
+    <div className="stopwatch-wrapper">
+      <div className="stopwatch">
+        <div className="stopwatch-display">{display}</div>
+        <div className="stopwatch-buttons">
+          <button className="btn-start" onClick={handleStart} disabled={running}>
+            Start
+          </button>
+          <button className="btn-stop" onClick={handleStop} disabled={!running}>
+            Stop
+          </button>
+        </div>
+      </div>
+      {stoppedAt !== null && (
+        <div className="stopwatch-result">
+          <span className="result-label">Gestoppt</span>
+          <span className="result-time">{(stoppedAt / 1000).toFixed(2)}s</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default Stopwatch`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import Timer from './Timer'
+import Stopwatch from './Stopwatch'
+
+function App() {
+  return (
+    <div className="demo">
+      {/* Einfaches Beispiel: Timer mit Toggle */}
+      <Timer />
+      {/* Erweitertes Beispiel: Stoppuhr mit getrenntem Start/Stop */}
+      <Stopwatch />
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'Stopwatch.css',
+            language: 'css',
+            code: `.demo {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.stopwatch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.stopwatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 36px;
+  border: 1px solid #e6ddf3;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+}
+
+.stopwatch-display {
+  font-size: 52px;
+  font-weight: 700;
+  color: #2d1b4e;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.stopwatch-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-start {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-start:disabled {
+  background: #d1fae5;
+  color: #86efac;
+  cursor: not-allowed;
+}
+
+.btn-start:not(:disabled):hover {
+  background: #15803d;
+}
+
+.btn-stop {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-stop:disabled {
+  background: #fee2e2;
+  color: #fca5a5;
+  cursor: not-allowed;
+}
+
+.btn-stop:not(:disabled):hover {
+  background: #b91c1c;
+}
+
+.stopwatch-result {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid #7c3aed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.result-label {
+  font-size: 10px;
+  color: #9d8bc0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.result-time {
+  font-size: 20px;
+  font-weight: 700;
+  color: #7c3aed;
+}`,
           },
         ],
       },

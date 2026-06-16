@@ -185,6 +185,7 @@ function highlight(code: string, lang: string): string {
     const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     let r = escaped.replace(/(\/\*[\s\S]*?\*\/)/g, '<span style="color:#6a9955">$1</span>')
     r = sr(r, /(\.[a-zA-Z][a-zA-Z0-9_-]*)/g,  '<span style="color:#ffd700">$1</span>')
+    r = sr(r, /\b(div|span|p|h1|h2|h3|h4|h5|h6|ul|ol|li|a|button|input|form|label|nav|header|footer|main|section|article|table|tr|td|th|img|pre|code|body|html)\b/g, '<span style="color:#ffd700">$1</span>')
     r = sr(r, /(@[a-zA-Z-]+)/g,               '<span style="color:#569cd6">$1</span>')
     r = sr(r, /\b([a-z][a-z0-9-]+)(?=\s*:)/g, '<span style="color:#9cdcfe">$1</span>')
     return colorizeBrackets(r)
