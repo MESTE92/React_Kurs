@@ -116,11 +116,11 @@ function LessonView({ lesson, totalLessons, onPrev, onNext }: LessonViewProps) {
       }}>
         <button
           onClick={onPrev}
-          disabled={lesson.id === 1}
+          disabled={lesson.id === 0}
           style={{
-            padding: '10px 20px', borderRadius: '6px', cursor: lesson.id === 1 ? 'not-allowed' : 'pointer',
-            background: lesson.id === 1 ? '#f3edfb' : '#ffffff',
-            color: lesson.id === 1 ? '#c9bce0' : '#2d1b4e',
+            padding: '10px 20px', borderRadius: '6px', cursor: lesson.id === 0 ? 'not-allowed' : 'pointer',
+            background: lesson.id === 0 ? '#f3edfb' : '#ffffff',
+            color: lesson.id === 0 ? '#c9bce0' : '#2d1b4e',
             border: '1px solid #e6ddf3', fontSize: '14px',
           }}
         >

@@ -8,6 +8,121 @@ export const chapters: Chapter[] = [
     title: '1. Grundlagen',
     lessons: [
       {
+        id: 0,
+        title: 'Projekt aufsetzen — React + Vite',
+        category: 'Grundlagen',
+        explanation: `Bevor du React-Code schreiben kannst, brauchst du ein Projekt.
+**Vite** ist das empfohlene Build-Tool für neue React-Projekte — es startet in Millisekunden und unterstützt TypeScript von Haus aus.
+Du brauchst nur **Node.js** (ab Version 18) auf deinem Rechner — dann reicht ein einziger Befehl im Terminal.`,
+        keyPoints: [
+          'Node.js installieren: nodejs.org (Version 18 oder neuer)',
+          '`npm create vite@latest` erstellt das komplette Projektgerüst',
+          '`--template react-ts` = React + TypeScript voreingestellt',
+          '`npm install` lädt alle Abhängigkeiten (React, Vite, TypeScript...)',
+          '`npm run dev` startet den Server — App läuft unter localhost:5173',
+        ],
+        files: [
+          {
+            name: 'Terminal',
+            language: 'bash',
+            code: `# Weg 1: Interaktiv — Vite fragt Schritt für Schritt nach
+npm create vite@latest
+# → Projektname eingeben
+# → Framework wählen: React
+# → Variant wählen:   TypeScript
+
+# Weg 2: Direkt — alles auf einmal, kein Dialog
+# "meine-app" = Projektname, react-ts = React + TypeScript
+npm create vite@latest meine-app -- --template react-ts
+
+# Ab hier identisch für beide Wege:
+
+# In den Projektordner wechseln
+cd meine-app
+
+# Abhängigkeiten installieren (node_modules wird angelegt)
+npm install
+
+# Entwicklungsserver starten — App läuft unter http://localhost:5173
+npm run dev`,
+          },
+          {
+            name: 'package.json',
+            language: 'json',
+            code: `{
+  "name": "meine-app",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^6.0.0"
+  }
+}`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `// src/App.tsx — Startpunkt deiner App nach "npm create vite"
+function App() {
+  return (
+    <div className="app">
+      <h1>Mein erstes React-Projekt</h1>
+      <p>Projekt läuft — bearbeite diese Datei und speichere.</p>
+      <p className="hint">Datei: <code>src/App.tsx</code></p>
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.app {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 32px;
+  border-radius: 12px;
+  background: #f7f3fc;
+  border: 1px solid #e6ddf3;
+  text-align: center;
+}
+
+.app h1 {
+  font-size: 22px;
+  color: #2d1b4e;
+  margin-bottom: 10px;
+}
+
+.app p {
+  color: #6b5b8c;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.hint {
+  font-size: 13px;
+  color: #9d8bc0;
+}
+
+.hint code {
+  background: #ede9fe;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}`,
+          },
+        ],
+      },
+      {
         id: 1,
         title: 'Was ist React?',
         category: 'Grundlagen',
