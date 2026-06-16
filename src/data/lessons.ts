@@ -404,19 +404,19 @@ In TypeScript nutzt du \`React.ReactNode\` als Typ für children.`,
           {
             name: 'Box.tsx',
             language: 'tsx',
-            code: `import { ReactNode } from 'react'  // ReactNode-Typ importieren
+            code: `import { ReactNode } from 'react'  // TypeScript: ReactNode importieren — gibt Typsicherheit für children
 import './Box.css'
 
 interface BoxProps {
-  color?: string
-  children: ReactNode   // Alles was zwischen <Box>...</Box> steht
+  color?: string          // optionale Hintergrundfarbe — ? heißt: muss nicht übergeben werden
+  children: ReactNode     // alles was zwischen <Box>...</Box> steht
 }
 
 function Box({ color = 'lightgray', children }: BoxProps) {
   return (
-    // Dynamische Hintergrundfarbe als CSS-Variable übergeben
-    <div className="box" style={{ '--box-color': color } as React.CSSProperties}>
-      {children}   {/* Hier wird der übergebene Inhalt gerendert */}
+    // style-Prop direkt setzen — backgroundColor nimmt den color-Wert entgegen
+    <div className="box" style={{ backgroundColor: color }}>
+      {children}   {/* Inhalt kommt von außen — Box weiß nicht was drin ist */}
     </div>
   )
 }
@@ -449,13 +449,11 @@ export default App`,
           {
             name: 'Box.css',
             language: 'css',
-            code: `
-.box {
-  background: var(--box-color, lightgray);
+            code: `.box {
   padding: 16px;
   border-radius: 8px;
-}
-`,
+  margin-bottom: 12px;
+}`,
           },
         ],
       },
