@@ -164,9 +164,9 @@ Komponenten können andere Komponenten enthalten — so entsteht ein **Komponent
             code: `// Eigene Komponente — wiederverwendbarer UI-Block
 function Header() {
   return (
-    <header>
+    <header className="app-header">
       <h1>Meine App</h1>
-      <nav>
+      <nav className="app-nav">
         <a href="/">Home</a>
         <a href="/about">Über uns</a>
       </nav>
@@ -181,7 +181,7 @@ export default Header`,
             language: 'tsx',
             code: `function Footer() {
   return (
-    <footer>
+    <footer className="app-footer">
       <p>© 2025 Meine App</p>
     </footer>
   )
@@ -202,7 +202,7 @@ function App() {
     // Fragment <> als Root statt unnötigem div
     <>
       <Header />          {/* Komponente als selbst-schließender Tag */}
-      <main>
+      <main className="app-main">
         <p>Hauptinhalt hier</p>
       </main>
       <Footer />
@@ -215,7 +215,7 @@ export default App`,
           {
             name: 'App.css',
             language: 'css',
-            code: `header {
+            code: `.app-header {
   background: #1e1e2e;
   padding: 16px 24px;
   border-radius: 8px;
@@ -225,19 +225,19 @@ export default App`,
   justify-content: space-between;
 }
 
-header h1 {
+.app-header h1 {
   font-size: 20px;
   font-weight: 700;
   margin: 0;
   color: #a78bfa;
 }
 
-nav {
+.app-nav {
   display: flex;
   gap: 12px;
 }
 
-nav a {
+.app-nav a {
   color: #c4b5fd;
   text-decoration: none;
   font-size: 14px;
@@ -245,16 +245,16 @@ nav a {
   border-radius: 4px;
 }
 
-nav a:hover {
+.app-nav a:hover {
   background: #ffffff22;
 }
 
-main {
+.app-main {
   padding: 12px 4px;
   color: #374151;
 }
 
-footer {
+.app-footer {
   margin-top: 16px;
   padding-top: 12px;
   border-top: 1px solid #e5e7eb;
