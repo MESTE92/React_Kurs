@@ -593,15 +593,13 @@ Ein CSS-Wrapper ist das klassische Beispiel: er gibt dem Inhalt einen Rahmen, oh
 import './Wrapper.css'
 
 interface WrapperProps {
-  variant?: 'primary' | 'secondary'   // Union Type — nur diese zwei Werte sind erlaubt, ? = optional (default greift sonst)
   children: ReactNode   // ReactNode = alles was React rendern kann (Text, JSX, Arrays...)
 }
 
-// { children } ist Destructuring von props — gleiches Ergebnis wie props.children, nur kürzer
-function Wrapper({ variant = 'primary', children }: WrapperProps) {
+// Die Komponente kümmert sich nur um das Styling — der Inhalt kommt von außen
+function Wrapper({ children }: WrapperProps) {
   return (
-    // CSS-Klasse steuert das Styling — der Inhalt kommt komplett von außen
-    <div className={\`wrapper wrapper--\${variant}\`}>
+    <div className="wrapper">
       {children}   {/* was zwischen <Wrapper>...</Wrapper> steht, landet hier */}
     </div>
   )
@@ -618,15 +616,14 @@ function App() {
   return (
     <div>
       {/* Alles zwischen den Tags wird zu props.children */}
-      <Wrapper variant="primary">
-        <h2>Primary Wrapper</h2>
+      <Wrapper>
+        <h2>Erster Kasten</h2>
         <p>Dieser Inhalt ist props.children</p>
       </Wrapper>
 
-      {/* Mehrere Elemente sind erlaubt — children wird intern ein Array */}
-      <Wrapper variant="secondary">
-        <p>Zweiter Wrapper</p>
-        <small>Gleiche Komponente, anderes Variant-Prop</small>
+      {/* Gleiche Komponente — komplett anderer Inhalt */}
+      <Wrapper>
+        <p>Zweiter Kasten — dieselbe Wrapper-Komponente</p>
       </Wrapper>
     </div>
   )
@@ -641,16 +638,8 @@ export default App`,
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 12px;
-}
-
-.wrapper--primary {
   background: #f0e6ff;
   border-left: 4px solid #7c3aed;
-}
-
-.wrapper--secondary {
-  background: #e0f2fe;
-  border-left: 4px solid #0ea5e9;
 }`,
           },
         ],
