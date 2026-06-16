@@ -1,4 +1,4 @@
-import type { Chapter } from '../types';
+﻿import type { Chapter } from '../types';
 
 export const chapters: Chapter[] = [
   // ─────────────────────────────────────────────
@@ -47,6 +47,7 @@ createRoot(document.getElementById('root')!).render(
             code: `// Die Root-Komponente — der Startpunkt deiner UI
 function App() {
   return (
+    // JSX braucht genau ein Wurzelelement — div dient hier als äußere Hülle
     <div>
       <h1>Hallo React!</h1>
       <p>Das ist meine erste React-App mit Vite + TypeScript.</p>
@@ -54,7 +55,7 @@ function App() {
   )
 }
 
-export default App`,
+export default App  // export default = App kann in main.tsx importiert werden`,
           },
           {
             name: 'index.html',
@@ -108,13 +109,13 @@ function App() {
     // Kein echtes HTML — wird zu JS kompiliert
     <div className="container">  {/* React: className — HTML: class (class ist JS-Keyword) */}
 
-      {/* {} einbetten: alles in {} wird als JS ausgeführt */}
+      {/* Variablen in JSX immer in {} schreiben — ohne {} würde "name" als Text ausgegeben */}
       <h1>Hallo, {name}!</h1>
 
-      {/* Ternärer Operator: Bedingung ? wahr : falsch */}
+      {/* Ternärer Operator = if/else in einer Zeile: Bedingung ? wahr : falsch */}
       <p>{isLoggedIn ? "Eingeloggt" : "Bitte anmelden"}</p>
 
-      {/* CSS-Klasse statt inline-style — Styles leben in .css Datei */}
+      {/* className statt style="" — Styles besser in externe .css auslagern, nicht inline */}
       <span className="highlight-text">
         Blauer Text
       </span>
@@ -194,6 +195,7 @@ export default Footer`,
             code: `// Importiert und kombiniert Komponenten
 import Header from './Header'   // Named: ./Header.tsx
 import Footer from './Footer'
+import './App.css'              // Styles für alle Komponenten dieser App
 
 function App() {
   return (
@@ -209,6 +211,57 @@ function App() {
 }
 
 export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `header {
+  background: #1e1e2e;
+  padding: 16px 24px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: #a78bfa;
+}
+
+nav {
+  display: flex;
+  gap: 12px;
+}
+
+nav a {
+  color: #c4b5fd;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+nav a:hover {
+  background: #ffffff22;
+}
+
+main {
+  padding: 12px 4px;
+  color: #374151;
+}
+
+footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  color: #9ca3af;
+  font-size: 13px;
+  text-align: center;
+}`,
           },
         ],
       },
@@ -372,6 +425,89 @@ export default App`,
       },
       {
         id: 6,
+        title: 'props.children — Der CSS-Wrapper',
+        category: 'Grundlagen',
+        explanation: `**props.children** ist der Inhalt den du zwischen die Tags einer Komponente schreibst.
+Jede Komponente bekommt \`children\` automatisch — du musst es nur im Interface als \`ReactNode\` deklarieren und dann rendern.
+Ein CSS-Wrapper ist das klassische Beispiel: er gibt dem Inhalt einen Rahmen, ohne selbst zu wissen was drin ist.`,
+        keyPoints: [
+          '`children` muss im Interface als `ReactNode` deklariert werden',
+          'Zugriff via `props.children` oder kürzer per Destructuring `{ children }`',
+          '`ReactNode` deckt alles ab: Text, JSX-Elemente, Arrays, null',
+          'Wrapper-Muster: Styling in der Komponente — Inhalt kommt von außen',
+        ],
+        files: [
+          {
+            name: 'Wrapper.tsx',
+            language: 'tsx',
+            code: `import { ReactNode } from 'react'
+import './Wrapper.css'
+
+interface WrapperProps {
+  variant?: 'primary' | 'secondary'   // Union Type — nur diese zwei Werte sind erlaubt, ? = optional (default greift sonst)
+  children: ReactNode   // ReactNode = alles was React rendern kann (Text, JSX, Arrays...)
+}
+
+// { children } ist Destructuring von props — gleiches Ergebnis wie props.children, nur kürzer
+function Wrapper({ variant = 'primary', children }: WrapperProps) {
+  return (
+    // CSS-Klasse steuert das Styling — der Inhalt kommt komplett von außen
+    <div className={\`wrapper wrapper--\${variant}\`}>
+      {children}   {/* was zwischen <Wrapper>...</Wrapper> steht, landet hier */}
+    </div>
+  )
+}
+
+export default Wrapper`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import Wrapper from './Wrapper'
+
+function App() {
+  return (
+    <div>
+      {/* Alles zwischen den Tags wird zu props.children */}
+      <Wrapper variant="primary">
+        <h2>Primary Wrapper</h2>
+        <p>Dieser Inhalt ist props.children</p>
+      </Wrapper>
+
+      {/* Mehrere Elemente sind erlaubt — children wird intern ein Array */}
+      <Wrapper variant="secondary">
+        <p>Zweiter Wrapper</p>
+        <small>Gleiche Komponente, anderes Variant-Prop</small>
+      </Wrapper>
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'Wrapper.css',
+            language: 'css',
+            code: `.wrapper {
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.wrapper--primary {
+  background: #f0e6ff;
+  border-left: 4px solid #7c3aed;
+}
+
+.wrapper--secondary {
+  background: #e0f2fe;
+  border-left: 4px solid #0ea5e9;
+}`,
+          },
+        ],
+      },
+      {
+        id: 7,
         title: 'useState — Zustand in Komponenten',
         category: 'Grundlagen',
         explanation: `**useState** ist ein React Hook — eine Funktion die einer Komponente "Gedächtnis" gibt.
@@ -445,7 +581,7 @@ export default App`,
         ],
       },
       {
-        id: 7,
+        id: 8,
         title: 'useState — mit Objekten und Arrays',
         category: 'Grundlagen',
         explanation: `State kann jeden Typ halten: Strings, Numbers, Objekte, Arrays.
@@ -508,7 +644,7 @@ export default Form`,
         ],
       },
       {
-        id: 8,
+        id: 9,
         title: 'Event Handling',
         category: 'Grundlagen',
         explanation: `Events in React funktionieren wie in JavaScript — aber mit camelCase (\`onClick\` statt \`onclick\`).
@@ -568,7 +704,7 @@ export default EventDemo`,
         ],
       },
       {
-        id: 9,
+        id: 10,
         title: 'Conditional Rendering',
         category: 'Grundlagen',
         explanation: `React rendert nur was du zurückgibst — du kannst mit normalen JS-Bedingungen steuern was angezeigt wird.
@@ -637,7 +773,7 @@ export default App`,
         ],
       },
       {
-        id: 10,
+        id: 11,
         title: 'Lists & .map() — Listen rendern',
         category: 'Grundlagen',
         explanation: `Arrays in JSX renderst du mit \`.map()\` — jedes Element wird in JSX umgewandelt.
@@ -706,7 +842,7 @@ export default ProductList`,
     title: '2. Hooks',
     lessons: [
       {
-        id: 11,
+        id: 12,
         title: 'useEffect — Seiteneffekte',
         category: 'Hooks',
         explanation: `**useEffect** führt Code aus, nachdem React die Komponente gerendert hat.
@@ -760,7 +896,7 @@ export default Timer`,
         ],
       },
       {
-        id: 12,
+        id: 13,
         title: 'useEffect — API-Daten laden',
         category: 'Hooks',
         explanation: `API-Aufrufe gehören in \`useEffect\` — nicht direkt in die Komponente (würde bei jedem Render feuern).
@@ -824,7 +960,7 @@ export default UserFetch`,
         ],
       },
       {
-        id: 13,
+        id: 14,
         title: 'useRef — DOM-Zugriff ohne Re-render',
         category: 'Hooks',
         explanation: `**useRef** gibt eine veränderliche Box (\`.current\`) die zwischen Renders erhalten bleibt — aber kein Re-render auslöst.
@@ -872,7 +1008,7 @@ export default FocusInput`,
         ],
       },
       {
-        id: 14,
+        id: 15,
         title: 'useContext — globaler State',
         category: 'Hooks',
         explanation: `**Context** löst das "Prop Drilling" Problem: Props durch viele Ebenen nach unten reichen.
@@ -984,7 +1120,7 @@ export default App`,
         ],
       },
       {
-        id: 15,
+        id: 16,
         title: 'useMemo & useCallback — Performance',
         category: 'Hooks',
         explanation: `**useMemo** cached das Ergebnis einer Berechnung — wird nur neu berechnet wenn sich Abhängigkeiten ändern.
@@ -1036,7 +1172,7 @@ export default ExpensiveList`,
         ],
       },
       {
-        id: 16,
+        id: 17,
         title: 'Custom Hooks — wiederverwendbare Logik',
         category: 'Hooks',
         explanation: `**Custom Hooks** sind eigene Funktionen die mit "use" beginnen und andere Hooks nutzen.
@@ -1152,7 +1288,7 @@ export default App`,
     title: '3. Fortgeschritten',
     lessons: [
       {
-        id: 17,
+        id: 18,
         title: 'React Router — Navigation',
         category: 'Fortgeschritten',
         explanation: `**React Router** ermöglicht clientseitige Navigation ohne Seiten-Reload.
@@ -1240,7 +1376,7 @@ export default User`,
         ],
       },
       {
-        id: 18,
+        id: 19,
         title: 'Formulare — kontrolliert vs. unkontrolliert',
         category: 'Fortgeschritten',
         explanation: `**Kontrollierte Inputs** — React State ist die einzige Datenquelle, DOM wird gesteuert.
@@ -1332,7 +1468,7 @@ export default LoginForm`,
         ],
       },
       {
-        id: 19,
+        id: 20,
         title: 'useReducer — komplexer State',
         category: 'Fortgeschritten',
         explanation: `**useReducer** ist Alternative zu useState für komplexen State mit mehreren Aktionen.
@@ -1430,7 +1566,7 @@ export default Cart`,
         ],
       },
       {
-        id: 20,
+        id: 21,
         title: 'TypeScript mit React — Typen & Generics',
         category: 'Fortgeschritten',
         explanation: `TypeScript macht React-Code robuster: Fehler werden beim Schreiben erkannt, nicht erst zur Laufzeit.
@@ -1514,7 +1650,7 @@ export default App`,
         ],
       },
       {
-        id: 21,
+        id: 22,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
         explanation: `**React.memo** ist ein Higher-Order Component (HOC) — es "merkt" sich Props und rendert nur neu wenn Props sich ändern.
@@ -1584,7 +1720,7 @@ export default App`,
         ],
       },
       {
-        id: 22,
+        id: 23,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
         explanation: `**Error Boundaries** fangen JavaScript-Fehler in Kindkomponenten ab und zeigen Fallback-UI.
@@ -1674,7 +1810,7 @@ export default App`,
         ],
       },
       {
-        id: 23,
+        id: 24,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
         explanation: `**React.lazy()** lädt eine Komponente erst wenn sie gebraucht wird — Code-Splitting.
@@ -1718,7 +1854,7 @@ export default App`,
         ],
       },
       {
-        id: 24,
+        id: 25,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
         explanation: `**Portals** rendern Kinder in einen anderen DOM-Knoten als den Parent — aber bleiben im React-Komponentenbaum.
@@ -1799,7 +1935,7 @@ export default Modal`,
     title: '4. Praxisprojekt: SportsDash',
     lessons: [
       {
-        id: 25,
+        id: 26,
         title: 'Projektübersicht & Architektur',
         category: 'Praxisprojekt',
         explanation: `Wir bauen **SportsDash** — eine App mit Login/Register und Fußball-Ergebnissen via API.
@@ -1838,7 +1974,7 @@ Die App nutzt React Router für Navigation, Context für Auth-State, und fetch()
         ],
       },
       {
-        id: 26,
+        id: 27,
         title: 'Projekt: Types & Interfaces',
         category: 'Praxisprojekt',
         explanation: `Alle TypeScript-Typen zentral in einer Datei — so haben alle Komponenten dieselben Definitionen.
@@ -1925,7 +2061,7 @@ export interface ApiResponse<T> {
         ],
       },
       {
-        id: 27,
+        id: 28,
         title: 'Projekt: AuthContext',
         category: 'Praxisprojekt',
         explanation: `Der AuthContext verwaltet den eingeloggten User global — alle Komponenten können darauf zugreifen.
@@ -1999,7 +2135,7 @@ export function useAuth(): AuthContextType {
         ],
       },
       {
-        id: 28,
+        id: 29,
         title: 'Projekt: PrivateRoute & Layout',
         category: 'Praxisprojekt',
         explanation: `**PrivateRoute** schützt Seiten die nur eingeloggte User sehen dürfen — leitet sonst zum Login um.
@@ -2132,7 +2268,7 @@ export default Layout`,
         ],
       },
       {
-        id: 29,
+        id: 30,
         title: 'Projekt: Login & Register Pages',
         category: 'Praxisprojekt',
         explanation: `Login und Register sind kontrollierte Formulare die den AuthContext nutzen.
@@ -2337,7 +2473,7 @@ export default RegisterPage`,
         ],
       },
       {
-        id: 30,
+        id: 31,
         title: 'Projekt: Dashboard & API',
         category: 'Praxisprojekt',
         explanation: `Das Dashboard lädt Live-Fußballdaten von der API. Wir nutzen einen Mock-Datensatz falls kein API-Key vorhanden.
@@ -2665,7 +2801,7 @@ export default useFetch`,
         ],
       },
       {
-        id: 31,
+        id: 32,
         title: 'Projekt: App.tsx — Router zusammenbauen',
         category: 'Praxisprojekt',
         explanation: `Jetzt verbinden wir alles: Router, Auth-Provider, Layout, Private Routes und alle Seiten.

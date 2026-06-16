@@ -73,13 +73,20 @@ function LivePreview({ files }: { files: CodeFile[] }) {
   }, [files])
 
   // CSS-Sideeffect: austauschen wenn sich Dateien ändern
+  // Alle Selektoren werden auf .lp-root gescoped — verhindert Leakage in die App
   useEffect(() => {
     document.querySelector('style[data-lesson-preview]')?.remove()
     const cssFiles = files.filter(f => f.language === 'css')
     if (cssFiles.length > 0) {
+      const raw = cssFiles.map(f => f.code).join('\n')
+      const scoped = raw.replace(/([^{}@,]+)(,?)(?=\s*\{)/g, (_, sel, comma) => {
+        const trimmed = sel.trim()
+        if (!trimmed || trimmed.startsWith('@') || trimmed.startsWith('}')) return _
+        return `.lp-root ${trimmed}${comma}`
+      })
       const style = document.createElement('style')
       style.setAttribute('data-lesson-preview', '')
-      style.textContent = cssFiles.map(f => f.code).join('\n')
+      style.textContent = scoped
       document.head.appendChild(style)
     }
     return () => { document.querySelector('style[data-lesson-preview]')?.remove() }
@@ -102,6 +109,7 @@ function LivePreview({ files }: { files: CodeFile[] }) {
     <div style={{ position: 'relative', minHeight: '80px' }}>
       <div
         ref={mountRef}
+        className="lp-root"
         style={{ padding: '20px', fontFamily: 'system-ui,-apple-system,sans-serif', lineHeight: 1.6, color: '#1a1a2e' }}
       />
       {error && (
@@ -205,6 +213,10 @@ function highlight(code: string, lang: string): string {
     '<span style="color:#4ec9b0">$1</span>')
   r = sr(r, /(&lt;\/?a(?=[\s&]))/g,      '<span style="color:#4ade80">$1</span>')
   r = sr(r, /(&lt;\/?[A-Za-z][a-zA-Z0-9]*)/g, '<span style="color:#f97316">$1</span>')
+  // Fragment-Tags <> und </> — kein Buchstabe nach <, daher eigene Regel
+  r = sr(r, /(&lt;\/?&gt;)/g, '<span style="color:#f97316">$1</span>')
+  // Schließendes > und selbstschließendes /> ebenfalls orange — gehört zum Tag-Syntax
+  r = sr(r, /(\/&gt;|&gt;)/g, '<span style="color:#f97316">$1</span>')
 
   return colorizeBrackets(r)
 }
