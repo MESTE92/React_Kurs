@@ -294,7 +294,9 @@ Props fließen immer **von oben nach unten** (Parent → Child) — niemals umge
           {
             name: 'Card.tsx',
             language: 'tsx',
-            code: `// Interface definiert erlaubte Props und deren Typen
+            code: `import './Card.css'
+
+// Interface definiert erlaubte Props und deren Typen
 interface CardProps {
   title: string           // Pflicht-Prop
   description: string     // Pflicht-Prop
@@ -330,7 +332,6 @@ function App() {
         badge="Neu"
       />
 
-      {/* Ohne optionales badge — kein Fehler */}
       <Card
         title="TypeScript"
         description="Typen für JavaScript"
@@ -340,6 +341,41 @@ function App() {
 }
 
 export default App`,
+          },
+          {
+            name: 'Card.css',
+            language: 'css',
+            code: `.card {
+  border: 1px solid #e6ddf3;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+}
+
+.card h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #2d1b4e;
+  margin: 0 0 6px;
+}
+
+.card p {
+  color: #6b5b8c;
+  font-size: 14px;
+  margin: 0 0 12px;
+}
+
+.badge {
+  display: inline-block;
+  background: #7c3aed;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}`,
           },
         ],
       },
