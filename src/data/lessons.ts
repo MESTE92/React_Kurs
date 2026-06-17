@@ -806,59 +806,201 @@ export default App`,
         explanation: `State kann jeden Typ halten: Strings, Numbers, Objekte, Arrays.
 Bei Objekten und Arrays **niemals** direkt mutieren — immer neue Kopien erstellen (Spread-Operator \`...\`).
 React erkennt Änderungen über Referenzvergleich — nur eine neue Referenz löst Re-render aus.`,
-        preview: `<div style="display:flex;flex-direction:column;gap:10px;max-width:320px">
-  <input placeholder="Name" style="display:block">
-  <p>Name: <strong></strong></p>
-  <button style="align-self:flex-start">Tag hinzufügen</button>
-  <ul><li>Tag 1</li><li>Tag 2</li></ul>
-</div>`,
         keyPoints: [
           'Spread ... erstellt flache Kopie: { ...obj, key: newVal }',
           'Arrays: [...arr, newItem] statt arr.push()',
           'Objekte: { ...obj, name: "neu" } statt obj.name = "neu"',
+          'Direkte Mutation wie obj.name = "x" löst keinen Re-render aus',
         ],
         files: [
           {
-            name: 'Form.tsx',
+            name: 'ProfileCard.tsx',
             language: 'tsx',
             code: `import { useState } from 'react'
+import './ProfileCard.css'
 
-interface User {
+// Nächste Skills die nacheinander hinzugefügt werden
+const NEXT_SKILLS = ['TypeScript', 'Vite', 'CSS', 'Node.js']
+
+interface Profile {
   name: string
-  email: string
+  role: string
 }
 
-function Form() {
-  // State als Objekt
-  const [user, setUser] = useState<User>({ name: '', email: '' })
+function ProfileCard() {
+  // State als Objekt — name und role gebündelt in einem Wert
+  const [profile, setProfile] = useState<Profile>({
+    name: 'Anna',
+    role: 'Junior Developer',
+  })
 
-  // State als Array
-  const [tags, setTags] = useState<string[]>([])
+  // State als Array — Liste der Skills
+  const [skills, setSkills] = useState<string[]>(['React'])
 
-  function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
-    // Spread: kopiert alle alten Felder, überschreibt nur name
-    setUser({ ...user, name: e.target.value })
+  function promote() {
+    // Spread kopiert alle Felder — nur role wird überschrieben
+    setProfile({ ...profile, role: 'Senior Developer' })
   }
 
-  function addTag() {
-    // Spread: altes Array + neues Element
-    setTags([...tags, 'Tag ' + (tags.length + 1)])
+  function addSkill() {
+    const next = NEXT_SKILLS[skills.length - 1]
+    if (!next) return
+    // Spread erhält das alte Array — neuer Skill hinten angehängt
+    setSkills([...skills, next])
   }
 
   return (
-    <div>
-      <input value={user.name} onChange={handleNameChange} placeholder="Name" />
-      <p>Name: {user.name}</p>
+    <div className="profile-card">
+      <div className="profile-header">
+        <div className="profile-avatar">{profile.name[0]}</div>
+        <div>
+          <h2 className="profile-name">{profile.name}</h2>
+          <span className="profile-role">{profile.role}</span>
+        </div>
+      </div>
 
-      <button onClick={addTag}>Tag hinzufügen</button>
-      <ul>
-        {tags.map((tag, i) => <li key={i}>{tag}</li>)}
-      </ul>
+      {/* join() zeigt das Array als Text — kein .map() nötig */}
+      <p className="skills-label">Skills: {skills.join(' · ')}</p>
+
+      <div className="profile-actions">
+        <button className="btn-promote" onClick={promote}
+          disabled={profile.role === 'Senior Developer'}>
+          Befördern
+        </button>
+        <button className="btn-skill" onClick={addSkill}
+          disabled={skills.length > NEXT_SKILLS.length}>
+          Skill hinzufügen
+        </button>
+      </div>
     </div>
   )
 }
 
-export default Form`,
+export default ProfileCard`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import ProfileCard from './ProfileCard'
+
+function App() {
+  return (
+    <div className="app">
+      <h1>Profil-Demo</h1>
+      <ProfileCard />
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'ProfileCard.css',
+            language: 'css',
+            code: `.app h1 {
+  font-size: 20px;
+  color: #2d1b4e;
+  margin-bottom: 16px;
+}
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid #e6ddf3;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+  max-width: 320px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d1b4e;
+  margin: 0 0 2px;
+}
+
+.profile-role {
+  font-size: 12px;
+  color: #9d8bc0;
+}
+
+.skills-label {
+  font-size: 13px;
+  color: #6b5b8c;
+  background: #f7f3fc;
+  border: 1px solid #e6ddf3;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-promote {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.btn-promote:hover:not(:disabled) {
+  background: #6d28d9;
+}
+
+.btn-promote:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-skill {
+  background: #fff;
+  color: #7c3aed;
+  border: 1px solid #7c3aed;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.btn-skill:hover:not(:disabled) {
+  background: #f3edfb;
+}
+
+.btn-skill:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}`,
           },
         ],
       },
