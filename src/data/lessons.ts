@@ -1099,7 +1099,7 @@ Dieses Muster heißt **Lifting State Up** und ist eines der wichtigsten Konzepte
             name: 'Inputfeld.tsx',
             language: 'tsx',
             code: `interface InputfeldProps {
-  // onChange erwartet eine Funktion die einen String bekommt
+  // onChange ist eine Funktion — der Elternteil gibt setText hier rein
   onChange: (value: string) => void
 }
 
@@ -1108,6 +1108,8 @@ function Inputfeld({ onChange }: InputfeldProps) {
     <input
       className="input"
       placeholder="Tippe etwas..."
+      // e.target.value = der aktuelle Text im Input
+      // onChange(...) ruft setText im Elternteil auf → State ändert sich
       onChange={e => onChange(e.target.value)}
     />
   )
@@ -1119,12 +1121,14 @@ export default Inputfeld`,
             name: 'Anzeige.tsx',
             language: 'tsx',
             code: `interface AnzeigeProps {
+  // text kommt als Prop von oben — kein eigener State nötig
   text: string
 }
 
 function Anzeige({ text }: AnzeigeProps) {
   return (
     <div className="anzeige">
+      {/* text || '...' zeigt '...' solange nichts getippt wurde */}
       Du tippst: <strong>{text || '...'}</strong>
     </div>
   )
@@ -1141,15 +1145,15 @@ import Anzeige from './Anzeige'
 import './App.css'
 
 function App() {
-  // State lebt im Elternteil — beide Kinder teilen ihn
+  // State lebt hier oben — nur der Elternteil besitzt ihn
   const [text, setText] = useState('')
 
   return (
     <div className="app">
       <h1>State Lifting</h1>
-      {/* setText wird nach unten gegeben — Inputfeld kann State ändern */}
+      {/* setText nach unten geben → Inputfeld kann den State verändern */}
       <Inputfeld onChange={setText} />
-      {/* text wird nach unten gegeben — Anzeige kann State lesen */}
+      {/* text nach unten geben → Anzeige kann den State nur lesen */}
       <Anzeige text={text} />
     </div>
   )
@@ -1210,7 +1214,7 @@ export default App`,
 Die drei gängigen Muster: **ternärer Operator**, **&&-Kurzschluss**, **early return**.
 \`null\` oder \`undefined\` rendern nichts — nützlich um Elemente auszublenden.`,
         keyPoints: [
-          'Ternär: condition ? <A /> : <B />',
+          'Ternär: condition ? wahr : falsch — z.B. isLoggedIn ? <Dashboard /> : <Login />',
           'Kurzschluss: condition && <A /> (false = nichts)',
           'Early return: if (!data) return <Loading />',
           'null zurückgeben = Element verstecken',
@@ -1219,7 +1223,9 @@ Die drei gängigen Muster: **ternärer Operator**, **&&-Kurzschluss**, **early r
           {
             name: 'UserStatus.tsx',
             language: 'tsx',
-            code: `interface UserStatusProps {
+            code: `import './UserStatus.css'
+
+interface UserStatusProps {
   isLoggedIn: boolean
   isAdmin: boolean
   name?: string
@@ -1229,19 +1235,19 @@ function UserStatus({ isLoggedIn, isAdmin, name }: UserStatusProps) {
 
   // Early return Pattern — wenn nicht eingeloggt, sofort zurück
   if (!isLoggedIn) {
-    return <p>Bitte melde dich an.</p>
+    return <p className="status-hint">Bitte melde dich an.</p>
   }
 
   return (
-    <div>
+    <div className="status-card">
       {/* Ternärer Operator */}
-      <p>Willkommen, {name ? name : 'Gast'}!</p>
+      <p className="status-welcome">Willkommen, {name ? name : 'Gast'}!</p>
 
       {/* &&-Kurzschluss: zeigt nur wenn isAdmin true */}
-      {isAdmin && <button>Admin-Panel öffnen</button>}
+      {isAdmin && <button className="btn-admin">Admin-Panel öffnen</button>}
 
       {/* Verschachtelte Bedingung */}
-      <p>
+      <p className={isAdmin ? 'role role--admin' : 'role role--user'}>
         Rolle: {isAdmin ? '🔴 Administrator' : '🟢 Normaler User'}
       </p>
     </div>
@@ -1257,17 +1263,86 @@ export default UserStatus`,
 
 function App() {
   return (
-    <div>
+    <div className="app">
       <UserStatus isLoggedIn={false} isAdmin={false} />
-      <hr />
-      <UserStatus isLoggedIn={true} isAdmin={false} name="Steven" />
-      <hr />
+      <UserStatus isLoggedIn={true} isAdmin={false} name="User" />
       <UserStatus isLoggedIn={true} isAdmin={true} name="Admin" />
     </div>
   )
 }
 
 export default App`,
+          },
+          {
+            name: 'UserStatus.css',
+            language: 'css',
+            code: `.app {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 300px;
+}
+
+.status-hint {
+  padding: 10px 14px;
+  background: #fef9c3;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 14px;
+  margin: 0;
+}
+
+.status-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #e6ddf3;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.07);
+}
+
+.status-welcome {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2d1b4e;
+  margin: 0;
+}
+
+.btn-admin {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.btn-admin:hover {
+  background: #6d28d9;
+}
+
+.role {
+  font-size: 13px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin: 0;
+  align-self: flex-start;
+}
+
+.role--admin {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.role--user {
+  background: #dcfce7;
+  color: #15803d;
+}`,
           },
         ],
       },
