@@ -1006,6 +1006,83 @@ export default App`,
       },
       {
         id: 9,
+        title: 'Event Handling',
+        category: 'Grundlagen',
+        explanation: `Events in React funktionieren wie in JavaScript — aber mit camelCase (\`onClick\` statt \`onclick\`).
+Handler-Funktionen erhalten ein **Event-Objekt** mit Infos über das Event (z.B. den Wert eines Inputs).
+TypeScript erwartet den richtigen Event-Typ — VS Code schlägt ihn beim Hover vor.`,
+        keyPoints: [
+          'camelCase: onClick, onChange, onSubmit, onKeyDown',
+          'Handler als Referenz übergeben: onClick={handleClick} — kein () dahinter',
+          'Arrow-Function inline wenn nötig: onClick={() => setCount(c => c + 1)}',
+          'e.preventDefault() unterbindet Standard-Browser-Verhalten (z.B. Seiten-Reload)',
+        ],
+        files: [
+          {
+            name: 'EventDemo.tsx',
+            language: 'tsx',
+            code: `import { useState } from 'react'
+import './EventDemo.css'
+
+function EventDemo() {
+  const [clicked, setClicked] = useState(false)
+
+  // MouseEvent: wird beim Klick ausgelöst — es gibt viele weitere Events
+  // z.B. React.ChangeEvent (für Inputs) oder React.FormEvent (für Formulare)
+  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+    setClicked(true)
+  }
+
+  return (
+    <div className="demo">
+      {/* Handler als Referenz — kein () dahinter */}
+      <button className="btn" onClick={handleClick}>Klick mich</button>
+      {/* && ist ein if ohne else — zeigt den Inhalt nur wenn clicked true ist */}
+      {clicked && <p className="feedback">Button wurde geklickt!</p>}
+    </div>
+  )
+}
+
+export default EventDemo`,
+          },
+          {
+            name: 'EventDemo.css',
+            language: 'css',
+            code: `.demo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.btn {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #6d28d9;
+}
+
+.feedback {
+  padding: 10px 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  color: #16a34a;
+  font-size: 14px;
+  margin: 0;
+}`,
+          },
+        ],
+      },
+      {
+        id: 10,
         title: 'State Lifting — Zustand nach oben heben',
         category: 'Grundlagen',
         explanation: `Wenn zwei Komponenten denselben State teilen müssen, wandert der State nach oben — in den gemeinsamen Elternteil.
@@ -1122,66 +1199,6 @@ export default App`,
 .anzeige strong {
   color: #7c3aed;
 }`,
-          },
-        ],
-      },
-      {
-        id: 10,
-        title: 'Event Handling',
-        category: 'Grundlagen',
-        explanation: `Events in React funktionieren wie in JavaScript — aber mit camelCase (\`onClick\` statt \`onclick\`).
-Handler-Funktionen erhhalten ein **Event-Objekt** mit Infos über das Event (z.B. den Wert eines Inputs).
-TypeScript erwartet den richtigen Event-Typ — VS Code schlägt ihn beim Hover vor.`,
-        keyPoints: [
-          'camelCase: onClick, onChange, onSubmit, onKeyDown',
-          'Handler als Referenz übergeben: onClick={handleClick} (kein ()), ',
-          'Arrow-Function inline wenn nötig: onClick={() => setOpen(true)}',
-          'e.preventDefault() unterbindet Standard-Browser-Verhalten',
-        ],
-        files: [
-          {
-            name: 'EventDemo.tsx',
-            language: 'tsx',
-            code: `import { useState } from 'react'
-
-function EventDemo() {
-  const [text, setText] = useState('')
-  const [submitted, setSubmitted] = useState(false)
-
-  // ChangeEvent: für Input-Felder
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setText(e.target.value)  // e.target.value = aktueller Eingabewert
-  }
-
-  // MouseEvent: für Klicks
-  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
-    console.log('Klick auf:', e.currentTarget)
-    setSubmitted(true)
-  }
-
-  // FormEvent: für Formulare
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()   // Verhindert Seiten-Reload
-    alert('Abgeschickt: ' + text)
-  }
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        value={text}
-        onChange={handleChange}
-        placeholder="Eingabe..."
-      />
-      <button type="button" onClick={handleClick}>
-        Klick mich
-      </button>
-      <button type="submit">Abschicken</button>
-      {submitted && <p>Button wurde geklickt!</p>}
-    </form>
-  )
-}
-
-export default EventDemo`,
           },
         ],
       },
