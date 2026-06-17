@@ -1006,6 +1006,127 @@ export default App`,
       },
       {
         id: 9,
+        title: 'State Lifting — Zustand nach oben heben',
+        category: 'Grundlagen',
+        explanation: `Wenn zwei Komponenten denselben State teilen müssen, wandert der State nach oben — in den gemeinsamen Elternteil.
+Der Elternteil hält den State und gibt ihn nach unten weiter: den **Wert** an die lesende Komponente, den **Setter** an die schreibende.
+Dieses Muster heißt **Lifting State Up** und ist eines der wichtigsten Konzepte in React.`,
+        keyPoints: [
+          'State immer im niedrigsten gemeinsamen Elternteil halten',
+          'Setter als Prop nach unten geben → Kind kann State ändern',
+          'Wert als Prop nach unten geben → Kind kann State lesen',
+          'Kinder haben keinen eigenen State — alles läuft über den Elternteil',
+        ],
+        files: [
+          {
+            name: 'Inputfeld.tsx',
+            language: 'tsx',
+            code: `interface InputfeldProps {
+  // onChange erwartet eine Funktion die einen String bekommt
+  onChange: (value: string) => void
+}
+
+function Inputfeld({ onChange }: InputfeldProps) {
+  return (
+    <input
+      className="input"
+      placeholder="Tippe etwas..."
+      onChange={e => onChange(e.target.value)}
+    />
+  )
+}
+
+export default Inputfeld`,
+          },
+          {
+            name: 'Anzeige.tsx',
+            language: 'tsx',
+            code: `interface AnzeigeProps {
+  text: string
+}
+
+function Anzeige({ text }: AnzeigeProps) {
+  return (
+    <div className="anzeige">
+      Du tippst: <strong>{text || '...'}</strong>
+    </div>
+  )
+}
+
+export default Anzeige`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { useState } from 'react'
+import Inputfeld from './Inputfeld'
+import Anzeige from './Anzeige'
+import './App.css'
+
+function App() {
+  // State lebt im Elternteil — beide Kinder teilen ihn
+  const [text, setText] = useState('')
+
+  return (
+    <div className="app">
+      <h1>State Lifting</h1>
+      {/* setText wird nach unten gegeben — Inputfeld kann State ändern */}
+      <Inputfeld onChange={setText} />
+      {/* text wird nach unten gegeben — Anzeige kann State lesen */}
+      <Anzeige text={text} />
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.app {
+  max-width: 360px;
+}
+
+.app h1 {
+  font-size: 20px;
+  color: #2d1b4e;
+  margin-bottom: 20px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e6ddf3;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2d1b4e;
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+}
+
+.input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.anzeige {
+  padding: 12px 16px;
+  border: 1px solid #e6ddf3;
+  border-radius: 8px;
+  background: #f7f3fc;
+  font-size: 14px;
+  color: #6b5b8c;
+}
+
+.anzeige strong {
+  color: #7c3aed;
+}`,
+          },
+        ],
+      },
+      {
+        id: 10,
         title: 'Event Handling',
         category: 'Grundlagen',
         explanation: `Events in React funktionieren wie in JavaScript — aber mit camelCase (\`onClick\` statt \`onclick\`).
@@ -1065,7 +1186,7 @@ export default EventDemo`,
         ],
       },
       {
-        id: 10,
+        id: 11,
         title: 'Conditional Rendering',
         category: 'Grundlagen',
         explanation: `React rendert nur was du zurückgibst — du kannst mit normalen JS-Bedingungen steuern was angezeigt wird.
@@ -1134,7 +1255,7 @@ export default App`,
         ],
       },
       {
-        id: 11,
+        id: 12,
         title: 'Lists & .map() — Listen rendern',
         category: 'Grundlagen',
         explanation: `Arrays in JSX renderst du mit \`.map()\` — jedes Element wird in JSX umgewandelt.
@@ -1203,7 +1324,7 @@ export default ProductList`,
     title: '2. Hooks',
     lessons: [
       {
-        id: 12,
+        id: 13,
         title: 'useEffect — Seiteneffekte',
         category: 'Hooks',
         explanation: `**useEffect** führt Code aus, nachdem React die Komponente gerendert hat.
@@ -1442,7 +1563,7 @@ export default App`,
         ],
       },
       {
-        id: 13,
+        id: 14,
         title: 'useEffect — API-Daten laden',
         category: 'Hooks',
         explanation: `API-Aufrufe gehören in \`useEffect\` — nicht direkt in die Komponente (würde bei jedem Render feuern).
@@ -1506,7 +1627,7 @@ export default UserFetch`,
         ],
       },
       {
-        id: 14,
+        id: 15,
         title: 'useRef — DOM-Zugriff ohne Re-render',
         category: 'Hooks',
         explanation: `**useRef** gibt eine veränderliche Box (\`.current\`) die zwischen Renders erhalten bleibt — aber kein Re-render auslöst.
@@ -1554,7 +1675,7 @@ export default FocusInput`,
         ],
       },
       {
-        id: 15,
+        id: 16,
         title: 'useContext — globaler State',
         category: 'Hooks',
         explanation: `**Context** löst das "Prop Drilling" Problem: Props durch viele Ebenen nach unten reichen.
@@ -1666,7 +1787,7 @@ export default App`,
         ],
       },
       {
-        id: 16,
+        id: 17,
         title: 'useMemo & useCallback — Performance',
         category: 'Hooks',
         explanation: `**useMemo** cached das Ergebnis einer Berechnung — wird nur neu berechnet wenn sich Abhängigkeiten ändern.
@@ -1718,7 +1839,7 @@ export default ExpensiveList`,
         ],
       },
       {
-        id: 17,
+        id: 18,
         title: 'Custom Hooks — wiederverwendbare Logik',
         category: 'Hooks',
         explanation: `**Custom Hooks** sind eigene Funktionen die mit "use" beginnen und andere Hooks nutzen.
@@ -1834,7 +1955,7 @@ export default App`,
     title: '3. Fortgeschritten',
     lessons: [
       {
-        id: 18,
+        id: 19,
         title: 'React Router — Navigation',
         category: 'Fortgeschritten',
         explanation: `**React Router** ermöglicht clientseitige Navigation ohne Seiten-Reload.
@@ -1922,7 +2043,7 @@ export default User`,
         ],
       },
       {
-        id: 19,
+        id: 20,
         title: 'Formulare — kontrolliert vs. unkontrolliert',
         category: 'Fortgeschritten',
         explanation: `**Kontrollierte Inputs** — React State ist die einzige Datenquelle, DOM wird gesteuert.
@@ -2014,7 +2135,7 @@ export default LoginForm`,
         ],
       },
       {
-        id: 20,
+        id: 21,
         title: 'useReducer — komplexer State',
         category: 'Fortgeschritten',
         explanation: `**useReducer** ist Alternative zu useState für komplexen State mit mehreren Aktionen.
@@ -2112,7 +2233,7 @@ export default Cart`,
         ],
       },
       {
-        id: 21,
+        id: 22,
         title: 'TypeScript mit React — Typen & Generics',
         category: 'Fortgeschritten',
         explanation: `TypeScript macht React-Code robuster: Fehler werden beim Schreiben erkannt, nicht erst zur Laufzeit.
@@ -2196,7 +2317,7 @@ export default App`,
         ],
       },
       {
-        id: 22,
+        id: 23,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
         explanation: `**React.memo** ist ein Higher-Order Component (HOC) — es "merkt" sich Props und rendert nur neu wenn Props sich ändern.
@@ -2266,7 +2387,7 @@ export default App`,
         ],
       },
       {
-        id: 23,
+        id: 24,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
         explanation: `**Error Boundaries** fangen JavaScript-Fehler in Kindkomponenten ab und zeigen Fallback-UI.
@@ -2356,7 +2477,7 @@ export default App`,
         ],
       },
       {
-        id: 24,
+        id: 25,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
         explanation: `**React.lazy()** lädt eine Komponente erst wenn sie gebraucht wird — Code-Splitting.
@@ -2400,7 +2521,7 @@ export default App`,
         ],
       },
       {
-        id: 25,
+        id: 26,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
         explanation: `**Portals** rendern Kinder in einen anderen DOM-Knoten als den Parent — aber bleiben im React-Komponentenbaum.
@@ -2481,7 +2602,7 @@ export default Modal`,
     title: '4. Praxisprojekt: SportsDash',
     lessons: [
       {
-        id: 26,
+        id: 27,
         title: 'Projektübersicht & Architektur',
         category: 'Praxisprojekt',
         explanation: `Wir bauen **SportsDash** — eine App mit Login/Register und Fußball-Ergebnissen via API.
@@ -2520,7 +2641,7 @@ Die App nutzt React Router für Navigation, Context für Auth-State, und fetch()
         ],
       },
       {
-        id: 27,
+        id: 28,
         title: 'Projekt: Types & Interfaces',
         category: 'Praxisprojekt',
         explanation: `Alle TypeScript-Typen zentral in einer Datei — so haben alle Komponenten dieselben Definitionen.
@@ -2607,7 +2728,7 @@ export interface ApiResponse<T> {
         ],
       },
       {
-        id: 28,
+        id: 29,
         title: 'Projekt: AuthContext',
         category: 'Praxisprojekt',
         explanation: `Der AuthContext verwaltet den eingeloggten User global — alle Komponenten können darauf zugreifen.
@@ -2681,7 +2802,7 @@ export function useAuth(): AuthContextType {
         ],
       },
       {
-        id: 29,
+        id: 30,
         title: 'Projekt: PrivateRoute & Layout',
         category: 'Praxisprojekt',
         explanation: `**PrivateRoute** schützt Seiten die nur eingeloggte User sehen dürfen — leitet sonst zum Login um.
@@ -2814,7 +2935,7 @@ export default Layout`,
         ],
       },
       {
-        id: 30,
+        id: 31,
         title: 'Projekt: Login & Register Pages',
         category: 'Praxisprojekt',
         explanation: `Login und Register sind kontrollierte Formulare die den AuthContext nutzen.
@@ -3019,7 +3140,7 @@ export default RegisterPage`,
         ],
       },
       {
-        id: 31,
+        id: 32,
         title: 'Projekt: Dashboard & API',
         category: 'Praxisprojekt',
         explanation: `Das Dashboard lädt Live-Fußballdaten von der API. Wir nutzen einen Mock-Datensatz falls kein API-Key vorhanden.
@@ -3347,7 +3468,7 @@ export default useFetch`,
         ],
       },
       {
-        id: 32,
+        id: 33,
         title: 'Projekt: App.tsx — Router zusammenbauen',
         category: 'Praxisprojekt',
         explanation: `Jetzt verbinden wir alles: Router, Auth-Provider, Layout, Private Routes und alle Seiten.
@@ -3467,3 +3588,4 @@ input {
     ],
   },
 ];
+
