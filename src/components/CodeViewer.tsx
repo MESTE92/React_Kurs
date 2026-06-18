@@ -200,10 +200,11 @@ function highlight(code: string, lang: string): string {
     /\{(\/\*[\s\S]*?\*\/)\}/g,
     '<span style="color:#6a9955">{$1}</span>'
   )
+  // Kommentare zuerst — sonst brechen String-Spans den Kommentar auf
+  r = sr(r, /(\/\/.*)/g,              '<span style="color:#6a9955">$1</span>')
   r = r.replace(/(`[^`]*`)/g, '<span style="color:#ce9178">$1</span>')
   r = sr(r, /('[^']*')/g,              '<span style="color:#ce9178">$1</span>')
   r = sr(r, /("(?:[^"\\]|\\.)*")/g,   '<span style="color:#ce9178">$1</span>')
-  r = sr(r, /(\/\/.*)/g,              '<span style="color:#6a9955">$1</span>')
   r = sr(r, /\bfunction\s+([A-Za-z_$][A-Za-z0-9_$]*)/g,
     'function <span style="color:#e879f9">$1</span>')
   r = sr(r, /\b(const|let)\s+([A-Z][A-Za-z0-9_$]*)\s*=/g,

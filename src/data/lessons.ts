@@ -2094,98 +2094,58 @@ Das **Dependency Array** \`[]\` bestimmt wann der Effekt erneut läuft.`,
         ],
         files: [
           {
-            name: 'Timer.tsx',
-            language: 'tsx',
-            code: `import { useState, useEffect } from 'react'
-
-function Timer() {
-  const [seconds, setSeconds] = useState(0)
-  const [running, setRunning] = useState(false)
-
-  useEffect(() => {
-    // Effekt nur starten wenn running = true
-    if (!running) return
-
-    // Interval starten — das ist ein Seiteneffekt
-    const id = setInterval(() => {
-      setSeconds(prev => prev + 1)  // Funktionsform für aktuellen State
-    }, 1000)
-
-    // Cleanup: Interval stoppen wenn running wechselt oder Unmount
-    return () => clearInterval(id)
-
-  }, [running])  // Effekt neu ausführen wenn running sich ändert
-
-  return (
-    <div>
-      <p>Zeit: {seconds}s</p>
-      <button onClick={() => setRunning(r => !r)}>
-        {running ? 'Stop' : 'Start'}
-      </button>
-      <button onClick={() => { setRunning(false); setSeconds(0) }}>
-        Reset
-      </button>
-    </div>
-  )
-}
-
-export default Timer`,
-          },
-          {
             name: 'Stopwatch.tsx',
             language: 'tsx',
             code: `import { useState, useEffect } from 'react'
-import './Stopwatch.css'
+import './Stoppuhr.css'
 
 function Stopwatch() {
   const [running, setRunning] = useState(false)
-  // elapsed: vergangene Zeit in ms während die Uhr läuft
-  const [elapsed, setElapsed] = useState(0)
-  // stoppedAt: gespeicherte Zeit beim Drücken von Stop
-  const [stoppedAt, setStoppedAt] = useState<number | null>(null)
+  const [centiseconds, setCentiseconds] = useState(0)
+  // Union Type: nur diese drei Texte sind als Wert erlaubt
+  const [buttontext, setButtonText] = useState<'Start' | 'Stop' | 'Weiter'>('Start')
 
-  // Effekt läuft neu wenn running wechselt
-  // Cleanup-Funktion stoppt das Interval automatisch
+  // Effekt startet das Interval — läuft neu wenn running sich ändert
   useEffect(() => {
     if (!running) return
-    const id = setInterval(() => {
-      setElapsed(prev => prev + 100)  // Funktionsform: kein stale Closure
-    }, 100)
-    return () => clearInterval(id)  // Cleanup beim Stop oder Unmount
+
+    const interval = setInterval(() => {
+      setCentiseconds(c => c + 1)  // Funktionsform: immer aktueller State-Wert
+    }, 10)
+
+    // Cleanup: Interval wird gestoppt wenn running false wird oder Unmount
+    return () => clearInterval(interval)
   }, [running])
 
-  function handleStart() {
-    setElapsed(0)
-    setStoppedAt(null)
-    setRunning(true)
-  }
-
   function handleStop() {
+    if (!running) return
     setRunning(false)
-    setStoppedAt(elapsed)  // Wert einfrieren
+    setButtonText('Weiter')
   }
 
-  const display = (elapsed / 1000).toFixed(1) + 's'
+  const sekunden = Math.floor(centiseconds / 100)
+  const hundertstel = centiseconds % 100
+  // padStart(2, '0') stellt sicher dass z.B. 5 als "05" angezeigt wird
+  const zeitAnzeige = \`\${sekunden}.\${String(hundertstel).padStart(2, '0')}\`
 
   return (
-    <div className="stopwatch-wrapper">
-      <div className="stopwatch">
-        <div className="stopwatch-display">{display}</div>
-        <div className="stopwatch-buttons">
-          <button className="btn-start" onClick={handleStart} disabled={running}>
-            Start
-          </button>
-          <button className="btn-stop" onClick={handleStop} disabled={!running}>
-            Stop
-          </button>
-        </div>
+    <div className="stopwatch-container">
+      <div className="stopwatch-circle">
+        <span className="stopwatch-time">{zeitAnzeige}</span>
+        <span className="stopwatch-label">Sekunden</span>
       </div>
-      {stoppedAt !== null && (
-        <div className="stopwatch-result">
-          <span className="result-label">Gestoppt</span>
-          <span className="result-time">{(stoppedAt / 1000).toFixed(2)}s</span>
-        </div>
-      )}
+      <div className="stopwatch-buttons">
+        <button className="btn btn-start" onClick={() => setRunning(true)}>
+          {buttontext}
+        </button>
+        <button className="btn btn-stop" onClick={handleStop}>Stop</button>
+        <button
+          className="btn btn-reset"
+          onClick={() => { setRunning(false); setCentiseconds(0); setButtonText('Start') }}
+        >
+          Reset
+        </button>
+      </div>
     </div>
   )
 }
@@ -2193,127 +2153,90 @@ function Stopwatch() {
 export default Stopwatch`,
           },
           {
-            name: 'App.tsx',
-            language: 'tsx',
-            code: `import Timer from './Timer'
-import Stopwatch from './Stopwatch'
-
-function App() {
-  return (
-    <div className="demo">
-      {/* Einfaches Beispiel: Timer mit Toggle */}
-      <Timer />
-      {/* Erweitertes Beispiel: Stoppuhr mit getrenntem Start/Stop */}
-      <Stopwatch />
-    </div>
-  )
-}
-
-export default App`,
-          },
-          {
-            name: 'Stopwatch.css',
+            name: 'Stoppuhr.css',
             language: 'css',
-            code: `.demo {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.stopwatch-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.stopwatch {
+            code: `.stopwatch-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 28px 36px;
-  border: 1px solid #e6ddf3;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+  gap: 28px;
 }
 
-.stopwatch-display {
-  font-size: 52px;
+/* border-radius: 50% + gleiche width/height = perfekter Kreis */
+.stopwatch-circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 5px solid #7c3aed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #faf7ff;
+  box-shadow: 0 0 0 8px #ede9fe, 0 6px 24px rgba(124, 58, 237, 0.18);
+}
+
+.stopwatch-time {
+  font-size: 44px;
   font-weight: 700;
   color: #2d1b4e;
   font-variant-numeric: tabular-nums;
   line-height: 1;
+  letter-spacing: -1px;
+}
+
+.stopwatch-label {
+  font-size: 11px;
+  color: #9d8bc0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 6px;
 }
 
 .stopwatch-buttons {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.96);
 }
 
 .btn-start {
   background: #16a34a;
   color: #fff;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
 }
 
-.btn-start:disabled {
-  background: #d1fae5;
-  color: #86efac;
-  cursor: not-allowed;
-}
-
-.btn-start:not(:disabled):hover {
+.btn-start:hover {
   background: #15803d;
 }
 
 .btn-stop {
   background: #dc2626;
   color: #fff;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
 }
 
-.btn-stop:disabled {
-  background: #fee2e2;
-  color: #fca5a5;
-  cursor: not-allowed;
-}
-
-.btn-stop:not(:disabled):hover {
+.btn-stop:hover {
   background: #b91c1c;
 }
 
-.stopwatch-result {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  border: 3px solid #7c3aed;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
+.btn-reset {
+  background: #e6ddf3;
+  color: #6b5b8c;
 }
 
-.result-label {
-  font-size: 10px;
-  color: #9d8bc0;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.result-time {
-  font-size: 20px;
-  font-weight: 700;
-  color: #7c3aed;
+.btn-reset:hover {
+  background: #d4c8ed;
 }`,
           },
         ],
