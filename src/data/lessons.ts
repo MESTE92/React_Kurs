@@ -2243,65 +2243,115 @@ export default Stopwatch`,
       },
       {
         id: 17,
-        title: 'useEffect — API-Daten laden',
+        title: 'useEffect — API-Fetch mit PokéAPI',
         category: 'Hooks',
         explanation: `API-Aufrufe gehören in \`useEffect\` — nicht direkt in die Komponente (würde bei jedem Render feuern).
-\`async/await\` direkt im useEffect ist nicht erlaubt — deshalb eine innere async-Funktion definieren und sofort aufrufen.
-Loading- und Error-States verbessern die UX erheblich.`,
+\`fetch()\` gibt ein Promise zurück — mit \`.then()\` werden die Schritte hintereinander ausgeführt sobald das Ergebnis bereit ist.
+Der \`loading\`-State sorgt dafür dass die Komponente während des Ladens einen Platzhalter zeigt.`,
         keyPoints: [
-          'useEffect-Callback darf nicht async sein → innere Funktion nutzen',
-          'Immer Loading + Error State implementieren',
-          '[] als Dependency → Fetch nur einmal beim Mount',
-          'Fetch-Fehler mit try/catch abfangen',
+          '[] als Dependency → Fetch wird nur einmal beim Mounten ausgeführt',
+          '.then(antwort => antwort.json()) wandelt die HTTP-Antwort in ein JS-Objekt um',
+          'type Pokemon beschreibt genau welche Felder die API zurückgibt — TypeScript prüft das',
+          'loading-State: true solange Daten noch unterwegs sind, false wenn sie angekommen sind',
         ],
         files: [
           {
-            name: 'UserFetch.tsx',
+            name: 'PokemonFetch.tsx',
             language: 'tsx',
             code: `import { useState, useEffect } from 'react'
+import './Pokefetcher.css'
 
-interface User {
-  id: number
+// type beschreibt die Struktur der API-Antwort — nur die Felder die wir brauchen
+type Pokemon = {
   name: string
-  email: string
+  height: number
+  weight: number
+  sprites: {
+    front_default: string  // URL zum Bild des Pokémon
+  }
 }
 
-function UserFetch() {
-  const [user, setUser]       = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState<string | null>(null)
+function PokemonFetch() {
+  const [pokemon, setPokemon] = useState<Pokemon | null>(null)
 
   useEffect(() => {
-    // Innere async-Funktion — sofort aufgerufen (IIFE-Pattern)
-    async function fetchUser() {
-      try {
-        const res = await fetch('https://jsonplaceholder.typicode.com/users/1')
-        if (!res.ok) throw new Error('HTTP ' + res.status)
-        const data: User = await res.json()
-        setUser(data)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Fehler')
-      } finally {
-        setLoading(false)  // Immer ausgeführt — egal ob Erfolg oder Fehler
-      }
-    }
+    fetch('https://pokeapi.co/api/v2/pokemon/pikachu')
+      .then(antwort => antwort.json())  // HTTP-Antwort → JavaScript-Objekt
+      .then(daten => setPokemon(daten)) // Daten in State speichern
+  }, [])  // [] = nur einmal beim Mounten ausführen
 
-    fetchUser()
-  }, [])  // [] = nur beim Mount ausführen
-
-  if (loading) return <p>Laden...</p>
-  if (error)   return <p>Fehler: {error}</p>
-  if (!user)   return null
+  if (!pokemon) return <p className="pokemon-loading">Lädt...</p>
 
   return (
-    <div>
-      <h2>{user.name}</h2>
-      <p>{user.email}</p>
+    <div className="pokemon-card">
+      <img
+        src={pokemon.sprites.front_default}
+        alt={pokemon.name}
+        className="pokemon-sprite"
+      />
+      <h2 className="pokemon-name">{pokemon.name}</h2>
+      <div className="pokemon-stats">
+        <span className="stat-badge">Größe: {pokemon.height}</span>
+        <span className="stat-badge">Gewicht: {pokemon.weight}</span>
+      </div>
     </div>
   )
 }
 
-export default UserFetch`,
+export default PokemonFetch`,
+          },
+          {
+            name: 'Pokefetcher.css',
+            language: 'css',
+            code: `.pokemon-loading {
+  color: #9d8bc0;
+  font-size: 14px;
+}
+
+.pokemon-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 36px;
+  border: 2px solid #fbbf24;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #fffbeb 0%, #fef9c3 100%);
+  box-shadow: 0 4px 24px rgba(251, 191, 36, 0.28);
+  max-width: 220px;
+}
+
+/* pixelated verhindert dass das Sprite unscharf skaliert wird */
+.pokemon-sprite {
+  width: 130px;
+  height: 130px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+}
+
+.pokemon-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #92400e;
+  text-transform: capitalize;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.pokemon-stats {
+  display: flex;
+  gap: 10px;
+}
+
+.stat-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #78350f;
+  background: #fde68a;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid #fcd34d;
+}`,
           },
         ],
       },
@@ -2322,6 +2372,7 @@ Haupteinsatz 2: Werte speichern die sich ändern dürfen ohne Re-render (z.B. Ti
             name: 'FocusInput.tsx',
             language: 'tsx',
             code: `import { useRef } from 'react'
+import './FocusInput.css'
 
 function FocusInput() {
   // Ref für ein HTMLInputElement — initial null weil DOM noch nicht existiert
@@ -2340,16 +2391,92 @@ function FocusInput() {
   }
 
   return (
-    <div>
+    <div className="focus-container">
+      <h2 className="focus-title">useRef — Fokus steuern</h2>
       {/* ref verbindet die Variable mit dem DOM-Element */}
-      <input ref={inputRef} placeholder="Klick den Button..." />
-      <button onClick={handleFocus}>Fokus setzen</button>
-      <button onClick={handleClear}>Leeren</button>
+      <input
+        ref={inputRef}
+        className="focus-input"
+        placeholder="Klick einen Button..."
+      />
+      <div className="focus-buttons">
+        <button className="btn btn-focus" onClick={handleFocus}>Fokus setzen</button>
+        <button className="btn btn-clear" onClick={handleClear}>Leeren</button>
+      </div>
     </div>
   )
 }
 
 export default FocusInput`,
+          },
+          {
+            name: 'FocusInput.css',
+            language: 'css',
+            code: `.focus-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 320px;
+}
+
+.focus-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2d1b4e;
+  margin: 0;
+}
+
+.focus-input {
+  padding: 10px 14px;
+  border: 2px solid #e6ddf3;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2d1b4e;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.focus-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+.focus-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 9px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn-focus {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.btn-focus:hover {
+  background: #6d28d9;
+}
+
+.btn-clear {
+  background: #e6ddf3;
+  color: #6b5b8c;
+}
+
+.btn-clear:hover {
+  background: #d4c8ed;
+}`,
           },
         ],
       },
