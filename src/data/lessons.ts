@@ -1768,113 +1768,206 @@ export default FocusInput`,
       },
       {
         id: 16,
-        title: 'useContext — globaler State',
+        title: 'useContext — zentraler Datenspeicher',
         category: 'Hooks',
-        explanation: `**Context** löst das "Prop Drilling" Problem: Props durch viele Ebenen nach unten reichen.
-Du erstellst einen Context, wickelst Komponenten in einen **Provider**, und jede Kind-Komponente kann den Wert direkt lesen.
-Gut für: Theme, Sprache, eingeloggter User — Dinge die überall gebraucht werden.`,
+        explanation: `**Context** löst das "Prop Drilling" Problem — statt Props durch viele Ebenen zu reichen, landen alle Daten in einem zentralen Store.
+Jede Komponente die Zugriff braucht, holt sich genau das was sie benötigt über \`useContext()\`.
+Der **Provider** umhüllt den Komponentenbaum und stellt die Daten für alle Kinder bereit.`,
         keyPoints: [
-          'createContext() → Context-Objekt',
-          '<Context.Provider value={...}> → stellt Wert bereit',
-          'useContext(MyContext) → Wert lesen in Kindkomponente',
-          'Kein Prop Drilling mehr durch Zwischenschichten',
+          'createContext() erstellt den zentralen Datenspeicher',
+          'DataProvider hält den State und gibt ihn per value={} weiter',
+          'useContext(DataContext) gibt jeder Komponente direkten Zugriff — ohne Props',
+          'Jede Komponente nimmt sich nur was sie braucht — Inputfeld nur setInputText, Button nur inputText',
         ],
         files: [
           {
-            name: 'ThemeContext.tsx',
+            name: 'DataContext.tsx',
             language: 'tsx',
-            code: `import { createContext, useContext, useState, ReactNode } from 'react'
+            code: `import { createContext, useState } from 'react'
 
-// 1. Context-Typ definieren
-interface ThemeContextType {
-  theme: 'light' | 'dark'
-  toggleTheme: () => void
+// Statische Personendaten — kommen normalerweise von einer API
+const person = {
+  vorname: 'Max',
+  nachname: 'Mustermann',
+  alter: 32,
+  telefon: '0123456789',
+  mail: 'max@mustermann.de',
 }
 
-// 2. Context erstellen mit Default-Wert
-const ThemeContext = createContext<ThemeContextType>({
-  theme: 'light',
-  toggleTheme: () => {},
+// createContext() legt den Store an — Defaultwerte für Struktur und Typsicherheit
+export const DataContext = createContext({
+  vorname: '',
+  mail: '',
+  inputText: '',
+  setInputText: (text: string) => {},
 })
 
-// 3. Provider-Komponente — verwaltet den State und stellt ihn bereit
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
-
-  function toggleTheme() {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light')
-  }
+// DataProvider verwaltet den State und stellt alles per value={} bereit
+export function DataProvider({ children }: { children: React.ReactNode }) {
+  const [inputText, setInputText] = useState('')
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <DataContext.Provider value={{
+      vorname: person.vorname,
+      mail: person.mail,
+      inputText,
+      setInputText,
+    }}>
       {children}
-    </ThemeContext.Provider>
+    </DataContext.Provider>
   )
-}
-
-// 4. Custom Hook für bequemen Zugriff
-export function useTheme() {
-  return useContext(ThemeContext)
 }`,
           },
           {
-            name: 'ThemedButton.tsx',
+            name: 'Inputfeld.tsx',
             language: 'tsx',
-            code: `import { useTheme } from './ThemeContext'  // Custom Hook nutzen
-import './ThemedButton.css'
+            code: `import { useContext } from 'react'
+import { DataContext } from './DataContext'
 
-function ThemedButton() {
-  const { theme, toggleTheme } = useTheme()  // Direkt aus Context lesen
+function Inputfeld() {
+  // Nur setInputText wird gebraucht — der Rest interessiert hier nicht
+  const { setInputText } = useContext(DataContext)
 
   return (
-    <button
-      onClick={toggleTheme}
-      className={theme === 'dark' ? 'btn-dark' : 'btn-light'}
-    >
-      Theme: {theme} — Wechseln
+    <input
+      className="context-input"
+      type="text"
+      placeholder="Schreib was..."
+      onChange={e => setInputText(e.target.value)}
+    />
+  )
+}
+
+export default Inputfeld`,
+          },
+          {
+            name: 'Button.tsx',
+            language: 'tsx',
+            code: `import { useContext } from 'react'
+import { DataContext } from './DataContext'
+
+function Button() {
+  // Nur inputText wird gebraucht — kein prop von außen nötig
+  const { inputText } = useContext(DataContext)
+
+  return (
+    <button className="context-btn">
+      {inputText || 'Noch nichts getippt'}
     </button>
   )
 }
 
-export default ThemedButton`,
+export default Button`,
+          },
+          {
+            name: 'PersonAnzeige.tsx',
+            language: 'tsx',
+            code: `import { useContext } from 'react'
+import { DataContext } from './DataContext'
+
+function PersonAnzeige() {
+  // Nur vorname und mail werden gebraucht
+  const { vorname, mail } = useContext(DataContext)
+
+  return (
+    <div className="person-card">
+      <p className="person-row"><span>Vorname</span><strong>{vorname}</strong></p>
+      <p className="person-row"><span>Mail</span><strong>{mail}</strong></p>
+    </div>
+  )
+}
+
+export default PersonAnzeige`,
           },
           {
             name: 'App.tsx',
             language: 'tsx',
-            code: `import { ThemeProvider } from './ThemeContext'
-import ThemedButton from './ThemedButton'
+            code: `import { DataProvider } from './DataContext'
+import Inputfeld from './Inputfeld'
+import Button from './Button'
+import PersonAnzeige from './PersonAnzeige'
+import './App.css'
 
 function App() {
   return (
-    // Provider umhüllt alle Komponenten die Zugriff brauchen
-    <ThemeProvider>
-      <div>
+    // DataProvider umhüllt alle Komponenten die Zugriff auf den Store brauchen
+    <DataProvider>
+      <div className="app">
         <h1>Context Demo</h1>
-        <ThemedButton />
-        {/* Beliebig viele Kindkomponenten können useTheme() nutzen */}
+        <Inputfeld />
+        <Button />
+        <PersonAnzeige />
       </div>
-    </ThemeProvider>
+    </DataProvider>
   )
 }
 
 export default App`,
           },
           {
-            name: 'ThemedButton.css',
+            name: 'App.css',
             language: 'css',
-            code: `
-.btn-light {
-  background: #eee;
-  color: #000;
-  padding: 8px 16px;
+            code: `.app {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 320px;
 }
 
-.btn-dark {
-  background: #333;
-  color: #fff;
-  padding: 8px 16px;
+.app h1 {
+  font-size: 20px;
+  color: #2d1b4e;
+  margin: 0 0 4px;
 }
-`,
+
+.context-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e6ddf3;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2d1b4e;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.context-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.context-btn {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: default;
+  text-align: left;
+}
+
+.person-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid #e6ddf3;
+  border-radius: 10px;
+  background: #f7f3fc;
+}
+
+.person-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #6b5b8c;
+  margin: 0;
+}
+
+.person-row strong {
+  color: #2d1b4e;
+}`,
           },
         ],
       },
