@@ -1973,6 +1973,215 @@ export default App`,
       },
       {
         id: 17,
+        title: 'useContext — gestapelte Kontexte',
+        category: 'Hooks',
+        explanation: `Jede Komponente kann ihren eigenen Kontext und Provider **selbst definieren und exportieren** — nicht alles muss in eine zentrale Datei.
+In \`App()\` werden die Provider einfach **ineinander geschachtelt** — jeder stellt seinen eigenen Bereich bereit.
+Eine Komponente die Daten aus mehreren Kontexten braucht, ruft \`useContext()\` einfach mehrfach auf.`,
+        keyPoints: [
+          'Kontext und Provider können direkt in der Komponenten-Datei definiert werden',
+          'Provider stapeln: <NameProvider><StadtProvider>...</StadtProvider></NameProvider>',
+          'useContext() mehrfach aufrufen um auf verschiedene Kontexte zuzugreifen',
+          'Jeder Kontext ist unabhängig — Änderungen in einem berühren den anderen nicht',
+        ],
+        files: [
+          {
+            name: 'NameInput.tsx',
+            language: 'tsx',
+            code: `import { createContext, useState, useContext } from 'react'
+
+// Kontext und Provider leben direkt in dieser Datei — beides wird exportiert
+export const NameContext = createContext({
+  name: '',
+  // TypeScript verlangt einen Parameternamen in Funktionssignaturen — _ ist Konvention für "nicht benutzt"
+  // könnte auch setName: (irgendwas: string) => {} heißen — der Name spielt keine Rolle
+  setName: (_: string) => {},
+})
+
+export function NameProvider({ children }: { children: React.ReactNode }) {
+  const [name, setName] = useState('')
+
+  return (
+    <NameContext.Provider value={{ name, setName }}>
+      {children}
+    </NameContext.Provider>
+  )
+}
+
+function NameInput() {
+  // Nur setName wird gebraucht — name bleibt hier unbenutzt
+  const { setName } = useContext(NameContext)
+
+  return (
+    <input
+      className="ctx-input"
+      placeholder="Name eingeben..."
+      onChange={e => setName(e.target.value)}
+    />
+  )
+}
+
+export default NameInput`,
+          },
+          {
+            name: 'AlterInput.tsx',
+            language: 'tsx',
+            code: `import { createContext, useState, useContext } from 'react'
+
+// Eigener Kontext für das Alter — number statt string
+export const AlterContext = createContext({
+  alter: 0,
+  // TypeScript verlangt einen Parameternamen in Funktionssignaturen — _ ist Konvention für "nicht benutzt"
+  // könnte auch setAlter: (irgendwas: number) => {} heißen — der Name spielt keine Rolle
+  setAlter: (_: number) => {},
+})
+
+export function AlterProvider({ children }: { children: React.ReactNode }) {
+  const [alter, setAlter] = useState(0)
+
+  return (
+    <AlterContext.Provider value={{ alter, setAlter }}>
+      {children}
+    </AlterContext.Provider>
+  )
+}
+
+function AlterInput() {
+  // Nur setAlter wird gebraucht
+  const { setAlter } = useContext(AlterContext)
+
+  return (
+    <input
+      className="ctx-input"
+      type="number"
+      placeholder="Alter eingeben..."
+      onChange={e => setAlter(Number(e.target.value))}
+    />
+  )
+}
+
+export default AlterInput`,
+          },
+          {
+            name: 'Anzeige.tsx',
+            language: 'tsx',
+            code: `import { useContext } from 'react'
+import { NameContext } from './NameInput'
+import { AlterContext } from './AlterInput'
+
+function Anzeige() {
+  // useContext zweimal — einmal pro Kontext
+  const { name } = useContext(NameContext)
+  const { alter } = useContext(AlterContext)
+
+  return (
+    <div className="anzeige-card">
+      <p className="anzeige-row">
+        <span>Name</span>
+        {/* || = Oder: zeige name, ist name leer → zeige '...' als Fallback */}
+        {/* Alternative: {name ? name : '...'} — macht dasselbe, nur ausführlicher */}
+        <strong>{name || '...'}</strong>
+      </p>
+      <p className="anzeige-row">
+        <span>Alter</span>
+        {/* gleiche Logik: 0 gilt als falsy → solange nichts eingegeben wurde erscheint '...' */}
+        <strong>{alter || '...'}</strong>
+      </p>
+    </div>
+  )
+}
+
+export default Anzeige`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { NameProvider } from './NameInput'
+import { AlterProvider } from './AlterInput'
+import NameInput from './NameInput'
+import AlterInput from './AlterInput'
+import Anzeige from './Anzeige'
+import './App.css'
+
+function App() {
+  return (
+    // Provider stapeln — jeder liefert seinen eigenen Kontext
+    <NameProvider>
+      <AlterProvider>
+        <div className="app">
+          <h1>Gestapelte Kontexte</h1>
+          <NameInput />
+          <AlterInput />
+          {/* Anzeige hat Zugriff auf beide Kontexte */}
+          <Anzeige />
+        </div>
+      </AlterProvider>
+    </NameProvider>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.app {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 320px;
+}
+
+.app h1 {
+  font-size: 20px;
+  color: #2d1b4e;
+  margin: 0 0 4px;
+}
+
+.ctx-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e6ddf3;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2d1b4e;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.ctx-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.anzeige-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid #e6ddf3;
+  border-radius: 10px;
+  background: #f7f3fc;
+}
+
+.anzeige-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+  font-size: 13px;
+  color: #6b5b8c;
+}
+
+.anzeige-row strong {
+  color: #7c3aed;
+  font-size: 14px;
+}`,
+          },
+        ],
+      },
+      {
+        id: 18,
         title: 'useMemo & useCallback — Performance',
         category: 'Hooks',
         explanation: `**useMemo** cached das Ergebnis einer Berechnung — wird nur neu berechnet wenn sich Abhängigkeiten ändern.
@@ -2024,7 +2233,7 @@ export default ExpensiveList`,
         ],
       },
       {
-        id: 18,
+        id: 19,
         title: 'Custom Hooks — wiederverwendbare Logik',
         category: 'Hooks',
         explanation: `**Custom Hooks** sind eigene Funktionen die mit "use" beginnen und andere Hooks nutzen.
@@ -2140,7 +2349,7 @@ export default App`,
     title: '3. Fortgeschritten',
     lessons: [
       {
-        id: 19,
+        id: 20,
         title: 'React Router — Navigation',
         category: 'Fortgeschritten',
         explanation: `**React Router** ermöglicht clientseitige Navigation ohne Seiten-Reload.
@@ -2228,7 +2437,7 @@ export default User`,
         ],
       },
       {
-        id: 20,
+        id: 21,
         title: 'Formulare — kontrolliert vs. unkontrolliert',
         category: 'Fortgeschritten',
         explanation: `**Kontrollierte Inputs** — React State ist die einzige Datenquelle, DOM wird gesteuert.
@@ -2320,7 +2529,7 @@ export default LoginForm`,
         ],
       },
       {
-        id: 21,
+        id: 22,
         title: 'useReducer — komplexer State',
         category: 'Fortgeschritten',
         explanation: `**useReducer** ist Alternative zu useState für komplexen State mit mehreren Aktionen.
@@ -2418,7 +2627,7 @@ export default Cart`,
         ],
       },
       {
-        id: 22,
+        id: 23,
         title: 'TypeScript mit React — Typen & Generics',
         category: 'Fortgeschritten',
         explanation: `TypeScript macht React-Code robuster: Fehler werden beim Schreiben erkannt, nicht erst zur Laufzeit.
@@ -2502,7 +2711,7 @@ export default App`,
         ],
       },
       {
-        id: 23,
+        id: 24,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
         explanation: `**React.memo** ist ein Higher-Order Component (HOC) — es "merkt" sich Props und rendert nur neu wenn Props sich ändern.
@@ -2572,7 +2781,7 @@ export default App`,
         ],
       },
       {
-        id: 24,
+        id: 25,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
         explanation: `**Error Boundaries** fangen JavaScript-Fehler in Kindkomponenten ab und zeigen Fallback-UI.
@@ -2662,7 +2871,7 @@ export default App`,
         ],
       },
       {
-        id: 25,
+        id: 26,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
         explanation: `**React.lazy()** lädt eine Komponente erst wenn sie gebraucht wird — Code-Splitting.
@@ -2706,7 +2915,7 @@ export default App`,
         ],
       },
       {
-        id: 26,
+        id: 27,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
         explanation: `**Portals** rendern Kinder in einen anderen DOM-Knoten als den Parent — aber bleiben im React-Komponentenbaum.
@@ -2787,7 +2996,7 @@ export default Modal`,
     title: '4. Praxisprojekt: SportsDash',
     lessons: [
       {
-        id: 27,
+        id: 28,
         title: 'Projektübersicht & Architektur',
         category: 'Praxisprojekt',
         explanation: `Wir bauen **SportsDash** — eine App mit Login/Register und Fußball-Ergebnissen via API.
@@ -2826,7 +3035,7 @@ Die App nutzt React Router für Navigation, Context für Auth-State, und fetch()
         ],
       },
       {
-        id: 28,
+        id: 29,
         title: 'Projekt: Types & Interfaces',
         category: 'Praxisprojekt',
         explanation: `Alle TypeScript-Typen zentral in einer Datei — so haben alle Komponenten dieselben Definitionen.
@@ -2913,7 +3122,7 @@ export interface ApiResponse<T> {
         ],
       },
       {
-        id: 29,
+        id: 30,
         title: 'Projekt: AuthContext',
         category: 'Praxisprojekt',
         explanation: `Der AuthContext verwaltet den eingeloggten User global — alle Komponenten können darauf zugreifen.
@@ -2987,7 +3196,7 @@ export function useAuth(): AuthContextType {
         ],
       },
       {
-        id: 30,
+        id: 31,
         title: 'Projekt: PrivateRoute & Layout',
         category: 'Praxisprojekt',
         explanation: `**PrivateRoute** schützt Seiten die nur eingeloggte User sehen dürfen — leitet sonst zum Login um.
@@ -3120,7 +3329,7 @@ export default Layout`,
         ],
       },
       {
-        id: 31,
+        id: 32,
         title: 'Projekt: Login & Register Pages',
         category: 'Praxisprojekt',
         explanation: `Login und Register sind kontrollierte Formulare die den AuthContext nutzen.
@@ -3325,7 +3534,7 @@ export default RegisterPage`,
         ],
       },
       {
-        id: 32,
+        id: 33,
         title: 'Projekt: Dashboard & API',
         category: 'Praxisprojekt',
         explanation: `Das Dashboard lädt Live-Fußballdaten von der API. Wir nutzen einen Mock-Datensatz falls kein API-Key vorhanden.
@@ -3653,7 +3862,7 @@ export default useFetch`,
         ],
       },
       {
-        id: 33,
+        id: 34,
         title: 'Projekt: App.tsx — Router zusammenbauen',
         category: 'Praxisprojekt',
         explanation: `Jetzt verbinden wir alles: Router, Auth-Provider, Layout, Private Routes und alle Seiten.
@@ -3773,4 +3982,5 @@ input {
     ],
   },
 ];
+
 
