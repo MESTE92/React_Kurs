@@ -1562,6 +1562,174 @@ export default App`,
       },
       {
         id: 13,
+        title: 'Formulare — Formulardatenobjekt',
+        category: 'Grundlagen',
+        explanation: `Statt für jedes Feld einen eigenen \`useState\` zu nutzen, fasst man alle Felder in einem **Objekt-State** zusammen.
+Ein einziger \`handleChange\` reicht für alle Inputs — er liest den Feldnamen über \`event.target.name\` und aktualisiert gezielt nur dieses Feld.
+Der **Spread-Operator** kopiert alle bestehenden Felder, der berechnete Schlüssel \`[name]\` überschreibt nur das geänderte.`,
+        keyPoints: [
+          'Ein Objekt-State für alle Felder statt vieler einzelner useState',
+          'event.target.name liest den name-Attribut des Inputs — damit weiß handleChange welches Feld sich änderte',
+          '[name]: value — berechneter Schlüssel: der Variableninhalt wird als Key benutzt',
+          'Nach dem Submit: State zurücksetzen setzt alle Felder auf leer',
+        ],
+        files: [
+          {
+            name: 'KontaktFormular.tsx',
+            language: 'tsx',
+            code: `import { useState } from 'react'
+import './KontaktFormular.css'
+
+// Typ für alle Formularfelder — ein Objekt statt mehrerer einzelner States
+type FormularDaten = {
+  name: string
+  email: string
+}
+
+function KontaktFormular() {
+  const [formularDaten, setFormularDaten] = useState<FormularDaten>({
+    name: '',
+    email: '',
+  })
+
+  // Ein einziger Handler für alle Felder
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    // name = Attribut des Inputs (z.B. "name" oder "email")
+    // value = was der User gerade getippt hat
+    const { name, value } = event.target
+
+    setFormularDaten({
+      ...formularDaten,   // alle bisherigen Felder kopieren
+      [name]: value,      // nur das geänderte Feld überschreiben
+    })
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()    // verhindert Seiten-Reload
+    console.log(formularDaten)
+
+    // Formular nach dem Absenden leeren
+    setFormularDaten({ name: '', email: '' })
+  }
+
+  return (
+    <form className="kontakt-form" onSubmit={handleSubmit}>
+      <h2>Kontakt</h2>
+
+      <div className="form-group">
+        <label htmlFor="name">Name</label>
+        {/* name="name" → event.target.name liefert "name" → [name]: value aktualisiert formularDaten.name */}
+        <input
+          id="name"
+          name="name"
+          type="text"
+          value={formularDaten.name}
+          onChange={handleChange}
+          placeholder="Max Mustermann"
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="email">E-Mail</label>
+        {/* name="email" → event.target.name liefert "email" → [name]: value aktualisiert formularDaten.email */}
+        <input
+          id="email"
+          name="email"
+          type="email"
+          value={formularDaten.email}
+          onChange={handleChange}
+          placeholder="max@beispiel.de"
+        />
+      </div>
+
+      <button type="submit" className="btn-submit">Absenden</button>
+    </form>
+  )
+}
+
+export default KontaktFormular`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import KontaktFormular from './KontaktFormular'
+
+function App() {
+  return <KontaktFormular />
+}
+
+export default App`,
+          },
+          {
+            name: 'KontaktFormular.css',
+            language: 'css',
+            code: `.kontakt-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 24px;
+  border: 1px solid #99f6e4;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.08);
+  max-width: 320px;
+}
+
+.kontakt-form h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #134e4a;
+  margin: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f766e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-group input {
+  padding: 9px 12px;
+  border: 1px solid #99f6e4;
+  border-radius: 7px;
+  font-size: 14px;
+  color: #134e4a;
+  outline: none;
+}
+
+.form-group input:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.btn-submit {
+  background: #0d9488;
+  color: #fff;
+  border: none;
+  padding: 11px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.btn-submit:hover {
+  background: #0f766e;
+}`,
+          },
+        ],
+      },
+      {
+        id: 14,
         title: 'Lists & .map() — Listen rendern',
         category: 'Grundlagen',
         explanation: `Arrays in JSX renderst du mit \`.map()\` — jedes Element wird in JSX umgewandelt.
@@ -1630,7 +1798,7 @@ export default ProductList`,
     title: '2. Hooks',
     lessons: [
       {
-        id: 14,
+        id: 15,
         title: 'useEffect — Seiteneffekte',
         category: 'Hooks',
         explanation: `**useEffect** führt Code aus, nachdem React die Komponente gerendert hat.
@@ -1869,7 +2037,7 @@ export default App`,
         ],
       },
       {
-        id: 15,
+        id: 16,
         title: 'useEffect — API-Daten laden',
         category: 'Hooks',
         explanation: `API-Aufrufe gehören in \`useEffect\` — nicht direkt in die Komponente (würde bei jedem Render feuern).
@@ -1933,7 +2101,7 @@ export default UserFetch`,
         ],
       },
       {
-        id: 16,
+        id: 17,
         title: 'useRef — DOM-Zugriff ohne Re-render',
         category: 'Hooks',
         explanation: `**useRef** gibt eine veränderliche Box (\`.current\`) die zwischen Renders erhalten bleibt — aber kein Re-render auslöst.
@@ -1981,7 +2149,7 @@ export default FocusInput`,
         ],
       },
       {
-        id: 17,
+        id: 18,
         title: 'useContext — zentraler Datenspeicher',
         category: 'Hooks',
         explanation: `**Context** löst das "Prop Drilling" Problem — statt Props durch viele Ebenen zu reichen, landen alle Daten in einem zentralen Store.
@@ -2186,7 +2354,7 @@ export default App`,
         ],
       },
       {
-        id: 18,
+        id: 19,
         title: 'useContext — gestapelte Kontexte',
         category: 'Hooks',
         explanation: `Jede Komponente kann ihren eigenen Kontext und Provider **selbst definieren und exportieren** — nicht alles muss in eine zentrale Datei.
@@ -2395,7 +2563,7 @@ export default App`,
         ],
       },
       {
-        id: 19,
+        id: 20,
         title: 'useMemo & useCallback — Performance',
         category: 'Hooks',
         explanation: `**useMemo** cached das Ergebnis einer Berechnung — wird nur neu berechnet wenn sich Abhängigkeiten ändern.
@@ -2447,7 +2615,7 @@ export default ExpensiveList`,
         ],
       },
       {
-        id: 20,
+        id: 21,
         title: 'Custom Hooks — wiederverwendbare Logik',
         category: 'Hooks',
         explanation: `**Custom Hooks** sind eigene Funktionen die mit "use" beginnen und andere Hooks nutzen.
@@ -2563,7 +2731,7 @@ export default App`,
     title: '3. Fortgeschritten',
     lessons: [
       {
-        id: 21,
+        id: 22,
         title: 'React Router — Navigation',
         category: 'Fortgeschritten',
         explanation: `**React Router** ermöglicht clientseitige Navigation ohne Seiten-Reload.
@@ -2651,7 +2819,7 @@ export default User`,
         ],
       },
       {
-        id: 22,
+        id: 23,
         title: 'Formulare — kontrolliert vs. unkontrolliert',
         category: 'Fortgeschritten',
         explanation: `**Kontrollierte Inputs** — React State ist die einzige Datenquelle, DOM wird gesteuert.
@@ -2743,7 +2911,7 @@ export default LoginForm`,
         ],
       },
       {
-        id: 23,
+        id: 24,
         title: 'useReducer — komplexer State',
         category: 'Fortgeschritten',
         explanation: `**useReducer** ist Alternative zu useState für komplexen State mit mehreren Aktionen.
@@ -2841,7 +3009,7 @@ export default Cart`,
         ],
       },
       {
-        id: 24,
+        id: 25,
         title: 'TypeScript mit React — Typen & Generics',
         category: 'Fortgeschritten',
         explanation: `TypeScript macht React-Code robuster: Fehler werden beim Schreiben erkannt, nicht erst zur Laufzeit.
@@ -2925,7 +3093,7 @@ export default App`,
         ],
       },
       {
-        id: 25,
+        id: 26,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
         explanation: `**React.memo** ist ein Higher-Order Component (HOC) — es "merkt" sich Props und rendert nur neu wenn Props sich ändern.
@@ -2995,7 +3163,7 @@ export default App`,
         ],
       },
       {
-        id: 26,
+        id: 27,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
         explanation: `**Error Boundaries** fangen JavaScript-Fehler in Kindkomponenten ab und zeigen Fallback-UI.
@@ -3085,7 +3253,7 @@ export default App`,
         ],
       },
       {
-        id: 27,
+        id: 28,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
         explanation: `**React.lazy()** lädt eine Komponente erst wenn sie gebraucht wird — Code-Splitting.
@@ -3129,7 +3297,7 @@ export default App`,
         ],
       },
       {
-        id: 28,
+        id: 29,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
         explanation: `**Portals** rendern Kinder in einen anderen DOM-Knoten als den Parent — aber bleiben im React-Komponentenbaum.
@@ -3210,7 +3378,7 @@ export default Modal`,
     title: '4. Praxisprojekt: SportsDash',
     lessons: [
       {
-        id: 29,
+        id: 30,
         title: 'Projektübersicht & Architektur',
         category: 'Praxisprojekt',
         explanation: `Wir bauen **SportsDash** — eine App mit Login/Register und Fußball-Ergebnissen via API.
@@ -3249,7 +3417,7 @@ Die App nutzt React Router für Navigation, Context für Auth-State, und fetch()
         ],
       },
       {
-        id: 30,
+        id: 31,
         title: 'Projekt: Types & Interfaces',
         category: 'Praxisprojekt',
         explanation: `Alle TypeScript-Typen zentral in einer Datei — so haben alle Komponenten dieselben Definitionen.
@@ -3336,7 +3504,7 @@ export interface ApiResponse<T> {
         ],
       },
       {
-        id: 31,
+        id: 32,
         title: 'Projekt: AuthContext',
         category: 'Praxisprojekt',
         explanation: `Der AuthContext verwaltet den eingeloggten User global — alle Komponenten können darauf zugreifen.
@@ -3410,7 +3578,7 @@ export function useAuth(): AuthContextType {
         ],
       },
       {
-        id: 32,
+        id: 33,
         title: 'Projekt: PrivateRoute & Layout',
         category: 'Praxisprojekt',
         explanation: `**PrivateRoute** schützt Seiten die nur eingeloggte User sehen dürfen — leitet sonst zum Login um.
@@ -3543,7 +3711,7 @@ export default Layout`,
         ],
       },
       {
-        id: 33,
+        id: 34,
         title: 'Projekt: Login & Register Pages',
         category: 'Praxisprojekt',
         explanation: `Login und Register sind kontrollierte Formulare die den AuthContext nutzen.
@@ -3748,7 +3916,7 @@ export default RegisterPage`,
         ],
       },
       {
-        id: 34,
+        id: 35,
         title: 'Projekt: Dashboard & API',
         category: 'Praxisprojekt',
         explanation: `Das Dashboard lädt Live-Fußballdaten von der API. Wir nutzen einen Mock-Datensatz falls kein API-Key vorhanden.
@@ -4076,7 +4244,7 @@ export default useFetch`,
         ],
       },
       {
-        id: 35,
+        id: 36,
         title: 'Projekt: App.tsx — Router zusammenbauen',
         category: 'Praxisprojekt',
         explanation: `Jetzt verbinden wir alles: Router, Auth-Provider, Layout, Private Routes und alle Seiten.
@@ -4196,6 +4364,7 @@ input {
     ],
   },
 ];
+
 
 
 
