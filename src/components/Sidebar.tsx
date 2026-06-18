@@ -18,6 +18,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 function Sidebar({ chapters, currentLessonId, onSelect, isOpen, onToggle }: SidebarProps) {
+  const totalLessons = chapters.reduce((sum, ch) => sum + ch.lessons.length, 0)
   return (
     <>
       {/* Mobile Toggle Button */}
@@ -50,7 +51,7 @@ function Sidebar({ chapters, currentLessonId, onSelect, isOpen, onToggle }: Side
             ⚛ React Kurs
           </div>
           <div style={{ fontSize: '12px', color: '#9d8bc0', marginTop: '4px' }}>
-            Vite + TypeScript · 31 Lektionen
+            Vite + TypeScript · {totalLessons} Lektionen
           </div>
         </div>
 

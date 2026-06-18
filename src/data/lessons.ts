@@ -1841,6 +1841,235 @@ export default ProductList`,
           },
         ],
       },
+      {
+        id: 15,
+        title: 'Listen — Todo-App',
+        category: 'Grundlagen',
+        explanation: `Eine Todo-App zeigt wie \`.map()\`, \`.filter()\` und der Spread-Operator zusammenspielen.
+Jedes Todo bekommt eine eindeutige \`id\` über \`Date.now()\` — damit hat React immer einen stabilen \`key\`.
+State wird nie direkt verändert — immer neue Arrays über \`map()\` und \`filter()\` erstellen.`,
+        keyPoints: [
+          'Date.now() als einfache eindeutige ID — besser als Array-Index',
+          'filter() löscht: neues Array ohne das Element mit der passenden ID',
+          'map() + Spread: nur ein Feld ändern, den Rest kopieren — { ...todo, done: !todo.done }',
+          'trim() verhindert dass leere Eingaben als Todo gespeichert werden',
+        ],
+        files: [
+          {
+            name: 'TodoApp.tsx',
+            language: 'tsx',
+            code: `import { useState } from 'react'
+import './TodoApp.css'
+
+// type beschreibt die Struktur eines Objekts — TypeScript prüft ob alle Felder korrekt befüllt werden
+type Todo = {
+  id: number
+  text: string
+  done: boolean
+}
+
+function TodoApp() {
+  // Todo[] bedeutet: ein Array aus Todo-Objekten — TypeScript weiß damit genau welche Felder erlaubt sind
+  const [todos, setTodos] = useState<Todo[]>([
+    { id: 1, text: 'React lernen', done: false },
+    { id: 2, text: 'Listen anzeigen', done: true },
+  ])
+
+  const [todoText, setTodoText] = useState('')
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (todoText.trim() === '') return  // leere Eingaben verhindern
+
+    const neuesTodo: Todo = {
+      id: Date.now(),  // einfache eindeutige ID
+      text: todoText,
+      done: false,
+    }
+
+    setTodos([...todos, neuesTodo])
+    setTodoText('')
+  }
+
+  function deleteTodo(id: number) {
+    // filter: alle Todos behalten außer das mit der passenden ID
+    setTodos(todos.filter(todo => todo.id !== id))
+  }
+
+  function toggleTodo(id: number) {
+    // map: nur das Todo mit passender ID ändern — done umdrehen
+    setTodos(todos.map(todo =>
+      todo.id === id ? { ...todo, done: !todo.done } : todo
+    ))
+  }
+
+  return (
+    <div className="todo-app">
+      <h1>Meine Todo-Liste</h1>
+
+      <form className="todo-form" onSubmit={handleSubmit}>
+        <input
+          className="todo-input"
+          type="text"
+          placeholder="Neues Todo eingeben..."
+          value={todoText}
+          onChange={e => setTodoText(e.target.value)}
+        />
+        <button type="submit" className="btn-add">+</button>
+      </form>
+
+      <ul className="todo-list">
+        {todos.map(todo => (
+          <li key={todo.id} className={todo.done ? 'todo-item done' : 'todo-item'}>
+            {/* checked={todo.done} — Checkbox spiegelt den State wider */}
+            <input
+              type="checkbox"
+              checked={todo.done}
+              onChange={() => toggleTodo(todo.id)}
+            />
+            <span className="todo-text">{todo.text}</span>
+            <span className={todo.done ? 'todo-status status-done' : 'todo-status status-open'}>
+              {todo.done ? 'erledigt' : 'offen'}
+            </span>
+            <button className="btn-delete" onClick={() => deleteTodo(todo.id)}>
+              Löschen
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+export default TodoApp`,
+          },
+          {
+            name: 'TodoApp.css',
+            language: 'css',
+            code: `.todo-app {
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.todo-app h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2d1b4e;
+  margin: 0;
+}
+
+.todo-form {
+  display: flex;
+  gap: 8px;
+}
+
+.todo-input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid #e6ddf3;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2d1b4e;
+  outline: none;
+}
+
+.todo-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.btn-add {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-add:hover {
+  background: #6d28d9;
+}
+
+.todo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #e6ddf3;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(124, 58, 237, 0.05);
+}
+
+.todo-item.done {
+  background: #f7f3fc;
+  opacity: 0.7;
+}
+
+.todo-text {
+  flex: 1;
+  font-size: 14px;
+  color: #2d1b4e;
+}
+
+.todo-item.done .todo-text {
+  text-decoration: line-through;
+  color: #9d8bc0;
+}
+
+.todo-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.status-open {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.status-done {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.btn-delete {
+  background: transparent;
+  color: #c9bce0;
+  border: 1px solid #e6ddf3;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn-delete:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}`,
+          },
+        ],
+      },
     ],
   },
 
@@ -1851,7 +2080,7 @@ export default ProductList`,
     title: '2. Hooks',
     lessons: [
       {
-        id: 15,
+        id: 16,
         title: 'useEffect — Seiteneffekte',
         category: 'Hooks',
         explanation: `**useEffect** führt Code aus, nachdem React die Komponente gerendert hat.
@@ -2090,7 +2319,7 @@ export default App`,
         ],
       },
       {
-        id: 16,
+        id: 17,
         title: 'useEffect — API-Daten laden',
         category: 'Hooks',
         explanation: `API-Aufrufe gehören in \`useEffect\` — nicht direkt in die Komponente (würde bei jedem Render feuern).
@@ -2154,7 +2383,7 @@ export default UserFetch`,
         ],
       },
       {
-        id: 17,
+        id: 18,
         title: 'useRef — DOM-Zugriff ohne Re-render',
         category: 'Hooks',
         explanation: `**useRef** gibt eine veränderliche Box (\`.current\`) die zwischen Renders erhalten bleibt — aber kein Re-render auslöst.
@@ -2202,7 +2431,7 @@ export default FocusInput`,
         ],
       },
       {
-        id: 18,
+        id: 19,
         title: 'useContext — zentraler Datenspeicher',
         category: 'Hooks',
         explanation: `**Context** löst das "Prop Drilling" Problem — statt Props durch viele Ebenen zu reichen, landen alle Daten in einem zentralen Store.
@@ -2407,7 +2636,7 @@ export default App`,
         ],
       },
       {
-        id: 19,
+        id: 20,
         title: 'useContext — gestapelte Kontexte',
         category: 'Hooks',
         explanation: `Jede Komponente kann ihren eigenen Kontext und Provider **selbst definieren und exportieren** — nicht alles muss in eine zentrale Datei.
@@ -2616,7 +2845,7 @@ export default App`,
         ],
       },
       {
-        id: 20,
+        id: 21,
         title: 'useMemo & useCallback — Performance',
         category: 'Hooks',
         explanation: `**useMemo** cached das Ergebnis einer Berechnung — wird nur neu berechnet wenn sich Abhängigkeiten ändern.
@@ -2668,7 +2897,7 @@ export default ExpensiveList`,
         ],
       },
       {
-        id: 21,
+        id: 22,
         title: 'Custom Hooks — wiederverwendbare Logik',
         category: 'Hooks',
         explanation: `**Custom Hooks** sind eigene Funktionen die mit "use" beginnen und andere Hooks nutzen.
@@ -2784,7 +3013,7 @@ export default App`,
     title: '3. Fortgeschritten',
     lessons: [
       {
-        id: 22,
+        id: 23,
         title: 'React Router — Navigation',
         category: 'Fortgeschritten',
         explanation: `**React Router** ermöglicht clientseitige Navigation ohne Seiten-Reload.
@@ -2872,7 +3101,7 @@ export default User`,
         ],
       },
       {
-        id: 23,
+        id: 24,
         title: 'Formulare — kontrolliert vs. unkontrolliert',
         category: 'Fortgeschritten',
         explanation: `**Kontrollierte Inputs** — React State ist die einzige Datenquelle, DOM wird gesteuert.
@@ -2964,7 +3193,7 @@ export default LoginForm`,
         ],
       },
       {
-        id: 24,
+        id: 25,
         title: 'useReducer — komplexer State',
         category: 'Fortgeschritten',
         explanation: `**useReducer** ist Alternative zu useState für komplexen State mit mehreren Aktionen.
@@ -3062,7 +3291,7 @@ export default Cart`,
         ],
       },
       {
-        id: 25,
+        id: 26,
         title: 'TypeScript mit React — Typen & Generics',
         category: 'Fortgeschritten',
         explanation: `TypeScript macht React-Code robuster: Fehler werden beim Schreiben erkannt, nicht erst zur Laufzeit.
@@ -3146,7 +3375,7 @@ export default App`,
         ],
       },
       {
-        id: 26,
+        id: 27,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
         explanation: `**React.memo** ist ein Higher-Order Component (HOC) — es "merkt" sich Props und rendert nur neu wenn Props sich ändern.
@@ -3216,7 +3445,7 @@ export default App`,
         ],
       },
       {
-        id: 27,
+        id: 28,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
         explanation: `**Error Boundaries** fangen JavaScript-Fehler in Kindkomponenten ab und zeigen Fallback-UI.
@@ -3306,7 +3535,7 @@ export default App`,
         ],
       },
       {
-        id: 28,
+        id: 29,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
         explanation: `**React.lazy()** lädt eine Komponente erst wenn sie gebraucht wird — Code-Splitting.
@@ -3350,7 +3579,7 @@ export default App`,
         ],
       },
       {
-        id: 29,
+        id: 30,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
         explanation: `**Portals** rendern Kinder in einen anderen DOM-Knoten als den Parent — aber bleiben im React-Komponentenbaum.
@@ -3431,7 +3660,7 @@ export default Modal`,
     title: '4. Praxisprojekt: SportsDash',
     lessons: [
       {
-        id: 30,
+        id: 31,
         title: 'Projektübersicht & Architektur',
         category: 'Praxisprojekt',
         explanation: `Wir bauen **SportsDash** — eine App mit Login/Register und Fußball-Ergebnissen via API.
@@ -3470,7 +3699,7 @@ Die App nutzt React Router für Navigation, Context für Auth-State, und fetch()
         ],
       },
       {
-        id: 31,
+        id: 32,
         title: 'Projekt: Types & Interfaces',
         category: 'Praxisprojekt',
         explanation: `Alle TypeScript-Typen zentral in einer Datei — so haben alle Komponenten dieselben Definitionen.
@@ -3557,7 +3786,7 @@ export interface ApiResponse<T> {
         ],
       },
       {
-        id: 32,
+        id: 33,
         title: 'Projekt: AuthContext',
         category: 'Praxisprojekt',
         explanation: `Der AuthContext verwaltet den eingeloggten User global — alle Komponenten können darauf zugreifen.
@@ -3631,7 +3860,7 @@ export function useAuth(): AuthContextType {
         ],
       },
       {
-        id: 33,
+        id: 34,
         title: 'Projekt: PrivateRoute & Layout',
         category: 'Praxisprojekt',
         explanation: `**PrivateRoute** schützt Seiten die nur eingeloggte User sehen dürfen — leitet sonst zum Login um.
@@ -3764,7 +3993,7 @@ export default Layout`,
         ],
       },
       {
-        id: 34,
+        id: 35,
         title: 'Projekt: Login & Register Pages',
         category: 'Praxisprojekt',
         explanation: `Login und Register sind kontrollierte Formulare die den AuthContext nutzen.
@@ -3969,7 +4198,7 @@ export default RegisterPage`,
         ],
       },
       {
-        id: 35,
+        id: 36,
         title: 'Projekt: Dashboard & API',
         category: 'Praxisprojekt',
         explanation: `Das Dashboard lädt Live-Fußballdaten von der API. Wir nutzen einen Mock-Datensatz falls kein API-Key vorhanden.
@@ -4297,7 +4526,7 @@ export default useFetch`,
         ],
       },
       {
-        id: 36,
+        id: 37,
         title: 'Projekt: App.tsx — Router zusammenbauen',
         category: 'Praxisprojekt',
         explanation: `Jetzt verbinden wir alles: Router, Auth-Provider, Layout, Private Routes und alle Seiten.
@@ -4417,6 +4646,7 @@ input {
     ],
   },
 ];
+
 
 
 
