@@ -1736,10 +1736,10 @@ export default App`,
 Jedes Element in einer Liste braucht ein **key**-Prop: ein eindeutiger String oder Number.
 Key hilft React beim effizienten Update des DOM — ohne key gibt es Warnungen und mögliche Bugs.`,
         keyPoints: [
-          '.map() → Array von JSX-Elementen',
+          '.map() → wandelt jedes Array-Element in ein JSX-Element um',
           'key={item.id} — eindeutig, stabil, aus den Daten (nicht Index wenn vermeidbar)',
-          'Array-Index als key nur wenn keine stabile ID vorhanden',
-          'Fragment mit key: <Fragment key={id}> oder <React.Fragment key={id}>',
+          'key ist Pflicht: ohne key kann React nicht erkennen welches Element sich geändert hat — es rendert die gesamte Liste neu statt nur das geänderte Element',
+          'key niemals weglassen: React zeigt eine Warnung und die Performance leidet bei langen Listen spürbar',
         ],
         files: [
           {
@@ -1763,12 +1763,17 @@ const products: Product[] = [
 
 function ProductList() {
   return (
-    <ul>
+    <ul className="product-list">
+      {/* .map() geht jedes Element im Array durch und gibt dafür JSX zurück */}
       {products.map(product => (
-        // key muss eindeutig unter Geschwistern sein
-        <li key={product.id} className={product.inStock ? '' : 'out-of-stock'}>
-          <strong>{product.name}</strong> — {product.price}€
-          {!product.inStock && <span> (Ausverkauft)</span>}
+        // key={product.id} — React merkt sich damit welches Element welches ist
+        // Ändert sich die Liste, aktualisiert React nur das betroffene Element statt alles neu zu rendern
+        <li key={product.id} className={product.inStock ? 'product-item' : 'product-item out-of-stock'}>
+          <span className="product-name">{product.name}</span>
+          <span className="product-price">{product.price === 0 ? 'Gratis' : product.price + ' €'}</span>
+          <span className={product.inStock ? 'badge badge-in' : 'badge badge-out'}>
+            {product.inStock ? 'Verfügbar' : 'Ausverkauft'}
+          </span>
         </li>
       ))}
     </ul>
@@ -1780,11 +1785,59 @@ export default ProductList`,
           {
             name: 'ProductList.css',
             language: 'css',
-            code: `
-.out-of-stock {
-  opacity: 0.4;
+            code: `.product-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 340px;
 }
-`,
+
+.product-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border: 1px solid #e6ddf3;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.06);
+}
+
+.product-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d1b4e;
+}
+
+.product-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: #7c3aed;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.badge-in {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge-out {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.out-of-stock {
+  opacity: 0.5;
+}`,
           },
         ],
       },
