@@ -1348,6 +1348,220 @@ export default App`,
       },
       {
         id: 12,
+        title: 'Formulare — Eingaben verarbeiten',
+        category: 'Grundlagen',
+        explanation: `In React wird jedes Eingabefeld durch **State** gesteuert — man spricht von einem "controlled input".
+Der State speichert immer den aktuellen Wert des Felds, \`onChange\` aktualisiert ihn bei jeder Eingabe.
+\`onSubmit\` fängt das Absenden ab — \`e.preventDefault()\` verhindert dabei den Browser-Reload.`,
+        keyPoints: [
+          'Controlled Input: value={state} + onChange → React kontrolliert den Wert',
+          'e.preventDefault() verhindert den Standard-Reload beim Absenden',
+          'Jedes Feld bekommt seinen eigenen useState',
+          'type="email" aktiviert Browser-seitige Validierung der E-Mail-Adresse',
+        ],
+        files: [
+          {
+            name: 'NewsletterForm.tsx',
+            language: 'tsx',
+            code: `import { useState } from 'react'
+import './NewsletterForm.css'
+
+function NewsletterForm() {
+  // Jedes Feld hat seinen eigenen State
+  const [vorname, setVorname] = useState('')
+  const [name, setName]       = useState('')
+  const [mail, setMail]       = useState('')
+
+  // submitted steuert ob das Formular oder die Bestätigung angezeigt wird
+  const [submitted, setSubmitted] = useState(false)
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()  // verhindert Seiten-Reload
+    setSubmitted(true)
+  }
+
+  // Early return — nach dem Absenden wird die Bestätigung angezeigt
+  if (submitted) {
+    return (
+      <div className="success">
+        <span className="success-icon">✓</span>
+        <p>Danke, <strong>{vorname} {name}</strong>!</p>
+        <p className="success-sub">{mail} wurde angemeldet.</p>
+      </div>
+    )
+  }
+
+  return (
+    <form className="newsletter-form" onSubmit={handleSubmit}>
+      <h2>Newsletter</h2>
+      <p className="form-subtitle">Jetzt kostenlos anmelden</p>
+
+      <div className="form-group">
+        {/* htmlFor verknüpft das Label mit dem Input — Klick auf Label fokussiert das Feld */}
+        <label htmlFor="vorname">Vorname</label>
+        {/* value + onChange = controlled input — React kennt immer den aktuellen Wert */}
+        <input
+          id="vorname"
+          type="text"
+          value={vorname}
+          onChange={e => setVorname(e.target.value)}
+          placeholder="Max"
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="name">Name</label>
+        <input
+          id="name"
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="Mustermann"
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="mail">E-Mail</label>
+        {/* type="email" → Browser prüft das Format automatisch */}
+        <input
+          id="mail"
+          type="email"
+          value={mail}
+          onChange={e => setMail(e.target.value)}
+          placeholder="max@beispiel.de"
+        />
+      </div>
+
+      <button type="submit" className="btn-submit">Anmelden</button>
+    </form>
+  )
+}
+
+export default NewsletterForm`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import NewsletterForm from './NewsletterForm'
+
+function App() {
+  return <NewsletterForm />
+}
+
+export default App`,
+          },
+          {
+            name: 'NewsletterForm.css',
+            language: 'css',
+            code: `.newsletter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 24px;
+  border: 1px solid #e6ddf3;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+  max-width: 320px;
+}
+
+.newsletter-form h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2d1b4e;
+  margin: 0;
+}
+
+.form-subtitle {
+  font-size: 13px;
+  color: #9d8bc0;
+  margin: -8px 0 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b5b8c;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-group input {
+  padding: 9px 12px;
+  border: 1px solid #e6ddf3;
+  border-radius: 7px;
+  font-size: 14px;
+  color: #2d1b4e;
+  outline: none;
+}
+
+.form-group input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.btn-submit {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 11px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.btn-submit:hover {
+  background: #6d28d9;
+}
+
+.success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 24px;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  background: #f0fdf4;
+  max-width: 320px;
+  text-align: center;
+}
+
+.success-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #fff;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success p {
+  margin: 0;
+  color: #15803d;
+  font-size: 15px;
+}
+
+.success-sub {
+  font-size: 12px !important;
+  color: #9d8bc0 !important;
+}`,
+          },
+        ],
+      },
+      {
+        id: 13,
         title: 'Lists & .map() — Listen rendern',
         category: 'Grundlagen',
         explanation: `Arrays in JSX renderst du mit \`.map()\` — jedes Element wird in JSX umgewandelt.
@@ -1416,7 +1630,7 @@ export default ProductList`,
     title: '2. Hooks',
     lessons: [
       {
-        id: 13,
+        id: 14,
         title: 'useEffect — Seiteneffekte',
         category: 'Hooks',
         explanation: `**useEffect** führt Code aus, nachdem React die Komponente gerendert hat.
@@ -1655,7 +1869,7 @@ export default App`,
         ],
       },
       {
-        id: 14,
+        id: 15,
         title: 'useEffect — API-Daten laden',
         category: 'Hooks',
         explanation: `API-Aufrufe gehören in \`useEffect\` — nicht direkt in die Komponente (würde bei jedem Render feuern).
@@ -1719,7 +1933,7 @@ export default UserFetch`,
         ],
       },
       {
-        id: 15,
+        id: 16,
         title: 'useRef — DOM-Zugriff ohne Re-render',
         category: 'Hooks',
         explanation: `**useRef** gibt eine veränderliche Box (\`.current\`) die zwischen Renders erhalten bleibt — aber kein Re-render auslöst.
@@ -1767,7 +1981,7 @@ export default FocusInput`,
         ],
       },
       {
-        id: 16,
+        id: 17,
         title: 'useContext — zentraler Datenspeicher',
         category: 'Hooks',
         explanation: `**Context** löst das "Prop Drilling" Problem — statt Props durch viele Ebenen zu reichen, landen alle Daten in einem zentralen Store.
@@ -1972,7 +2186,7 @@ export default App`,
         ],
       },
       {
-        id: 17,
+        id: 18,
         title: 'useContext — gestapelte Kontexte',
         category: 'Hooks',
         explanation: `Jede Komponente kann ihren eigenen Kontext und Provider **selbst definieren und exportieren** — nicht alles muss in eine zentrale Datei.
@@ -2181,7 +2395,7 @@ export default App`,
         ],
       },
       {
-        id: 18,
+        id: 19,
         title: 'useMemo & useCallback — Performance',
         category: 'Hooks',
         explanation: `**useMemo** cached das Ergebnis einer Berechnung — wird nur neu berechnet wenn sich Abhängigkeiten ändern.
@@ -2233,7 +2447,7 @@ export default ExpensiveList`,
         ],
       },
       {
-        id: 19,
+        id: 20,
         title: 'Custom Hooks — wiederverwendbare Logik',
         category: 'Hooks',
         explanation: `**Custom Hooks** sind eigene Funktionen die mit "use" beginnen und andere Hooks nutzen.
@@ -2349,7 +2563,7 @@ export default App`,
     title: '3. Fortgeschritten',
     lessons: [
       {
-        id: 20,
+        id: 21,
         title: 'React Router — Navigation',
         category: 'Fortgeschritten',
         explanation: `**React Router** ermöglicht clientseitige Navigation ohne Seiten-Reload.
@@ -2437,7 +2651,7 @@ export default User`,
         ],
       },
       {
-        id: 21,
+        id: 22,
         title: 'Formulare — kontrolliert vs. unkontrolliert',
         category: 'Fortgeschritten',
         explanation: `**Kontrollierte Inputs** — React State ist die einzige Datenquelle, DOM wird gesteuert.
@@ -2529,7 +2743,7 @@ export default LoginForm`,
         ],
       },
       {
-        id: 22,
+        id: 23,
         title: 'useReducer — komplexer State',
         category: 'Fortgeschritten',
         explanation: `**useReducer** ist Alternative zu useState für komplexen State mit mehreren Aktionen.
@@ -2627,7 +2841,7 @@ export default Cart`,
         ],
       },
       {
-        id: 23,
+        id: 24,
         title: 'TypeScript mit React — Typen & Generics',
         category: 'Fortgeschritten',
         explanation: `TypeScript macht React-Code robuster: Fehler werden beim Schreiben erkannt, nicht erst zur Laufzeit.
@@ -2711,7 +2925,7 @@ export default App`,
         ],
       },
       {
-        id: 24,
+        id: 25,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
         explanation: `**React.memo** ist ein Higher-Order Component (HOC) — es "merkt" sich Props und rendert nur neu wenn Props sich ändern.
@@ -2781,7 +2995,7 @@ export default App`,
         ],
       },
       {
-        id: 25,
+        id: 26,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
         explanation: `**Error Boundaries** fangen JavaScript-Fehler in Kindkomponenten ab und zeigen Fallback-UI.
@@ -2871,7 +3085,7 @@ export default App`,
         ],
       },
       {
-        id: 26,
+        id: 27,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
         explanation: `**React.lazy()** lädt eine Komponente erst wenn sie gebraucht wird — Code-Splitting.
@@ -2915,7 +3129,7 @@ export default App`,
         ],
       },
       {
-        id: 27,
+        id: 28,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
         explanation: `**Portals** rendern Kinder in einen anderen DOM-Knoten als den Parent — aber bleiben im React-Komponentenbaum.
@@ -2996,7 +3210,7 @@ export default Modal`,
     title: '4. Praxisprojekt: SportsDash',
     lessons: [
       {
-        id: 28,
+        id: 29,
         title: 'Projektübersicht & Architektur',
         category: 'Praxisprojekt',
         explanation: `Wir bauen **SportsDash** — eine App mit Login/Register und Fußball-Ergebnissen via API.
@@ -3035,7 +3249,7 @@ Die App nutzt React Router für Navigation, Context für Auth-State, und fetch()
         ],
       },
       {
-        id: 29,
+        id: 30,
         title: 'Projekt: Types & Interfaces',
         category: 'Praxisprojekt',
         explanation: `Alle TypeScript-Typen zentral in einer Datei — so haben alle Komponenten dieselben Definitionen.
@@ -3122,7 +3336,7 @@ export interface ApiResponse<T> {
         ],
       },
       {
-        id: 30,
+        id: 31,
         title: 'Projekt: AuthContext',
         category: 'Praxisprojekt',
         explanation: `Der AuthContext verwaltet den eingeloggten User global — alle Komponenten können darauf zugreifen.
@@ -3196,7 +3410,7 @@ export function useAuth(): AuthContextType {
         ],
       },
       {
-        id: 31,
+        id: 32,
         title: 'Projekt: PrivateRoute & Layout',
         category: 'Praxisprojekt',
         explanation: `**PrivateRoute** schützt Seiten die nur eingeloggte User sehen dürfen — leitet sonst zum Login um.
@@ -3329,7 +3543,7 @@ export default Layout`,
         ],
       },
       {
-        id: 32,
+        id: 33,
         title: 'Projekt: Login & Register Pages',
         category: 'Praxisprojekt',
         explanation: `Login und Register sind kontrollierte Formulare die den AuthContext nutzen.
@@ -3534,7 +3748,7 @@ export default RegisterPage`,
         ],
       },
       {
-        id: 33,
+        id: 34,
         title: 'Projekt: Dashboard & API',
         category: 'Praxisprojekt',
         explanation: `Das Dashboard lädt Live-Fußballdaten von der API. Wir nutzen einen Mock-Datensatz falls kein API-Key vorhanden.
@@ -3862,7 +4076,7 @@ export default useFetch`,
         ],
       },
       {
-        id: 34,
+        id: 35,
         title: 'Projekt: App.tsx — Router zusammenbauen',
         category: 'Praxisprojekt',
         explanation: `Jetzt verbinden wir alles: Router, Auth-Provider, Layout, Private Routes und alle Seiten.
@@ -3982,5 +4196,6 @@ input {
     ],
   },
 ];
+
 
 
