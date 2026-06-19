@@ -257,6 +257,18 @@ function CodeViewer({ files, editMode, onToggleEdit, editedCodes, onEditChange, 
     setTimeout(() => setCopied(false), 2000)
   }
 
+  function handleDownload() {
+    if (!activeFile) return
+    const code = editMode ? activeEditedCode : activeFile.code
+    const blob = new Blob([code], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = activeFile.name
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   // Monaco: JSX-Support aktivieren und Fehler-Squiggles für fehlende Imports deaktivieren
   function handleMonacoBeforeMount(monaco: Parameters<NonNullable<React.ComponentProps<typeof MonacoEditor>['beforeMount']>>[0]) {
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
@@ -340,6 +352,21 @@ function CodeViewer({ files, editMode, onToggleEdit, editedCodes, onEditChange, 
               }}
             >
               {copied ? '✓ Kopiert' : '📋'}
+            </button>
+          )}
+
+          {/* Download-Button */}
+          {!isOutput && (
+            <button
+              onClick={handleDownload}
+              title={`${activeFile?.name} herunterladen`}
+              style={{
+                padding: '4px 10px', background: 'transparent',
+                border: 'none', color: '#888',
+                cursor: 'pointer', fontSize: '12px', whiteSpace: 'nowrap',
+              }}
+            >
+              💾
             </button>
           )}
 
