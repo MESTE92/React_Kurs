@@ -104,6 +104,27 @@ function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEd
         {lesson.title}
       </h1>
 
+      {/* Lernziele */}
+      {lesson.learningGoals && lesson.learningGoals.length > 0 && (
+        <div style={{
+          background: '#f0fdf4', border: '1px solid #bbf7d0',
+          borderLeft: '4px solid #16a34a',
+          borderRadius: '8px', padding: '16px', marginBottom: '20px',
+          boxShadow: '0 1px 3px rgba(22,163,74,0.06)',
+        }}>
+          <h3 style={{ fontSize: '13px', color: '#15803d', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            🎯 Nach dieser Lektion kannst du...
+          </h3>
+          <ul style={{ margin: 0, paddingLeft: '20px' }}>
+            {lesson.learningGoals.map((goal, i) => (
+              <li key={i} style={{ color: '#166534', fontSize: '13.5px', marginBottom: '4px', lineHeight: 1.6 }}>
+                {goal}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Erklärungstext */}
       <div style={{
         background: '#ffffff', border: `1px solid ${color}33`,

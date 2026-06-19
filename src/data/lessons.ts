@@ -21,6 +21,11 @@ Du brauchst nur **Node.js** (ab Version 18) auf deinem Rechner — dann reicht e
           '`npm install` lädt alle Abhängigkeiten (React, Vite, TypeScript...)',
           '`npm run dev` startet den Server — App läuft unter localhost:5173',
         ],
+        learningGoals: [
+          'Ein neues React-Projekt mit Vite und TypeScript aufsetzen',
+          'Die wichtigsten Dateien und Ordner eines Vite-Projekts verstehen',
+          'Die Entwicklungsumgebung starten und im Browser aufrufen',
+        ],
         files: [
           {
             name: 'Terminal',
@@ -135,6 +140,11 @@ Vite ist das Build-Tool: es startet einen Dev-Server und kompiliert TypeScript z
           'Vite = schnelles Build-Tool (ersetzt CRA)',
           'Komponenten = wiederverwendbare UI-Bausteine',
         ],
+        learningGoals: [
+          'Erklären was React ist und warum es eingesetzt wird',
+          'Den Unterschied zwischen einer SPA und einer klassischen Website beschreiben',
+          'Verstehen was Komponenten und der Virtual DOM sind',
+        ],
         preview: `<div>
   <h1>Hallo React!</h1>
   <p>Das ist meine erste React-App mit Vite + TypeScript.</p>
@@ -210,6 +220,11 @@ Wichtig: JSX ist kein echtes HTML. Attribute heißen anders (z.B. \`className\` 
           'Jede Komponente muss genau ein Root-Element zurückgeben',
           'Leere Tags <> </> als Container wenn kein div gewünscht',
         ],
+        learningGoals: [
+          'JSX-Syntax korrekt schreiben und von HTML unterscheiden',
+          'JavaScript-Ausdrücke mit {} in JSX einbetten',
+          'Wissen warum JSX className statt class verwendet',
+        ],
         files: [
           {
             name: 'App.tsx',
@@ -271,6 +286,11 @@ Komponenten können andere Komponenten enthalten — so entsteht ein **Komponent
           'Großbuchstabe am Anfang ist Pflicht',
           'Komponenten sind composable — ineinander verschachtelbar',
           'Eine Datei = eine Komponente (Konvention)',
+        ],
+        learningGoals: [
+          'Eigene React-Komponenten als Funktionen erstellen',
+          'Komponenten in anderen Komponenten verwenden',
+          'Den Unterschied zwischen Komponente und HTML-Element erkennen',
         ],
         files: [
           {
@@ -405,6 +425,11 @@ Props fließen immer **von oben nach unten** (Parent → Child) — niemals umge
           'Optionale Props mit ? markieren',
           'Props sind readonly — nie direkt verändern',
         ],
+        learningGoals: [
+          'Props definieren und an eine Komponente übergeben',
+          'Typen für Props mit TypeScript festlegen',
+          'Verstehen warum Props nur von oben nach unten fließen',
+        ],
         files: [
           {
             name: 'Card.tsx',
@@ -515,6 +540,11 @@ In TypeScript nutzt du \`React.ReactNode\` als Typ für children.`,
           'Typ: React.ReactNode (alles was React rendern kann)',
           'Ermöglicht flexible "Wrapper"-Komponenten',
         ],
+        learningGoals: [
+          'Die children-Prop einsetzen um Inhalte in Komponenten einzubetten',
+          'Den Unterschied zwischen regulären Props und children erklären',
+          'Wrapper-Komponenten mit children bauen',
+        ],
         files: [
           {
             name: 'Box.tsx',
@@ -584,6 +614,11 @@ Ein CSS-Wrapper ist das klassische Beispiel: er gibt dem Inhalt einen Rahmen, oh
           'Zugriff via `props.children` oder kürzer per Destructuring `{ children }`',
           '`ReactNode` deckt alles ab: Text, JSX-Elemente, Arrays, null',
           'Wrapper-Muster: Styling in der Komponente — Inhalt kommt von außen',
+        ],
+        learningGoals: [
+          'Eine Layout-Komponente mit children als CSS-Wrapper bauen',
+          'Styles über className an Kindkomponenten weitergeben',
+          'Verstehen wie children die Wiederverwendbarkeit von Komponenten erhöht',
         ],
         files: [
           {
@@ -667,6 +702,11 @@ Immer über den Setter verändern (\`setCount\`), nie direkt die Variable — so
           'Setter-Aufruf → React rendert Komponente neu',
           'TypeScript: Typ wird aus initialem Wert abgeleitet',
           'Nie `count = count + 1` — nur über `setCount()`, sonst bemerkt React die Änderung nicht',
+        ],
+        learningGoals: [
+          'State mit useState anlegen und aktualisieren',
+          'Eine interaktive Zähler-Komponente mit Buttons bauen',
+          'Verstehen warum React bei State-Änderungen neu rendert',
         ],
         files: [
           {
@@ -811,6 +851,11 @@ React erkennt Änderungen über Referenzvergleich — nur eine neue Referenz lö
           'Arrays: [...arr, newItem] statt arr.push()',
           'Objekte: { ...obj, name: "neu" } statt obj.name = "neu"',
           'Direkte Mutation wie obj.name = "x" löst keinen Re-render aus',
+        ],
+        learningGoals: [
+          'State mit Objekten und Arrays korrekt aktualisieren',
+          'Den Spread-Operator zum Updaten von State-Objekten einsetzen',
+          'Verstehen warum State nie direkt verändert werden darf',
         ],
         files: [
           {
@@ -1017,6 +1062,11 @@ TypeScript erwartet den richtigen Event-Typ — VS Code schlägt ihn beim Hover 
           'Arrow-Function inline wenn nötig: onClick={() => setCount(c => c + 1)}',
           'e.preventDefault() unterbindet Standard-Browser-Verhalten (z.B. Seiten-Reload)',
         ],
+        learningGoals: [
+          'Event-Handler-Funktionen an JSX-Elemente binden',
+          'Den MouseEvent-Typ in TypeScript korrekt verwenden',
+          'Den && Operator als vereinfachtes if ohne else einsetzen',
+        ],
         files: [
           {
             name: 'EventDemo.tsx',
@@ -1093,6 +1143,11 @@ Dieses Muster heißt **Lifting State Up** und ist eines der wichtigsten Konzepte
           'Setter als Prop nach unten geben → Kind kann State ändern',
           'Wert als Prop nach unten geben → Kind kann State lesen',
           'Kinder haben keinen eigenen State — alles läuft über den Elternteil',
+        ],
+        learningGoals: [
+          'State in eine übergeordnete Komponente hochziehen',
+          'State und Setter-Funktionen als Props weitergeben',
+          'Erklären wann State Lifting sinnvoll ist',
         ],
         files: [
           {
@@ -1218,6 +1273,11 @@ Die drei gängigen Muster: **ternärer Operator**, **&&-Kurzschluss**, **early r
           'Kurzschluss: condition && <A /> (false = nichts)',
           'Early return: if (!data) return <Loading />',
           'null zurückgeben = Element verstecken',
+        ],
+        learningGoals: [
+          'Komponenten und Elemente bedingt rendern',
+          'Den ternären Operator für if/else in JSX einsetzen',
+          'Den && Operator für einfaches bedingtes Rendern nutzen',
         ],
         files: [
           {
@@ -1358,6 +1418,11 @@ Der State speichert immer den aktuellen Wert des Felds, \`onChange\` aktualisier
           'e.preventDefault() verhindert den Standard-Reload beim Absenden',
           'Jedes Feld bekommt seinen eigenen useState',
           'type="email" aktiviert Browser-seitige Validierung der E-Mail-Adresse',
+        ],
+        learningGoals: [
+          'Kontrollierte Inputs mit value und onChange bauen',
+          'Formulardaten mit onSubmit verarbeiten',
+          'htmlFor und id korrekt für barrierefreie Labels einsetzen',
         ],
         files: [
           {
@@ -1573,6 +1638,11 @@ Der **Spread-Operator** kopiert alle bestehenden Felder, der berechnete Schlüss
           '[name]: value — berechneter Schlüssel: der Variableninhalt wird als Key benutzt',
           'Nach dem Submit: State zurücksetzen setzt alle Felder auf leer',
         ],
+        learningGoals: [
+          'Formulardaten in einem einzigen State-Objekt verwalten',
+          'Die computed property Syntax [name]: value verstehen und anwenden',
+          'Mehrere Inputs über einen gemeinsamen onChange-Handler steuern',
+        ],
         files: [
           {
             name: 'KontaktFormular.tsx',
@@ -1741,6 +1811,11 @@ Key hilft React beim effizienten Update des DOM — ohne key gibt es Warnungen u
           'key ist Pflicht: ohne key kann React nicht erkennen welches Element sich geändert hat — es rendert die gesamte Liste neu statt nur das geänderte Element',
           'key niemals weglassen: React zeigt eine Warnung und die Performance leidet bei langen Listen spürbar',
         ],
+        learningGoals: [
+          'Arrays mit .map() in JSX-Elemente umwandeln',
+          'Die key-Prop korrekt setzen und erklären warum sie wichtig ist',
+          'Listen mit .filter() filtern bevor sie gerendert werden',
+        ],
         files: [
           {
             name: 'ProductList.tsx',
@@ -1853,6 +1928,11 @@ State wird nie direkt verändert — immer neue Arrays über \`map()\` und \`fil
           'filter() löscht: neues Array ohne das Element mit der passenden ID',
           'map() + Spread: nur ein Feld ändern, den Rest kopieren — { ...todo, done: !todo.done }',
           'trim() verhindert dass leere Eingaben als Todo gespeichert werden',
+        ],
+        learningGoals: [
+          'Eine vollständige Todo-App mit hinzufügen, abhaken und löschen bauen',
+          '.filter() zum Löschen und .map() + Spread zum Updaten von Listen einsetzen',
+          'Date.now() als einfache eindeutige ID verwenden',
         ],
         files: [
           {
@@ -2092,6 +2172,11 @@ Das **Dependency Array** \`[]\` bestimmt wann der Effekt erneut läuft.`,
           'Ohne Array = nach jedem Render (Vorsicht: Endlosschleife möglich)',
           'Cleanup-Funktion: return () => {} — wird beim Unmount ausgeführt',
         ],
+        learningGoals: [
+          'useEffect für Seiteneffekte wie Timer und Intervals einsetzen',
+          'Das Dependency Array korrekt befüllen',
+          'Eine Cleanup-Funktion zurückgeben um Seiteneffekte zu beenden',
+        ],
         files: [
           {
             name: 'Stopwatch.tsx',
@@ -2254,6 +2339,11 @@ Der \`loading\`-State sorgt dafür dass die Komponente während des Ladens einen
           'type Pokemon beschreibt genau welche Felder die API zurückgibt — TypeScript prüft das',
           'loading-State: true solange Daten noch unterwegs sind, false wenn sie angekommen sind',
         ],
+        learningGoals: [
+          'Einen API-Fetch in useEffect korrekt platzieren',
+          '.then() Chains für asynchrone Daten verwenden',
+          'Einen Loading-State anzeigen während Daten geladen werden',
+        ],
         files: [
           {
             name: 'PokemonFetch.tsx',
@@ -2366,6 +2456,11 @@ Haupteinsatz 2: Werte speichern die sich ändern dürfen ohne Re-render (z.B. Ti
           'ref.current = direkte DOM-Referenz nach dem Mount',
           'Wertänderung löst KEIN Re-render aus (Unterschied zu useState)',
           'ref={myRef} an JSX-Element hängen um DOM-Node zu erhalten',
+        ],
+        learningGoals: [
+          'useRef für direkten DOM-Zugriff einsetzen',
+          'Den Unterschied zwischen useRef und useState erklären',
+          'Ein Input-Element programmatisch fokussieren',
         ],
         files: [
           {
@@ -2492,6 +2587,11 @@ Der **Provider** umhüllt den Komponentenbaum und stellt die Daten für alle Kin
           'DataProvider hält den State und gibt ihn per value={} weiter',
           'useContext(DataContext) gibt jeder Komponente direkten Zugriff — ohne Props',
           'Jede Komponente nimmt sich nur was sie braucht — Inputfeld nur setInputText, Button nur inputText',
+        ],
+        learningGoals: [
+          'Einen Context mit createContext und useContext anlegen',
+          'Einen Provider bauen der State zentral bereitstellt',
+          'Prop Drilling durch Context vermeiden',
         ],
         files: [
           {
@@ -2697,6 +2797,11 @@ Eine Komponente die Daten aus mehreren Kontexten braucht, ruft \`useContext()\` 
           'Provider stapeln: <NameProvider><StadtProvider>...</StadtProvider></NameProvider>',
           'useContext() mehrfach aufrufen um auf verschiedene Kontexte zuzugreifen',
           'Jeder Kontext ist unabhängig — Änderungen in einem berühren den anderen nicht',
+        ],
+        learningGoals: [
+          'Mehrere unabhängige Kontexte in einer App verwenden',
+          'Provider stacken und verstehen wie React den nächsten Provider findet',
+          'Den Fallback-Wert von || in Context-Komponenten erklären',
         ],
         files: [
           {
@@ -2907,6 +3012,11 @@ Beide sind Optimierungen — erst einsetzen wenn Performance-Probleme auftreten 
           'Dependency Array wie bei useEffect',
           'Kein blinder Einsatz — erst bei messbarem Performance-Problem',
         ],
+        learningGoals: [
+          'useMemo für teure Berechnungen einsetzen',
+          'useCallback für stabile Funktionsreferenzen verwenden',
+          'Erklären wann diese Hooks sinnvoll sind und wann nicht',
+        ],
         files: [
           {
             name: 'ExpensiveList.tsx',
@@ -2958,6 +3068,11 @@ Custom Hooks sind das React-Äquivalent zu Hilfs-Funktionen — nur für Hook-Lo
           'Kann useState, useEffect usw. intern nutzen',
           'Gibt State und Handler zurück wie eine Bibliothek',
           'Jede Komponente die den Hook nutzt, hat eigene State-Kopie',
+        ],
+        learningGoals: [
+          'Einen eigenen Custom Hook mit use-Präfix erstellen',
+          'Wiederverwendbare Logik aus Komponenten in Hooks auslagern',
+          'Den Unterschied zwischen einem Custom Hook und einer Hilfsfunktion erklären',
         ],
         files: [
           {
@@ -3076,6 +3191,11 @@ Installation: \`npm install react-router-dom\``,
           'useNavigate: programmatische Navigation per Code',
           'useParams: URL-Parameter auslesen (z.B. /user/:id)',
         ],
+        learningGoals: [
+          'React Router einrichten und Routen definieren',
+          'Zwischen Seiten mit Link und useNavigate navigieren',
+          'URL-Parameter mit useParams auslesen',
+        ],
         files: [
           {
             name: 'main.tsx',
@@ -3162,6 +3282,11 @@ Für komplexe Formulare empfiehlt sich React Hook Form (\`npm install react-hook
           'Unkontrolliert: ref.current.value — nur bei Bedarf lesen',
           'Kontrolliert = mehr Code, aber volle Kontrolle',
           'React Hook Form: spart Boilerplate, integriert Validierung',
+        ],
+        learningGoals: [
+          'Den Unterschied zwischen kontrollierten und unkontrollierten Inputs erklären',
+          'useRef für unkontrollierte Formulare einsetzen',
+          'Entscheiden wann welcher Ansatz sinnvoller ist',
         ],
         files: [
           {
@@ -3254,6 +3379,11 @@ Kommt aus dem Redux-Pattern — gut wenn State-Logik zu komplex für useState wi
           'dispatch({ type: "ACTION", payload: data }) → löst Reducer aus',
           'Reducer: reine Funktion — kein API-Call, kein Side Effect',
           'Gut wenn viele States zusammengehören',
+        ],
+        learningGoals: [
+          'useReducer für komplexen State einsetzen',
+          'Eine Reducer-Funktion mit Actions und Switch-Cases schreiben',
+          'Den Unterschied zwischen useReducer und useState erklären',
         ],
         files: [
           {
@@ -3353,6 +3483,11 @@ Wichtige React-Typen: \`React.FC\`, \`ReactNode\`, \`ComponentProps\`, \`HTMLAtt
           'React.ComponentProps<"button"> — HTMLButton-Attribute vererben',
           'Discriminated Unions für komplexe Props-Varianten',
         ],
+        learningGoals: [
+          'Props, State und Events mit TypeScript typisieren',
+          'Generics in React-Hooks korrekt einsetzen',
+          'Interface vs. Type für Komponenten-Props verwenden',
+        ],
         files: [
           {
             name: 'Select.tsx',
@@ -3437,6 +3572,11 @@ Mit memo: Children re-rendern nur wenn ihre Props sich wirklich geändert haben.
           'useCallback für Handler-Props — sonst neue Referenz bei jedem Render',
           'Nur einsetzen wenn Profiler Performance-Probleme zeigt',
         ],
+        learningGoals: [
+          'Komponenten mit React.memo vor unnötigen Re-renders schützen',
+          'Erklären wann React.memo sinnvoll ist',
+          'Das Zusammenspiel mit useCallback verstehen',
+        ],
         files: [
           {
             name: 'Child.tsx',
@@ -3506,6 +3646,11 @@ Gut für: Produktions-Apps, API-Fehler, defekte 3rd-Party-Komponenten.`,
           'getDerivedStateFromError → Fallback-State setzen',
           'componentDidCatch → Fehler loggen (z.B. Sentry)',
           'Async-Fehler (fetch) werden NICHT gefangen — useEffect try/catch nutzen',
+        ],
+        learningGoals: [
+          'Eine Error Boundary Komponente implementieren',
+          'Laufzeitfehler in Kindkomponenten abfangen',
+          'Einen benutzerfreundlichen Fehler-Fallback anzeigen',
         ],
         files: [
           {
@@ -3597,6 +3742,11 @@ Ergebnis: Kleineres initiales Bundle, schnellere erste Ladezeit.`,
           'Gilt auch für Routen — sehr häufiger Einsatz',
           'Vite unterstützt Code-Splitting automatisch',
         ],
+        learningGoals: [
+          'Komponenten mit React.lazy lazy laden',
+          'Suspense mit einem Fallback für den Ladevorgang einsetzen',
+          'Verstehen wie Code-Splitting die Ladezeit verbessert',
+        ],
         files: [
           {
             name: 'App.tsx',
@@ -3638,6 +3788,11 @@ Haupteinsatz: Modals, Tooltips, Dropdowns — diese müssen oft über anderen El
           'createPortal(jsx, domNode) — rendert jsx in domNode',
           'Events bubblen trotzdem durch React-Komponentenbaum',
           'domNode muss im echten DOM existieren (z.B. document.body)',
+        ],
+        learningGoals: [
+          'ReactDOM.createPortal einsetzen um außerhalb des Root zu rendern',
+          'Typische Anwendungsfälle für Portale nennen',
+          'Verstehen warum Portale für Modals und Tooltips nützlich sind',
         ],
         files: [
           {
@@ -3722,6 +3877,11 @@ Die App nutzt React Router für Navigation, Context für Auth-State, und fetch()
           'PrivateRoute: leitet nicht-eingeloggte User zum Login um',
           'API: api-football.com (kostenloser Tier verfügbar)',
         ],
+        learningGoals: [
+          'Die Ordnerstruktur des SportsDash-Projekts verstehen',
+          'Erklären wie die Komponenten und Seiten zusammenhängen',
+          'Den Unterschied zwischen Pages und Components in diesem Projekt beschreiben',
+        ],
         files: [
           {
             name: 'Ordnerstruktur',
@@ -3758,6 +3918,11 @@ User-Daten, API-Response-Typen und Auth-Context-Typ sind hier definiert.`,
           'Zentrale types/index.ts verhindert doppelte Definitionen',
           'API-Typen exakt nach API-Dokumentation benennen',
           'Optional fields (?) für Felder die manchmal fehlen',
+        ],
+        learningGoals: [
+          'Zentrale TypeScript-Typen für das Projekt anlegen',
+          'Interfaces für API-Responses und State-Objekte definieren',
+          'Typen projektübergreifend importieren und wiederverwenden',
         ],
         files: [
           {
@@ -3848,6 +4013,11 @@ Der User wird im localStorage gespeichert — bleibt auch nach Seiten-Reload erh
           'Provider wraps die ganze App in main.tsx',
           'Custom Hook useAuth() für bequemen Zugriff',
         ],
+        learningGoals: [
+          'Einen AuthContext für Login-State anlegen',
+          'Login- und Logout-Logik zentral im Context verwalten',
+          'Den AuthContext in beliebigen Komponenten konsumieren',
+        ],
         files: [
           {
             name: 'src/context/AuthContext.tsx',
@@ -3919,6 +4089,11 @@ export function useAuth(): AuthContextType {
           'Navigate component: programmatische Umleitung in Router',
           'replace: ersetzt History-Eintrag (kein Zurück-Button zur geschützten Seite)',
           'Outlet: rendert die aktuelle Kind-Route',
+        ],
+        learningGoals: [
+          'Eine PrivateRoute-Komponente zum Schützen von Routen bauen',
+          'Nicht eingeloggte Nutzer auf die Login-Seite weiterleiten',
+          'Ein gemeinsames Layout für geschützte Seiten definieren',
         ],
         files: [
           {
@@ -4052,6 +4227,11 @@ Fehler werden in einem lokalen Error-State angezeigt. Nach Erfolg wird zur Dashb
           'try/catch um login()/register() — fängt Fehler aus AuthContext',
           'navigate("/dashboard") nach erfolgreichem Login',
           'Link zu /register für User ohne Account',
+        ],
+        learningGoals: [
+          'Login- und Registrierungsformulare mit React bauen',
+          'Formulardaten validieren und Fehler anzeigen',
+          'Nach erfolgreichem Login zum Dashboard navigieren',
         ],
         files: [
           {
@@ -4258,6 +4438,11 @@ Die Daten werden als Karten-Grid angezeigt mit Team-Namen, Logos, Ergebnis und S
           'Mock-Daten als Fallback für Entwicklung ohne Key',
           'Karten-Grid mit CSS Grid/Flex',
           'Status "FT" = Abgepfiffen, "1H"/"2H" = Laufend',
+        ],
+        learningGoals: [
+          'Daten von einer API im Dashboard laden und anzeigen',
+          'Loading- und Error-States sauber implementieren',
+          'Daten in wiederverwendbaren Komponenten darstellen',
         ],
         files: [
           {
@@ -4585,6 +4770,11 @@ Diese Datei ist der zentrale Dreh- und Angelpunkt — hier ist die Struktur der 
           'Verschachtelte Routes: Layout als Wrapper für alle Seiten',
           'PrivateRoute schützt /dashboard',
           'Navigate to="/login": Root-URL leitet zum Login',
+        ],
+        learningGoals: [
+          'Alle Routen und Provider in App.tsx zusammenführen',
+          'Öffentliche und geschützte Routen korrekt verschachteln',
+          'Den fertigen Router der gesamten Anwendung verstehen',
         ],
         files: [
           {

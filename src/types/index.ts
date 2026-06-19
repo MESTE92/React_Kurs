@@ -13,6 +13,7 @@ export interface Lesson {
   explanation: string;         // Erklärungstext der Lektion
   files: CodeFile[];           // Code-Dateien mit Tab-Ansicht
   keyPoints?: string[];        // Stichpunkte zum Merken
+  learningGoals?: string[];    // "Nach dieser Lektion kannst du..."
   preview?: string;            // HTML-String für den Output-Tab
 }
 
