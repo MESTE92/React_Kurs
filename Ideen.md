@@ -9,13 +9,7 @@
 ## Mittel-Aufwand
 
 - **Editierbarer Code** — Code in den Tabs direkt bearbeitbar machen, Output aktualisiert sich live (Live-Preview-System ist bereits vorhanden, `textarea` statt `<pre>` rendern)
-- **Quiz nach jeder Lektion** — 2–3 Multiple-Choice-Fragen die als Daten in `lessons.ts` hinterlegt werden
-- **Notizen pro Lektion** — kleines Textfeld unterm Code das im `localStorage` gespeichert wird
 
 ## Höherer Aufwand
 
 - **Claude-Chat-Seitenleiste** — rechte Seitenleiste die aufklappt, Kontext-aware (schickt automatisch den aktuellen Lektion-Code + Erklärung als Systemprompt mit), User kann direkt Fragen zur aktuellen Lektion stellen — benötigt Anthropic API Key
-
-## Stärkste Kombination
-
-Editierbarer Code + Claude-Chat: direkt experimentieren und bei Unklarheiten sofort nachfragen.
