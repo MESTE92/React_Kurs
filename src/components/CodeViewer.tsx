@@ -214,7 +214,7 @@ function highlight(code: string, lang: string): string {
   r = sr(r, /\b(string|number|boolean|void|never|any|unknown|ReactNode|ReactElement)\b/g,
     '<span style="color:#4ec9b0">$1</span>')
   r = sr(r, /(&lt;\/?a(?=[\s&]))/g,      '<span style="color:#4ade80">$1</span>')
-  r = sr(r, /(&lt;\/?[A-Za-z][a-zA-Z0-9]*)/g, '<span style="color:#f97316">$1</span>')
+  r = sr(r, /(&lt;\/?[A-Za-z][a-zA-Z0-9]*(?:\.[A-Za-z][a-zA-Z0-9]*)*)/g, '<span style="color:#f97316">$1</span>')
   // Fragment-Tags <> und </> — kein Buchstabe nach <, daher eigene Regel
   r = sr(r, /(&lt;\/?&gt;)/g, '<span style="color:#f97316">$1</span>')
   // Schließendes > und selbstschließendes /> ebenfalls orange — gehört zum Tag-Syntax
