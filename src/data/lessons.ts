@@ -180,14 +180,21 @@ export default defineConfig({
         id: 1,
         title: 'Was ist React?',
         category: 'Grundlagen',
-        explanation: `**React** ist eine JavaScript-Bibliothek von Meta zum Bauen von Benutzeroberflächen.
-React zerlegt eine UI in kleine, wiederverwendbare **Komponenten** — ähnlich wie Python-Klassen, die du kombinierst.
-Vite ist das Build-Tool: es startet einen Dev-Server und kompiliert TypeScript zu JavaScript.`,
+        explanation: `**React** ist eine JavaScript-Bibliothek von Meta zum Bauen von Benutzeroberflächen. Sie wird eingesetzt weil moderne Web-Apps komplex und interaktiv sind — React macht es einfacher, solche UIs strukturiert und wartbar zu entwickeln.
+
+**SPA vs. klassische Website:**
+Bei einer klassischen Website lädt der Browser bei jedem Klick eine komplett neue HTML-Seite vom Server. Bei einer **Single Page Application (SPA)** wird die Seite nur einmal geladen — danach tauscht JavaScript gezielt einzelne Bereiche aus, ohne die Seite neu zu laden. React-Apps sind SPAs: schneller, flüssiger, und das UI reagiert sofort auf Aktionen.
+
+**Komponenten:**
+React zerlegt eine UI in kleine, wiederverwendbare **Komponenten** — jede Komponente ist eine Funktion die einen Teil der Oberfläche beschreibt (z.B. ein Button, eine Karte, eine Navbar). Du baust komplexe UIs indem du einfache Komponenten zusammensetzt.
+
+**Virtual DOM:**
+Wenn sich Daten ändern, berechnet React intern zuerst in einem **Virtual DOM** (einer Kopie der Seitenstruktur im Speicher) was sich geändert hat — und aktualisiert dann nur die betroffenen Stellen im echten Browser-DOM. Das ist deutlich schneller als die gesamte Seite neu zu rendern.`,
         keyPoints: [
-          'React = UI-Bibliothek, kein vollständiges Framework',
-          'TypeScript = JavaScript + statische Typen',
-          'Vite = schnelles Build-Tool (ersetzt CRA)',
-          'Komponenten = wiederverwendbare UI-Bausteine',
+          'React = UI-Bibliothek für SPAs, kein vollständiges Framework',
+          'SPA = Seite wird einmal geladen, dann nur Teile ausgetauscht',
+          'Komponente = Funktion die einen UI-Baustein beschreibt',
+          'Virtual DOM = React vergleicht intern und aktualisiert nur was sich geändert hat',
         ],
         learningGoals: [
           'Erklären was React ist und warum es eingesetzt wird',
