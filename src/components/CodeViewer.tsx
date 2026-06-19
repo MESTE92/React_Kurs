@@ -2,26 +2,28 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
 import * as Babel from '@babel/standalone'
+import MonacoEditor from '@monaco-editor/react'
 import type { CodeFile } from '../types'
 
 interface CodeViewerProps {
   files: CodeFile[]
   preview?: string
+  editMode: boolean
+  onToggleEdit: () => void
+  editedCodes: string[]
+  onEditChange: (fileIndex: number, code: string) => void
+  onResetEdit: () => void
 }
 
 // Live-Vorschau: kompiliert TSX mit Babel und rendert direkt in den DOM
-// Kein CDN nötig — React aus dem laufenden Projekt wird wiederverwendet
 function LivePreview({ files }: { files: CodeFile[] }) {
   const mountRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<ReturnType<typeof createRoot> | null>(null)
 
-  // Kompilierung ist pure computation → useMemo statt useEffect+setState
   const { Component, error } = useMemo(() => {
     const codeFiles = files
       .filter(f => ['tsx', 'ts', 'jsx', 'js'].includes(f.language))
-      // main.tsx / index.tsx enthalten Bootstrap-Code (createRoot) — wir rendern selbst
       .filter(f => !/^(main|index)\.[jt]sx?$/.test(f.name))
-    // Hilfsdateien vor App.tsx sortieren (damit Abhängigkeiten in scope sind)
     const sorted = [
       ...codeFiles.filter(f => !f.name.toLowerCase().includes('app')),
       ...codeFiles.filter(f => f.name.toLowerCase().includes('app')),
@@ -38,9 +40,7 @@ function LivePreview({ files }: { files: CodeFile[] }) {
           filename: file.name,
         })
         let js = result.code ?? ''
-        // Named/Default-Imports: import React from 'react'
         js = js.replace(/^import\b[\s\S]*?from\s+['"][^'"]*['"];?\s*\n?/gm, '')
-        // Side-Effect-Imports: import './styles.css'
         js = js.replace(/^import\s+['"][^'"]*['"];?\s*\n?/gm, '')
         js = js.replace(/\bexport\s+default\s+/g, '')
         js = js.replace(/\bexport\s+(const|let|var|function|class)\b/g, '$1')
@@ -72,8 +72,6 @@ function LivePreview({ files }: { files: CodeFile[] }) {
     }
   }, [files])
 
-  // CSS-Sideeffect: austauschen wenn sich Dateien ändern
-  // Alle Selektoren werden auf .lp-root gescoped — verhindert Leakage in die App
   useEffect(() => {
     document.querySelector('style[data-lesson-preview]')?.remove()
     const cssFiles = files.filter(f => f.language === 'css')
@@ -92,14 +90,12 @@ function LivePreview({ files }: { files: CodeFile[] }) {
     return () => { document.querySelector('style[data-lesson-preview]')?.remove() }
   }, [files])
 
-  // Root einmalig anlegen
   useEffect(() => {
     const mount = mountRef.current!
     rootRef.current = createRoot(mount)
     return () => { rootRef.current?.unmount(); rootRef.current = null }
   }, [])
 
-  // Komponente rendern wenn sich Compilation-Ergebnis ändert
   useEffect(() => {
     if (!rootRef.current || !Component) return
     rootRef.current.render(React.createElement(Component))
@@ -132,7 +128,6 @@ function sr(html: string, regex: RegExp, replacement: string): string {
   ).join('')
 }
 
-// Klammern pro Verschachtelungstiefe einfärben
 function colorizeBrackets(html: string): string {
   const COLORS = ['#ffd700', '#c586c0', '#9cdcfe']
   const CURLY = '#4ade80'
@@ -173,7 +168,6 @@ function colorizeBrackets(html: string): string {
   return result
 }
 
-// Syntax-Highlighting
 function highlight(code: string, lang: string): string {
   if (lang === 'bash') {
     return code
@@ -215,9 +209,7 @@ function highlight(code: string, lang: string): string {
     '<span style="color:#4ec9b0">$1</span>')
   r = sr(r, /(&lt;\/?a(?=[\s&]))/g,      '<span style="color:#4ade80">$1</span>')
   r = sr(r, /(&lt;\/?[A-Za-z][a-zA-Z0-9]*(?:\.[A-Za-z][a-zA-Z0-9]*)*)/g, '<span style="color:#f97316">$1</span>')
-  // Fragment-Tags <> und </> — kein Buchstabe nach <, daher eigene Regel
   r = sr(r, /(&lt;\/?&gt;)/g, '<span style="color:#f97316">$1</span>')
-  // Schließendes > und selbstschließendes /> ebenfalls orange — gehört zum Tag-Syntax
   r = sr(r, /(\/&gt;|&gt;)/g, '<span style="color:#f97316">$1</span>')
 
   return colorizeBrackets(r)
@@ -227,26 +219,56 @@ const LANG_LABELS: Record<string, string> = {
   tsx: 'TSX', ts: 'TS', css: 'CSS', json: 'JSON', html: 'HTML', bash: 'BASH',
 }
 
+// Monaco-Sprache pro Dateiendung
+function monacoLang(language: string): string {
+  if (language === 'tsx' || language === 'ts') return 'typescript'
+  if (language === 'css') return 'css'
+  if (language === 'html') return 'html'
+  if (language === 'json') return 'json'
+  return 'plaintext'
+}
+
 const OUTPUT_TAB = -1
 
-function CodeViewer({ files }: CodeViewerProps) {
+function CodeViewer({ files, editMode, onToggleEdit, editedCodes, onEditChange, onResetEdit }: CodeViewerProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [copied, setCopied] = useState(false)
 
   const isOutput = activeIndex === OUTPUT_TAB
   const activeFile = isOutput ? null : files[activeIndex]
+  const activeEditedCode = isOutput ? '' : (editedCodes[activeIndex] ?? files[activeIndex]?.code ?? '')
 
-  // LivePreview key: erzwingt Neustart wenn sich die Lesson-Dateien ändern
+  // Live-Preview bekommt editierte Codes im Editier-Modus, sonst Originale
+  const previewFiles = useMemo(() => files.map((f, i) => ({
+    ...f,
+    code: editMode ? (editedCodes[i] ?? f.code) : f.code,
+  })), [files, editMode, editedCodes])
+
   const previewKey = useMemo(
     () => files.map(f => f.name).join('|'),
     [files]
   )
 
   function handleCopy() {
-    if (!activeFile) return
-    navigator.clipboard.writeText(activeFile.code)
+    const code = editMode ? activeEditedCode : activeFile?.code
+    if (!code) return
+    navigator.clipboard.writeText(code)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  // Monaco: JSX-Support aktivieren und Fehler-Squiggles für fehlende Imports deaktivieren
+  function handleMonacoBeforeMount(monaco: Parameters<NonNullable<React.ComponentProps<typeof MonacoEditor>['beforeMount']>>[0]) {
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      jsx: monaco.languages.typescript.JsxEmit.React,
+      esModuleInterop: true,
+      allowSyntheticDefaultImports: true,
+    })
+    // Semantische Fehler (fehlende Imports) ausblenden — Syntax-Feedback kommt vom Live-Output
+    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: true,
+      noSyntaxValidation: false,
+    })
   }
 
   return (
@@ -257,8 +279,9 @@ function CodeViewer({ files }: CodeViewerProps) {
       {/* Tab-Leiste */}
       <div style={{
         display: 'flex', background: '#1e1e2e', overflowX: 'auto',
-        borderBottom: '1px solid #2d2d44',
+        borderBottom: '1px solid #2d2d44', alignItems: 'center',
       }}>
+        {/* Datei-Tabs */}
         {files.map((file, i) => (
           <button
             key={i}
@@ -283,6 +306,7 @@ function CodeViewer({ files }: CodeViewerProps) {
           </button>
         ))}
 
+        {/* Output-Tab */}
         <button
           onClick={() => setActiveIndex(OUTPUT_TAB)}
           style={{
@@ -298,31 +322,101 @@ function CodeViewer({ files }: CodeViewerProps) {
             fontSize: '10px', padding: '1px 5px',
             background: isOutput ? '#166534' : '#333',
             borderRadius: '3px', color: '#4ade80',
-          }}>
-            ▶
-          </span>
+          }}>▶</span>
           Output
         </button>
 
-        {!isOutput && (
-          <button
-            onClick={handleCopy}
-            style={{
-              marginLeft: 'auto', padding: '8px 14px', background: 'transparent',
-              border: 'none', color: copied ? '#4ade80' : '#888',
-              cursor: 'pointer', fontSize: '12px', whiteSpace: 'nowrap',
-            }}
-          >
-            {copied ? '✓ Kopiert' : '📋 Kopieren'}
-          </button>
-        )}
+        {/* Rechte Seite: Toggle + Reset + Kopieren */}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', paddingRight: '12px', flexShrink: 0 }}>
+
+          {/* Kopieren-Button */}
+          {!isOutput && (
+            <button
+              onClick={handleCopy}
+              style={{
+                padding: '4px 10px', background: 'transparent',
+                border: 'none', color: copied ? '#4ade80' : '#888',
+                cursor: 'pointer', fontSize: '12px', whiteSpace: 'nowrap',
+              }}
+            >
+              {copied ? '✓ Kopiert' : '📋'}
+            </button>
+          )}
+
+          {/* Reset-Button — nur im Editier-Modus */}
+          {editMode && (
+            <button
+              onClick={onResetEdit}
+              title="Originalcode wiederherstellen"
+              style={{
+                padding: '4px 10px', background: 'transparent',
+                border: '1px solid #555', borderRadius: '5px',
+                color: '#f87171', cursor: 'pointer', fontSize: '12px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ↺ Reset
+            </button>
+          )}
+
+          {/* Mode-Toggle: Read Only / Editieren */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '11px', color: editMode ? '#666' : '#c4b5fd', fontWeight: 600, whiteSpace: 'nowrap' }}>
+              Read Only
+            </span>
+            <button
+              onClick={onToggleEdit}
+              title={editMode ? 'Zurück zu Read Only' : 'Code bearbeiten'}
+              style={{
+                width: '36px', height: '18px', borderRadius: '9px',
+                background: editMode ? '#7c3aed' : '#444',
+                border: 'none', cursor: 'pointer', position: 'relative',
+                transition: 'background 0.2s', padding: 0, flexShrink: 0,
+              }}
+            >
+              <span style={{
+                position: 'absolute', top: '2px',
+                left: editMode ? '20px' : '2px',
+                width: '14px', height: '14px', borderRadius: '50%',
+                background: '#fff', transition: 'left 0.2s',
+                display: 'block',
+              }} />
+            </button>
+            <span style={{ fontSize: '11px', color: editMode ? '#c4b5fd' : '#666', fontWeight: 600, whiteSpace: 'nowrap' }}>
+              Editieren
+            </span>
+          </div>
+        </div>
       </div>
 
+      {/* Inhalt */}
       {isOutput ? (
         <div style={{ background: '#fff', minHeight: '200px' }}>
-          <LivePreview key={previewKey} files={files} />
+          <LivePreview key={previewKey} files={previewFiles} />
         </div>
+      ) : editMode ? (
+        // Monaco Editor im Editier-Modus
+        <MonacoEditor
+          height="480px"
+          language={monacoLang(activeFile?.language ?? 'tsx')}
+          value={activeEditedCode}
+          onChange={value => onEditChange(activeIndex, value ?? '')}
+          theme="vs-dark"
+          beforeMount={handleMonacoBeforeMount}
+          options={{
+            fontSize: 13.5,
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            lineNumbers: 'on',
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            tabSize: 2,
+            wordWrap: 'off',
+            padding: { top: 16 },
+          }}
+        />
       ) : (
+        // Read Only — Syntax-Highlighting wie bisher
         <div style={{
           background: '#1a1a2e', padding: '20px', overflowX: 'auto', maxHeight: '480px',
           overflowY: 'auto',

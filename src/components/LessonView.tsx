@@ -7,15 +7,18 @@ interface LessonViewProps {
   totalLessons: number
   onPrev: () => void
   onNext: () => void
+  editMode: boolean
+  onToggleEdit: () => void
+  editedCodes: string[]
+  onEditChange: (fileIndex: number, code: string) => void
+  onResetEdit: () => void
 }
 
 // Markdown-ähnliches Rendering für Erklärungstext
 function renderExplanation(text: string) {
   const parts = text.split('\n')
   return parts.map((line, i) => {
-    // **fett** erkennen
     const formatted = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    // `code` erkennen
     const withCode = formatted.replace(/`([^`]+)`/g, '<code style="background:#f3edfb;padding:2px 6px;border-radius:3px;font-size:0.9em;color:#7c3aed">$1</code>')
     return (
       <p key={i} style={{ marginBottom: '8px', lineHeight: '1.7', color: '#6b5b8c' }}
@@ -24,7 +27,6 @@ function renderExplanation(text: string) {
   })
 }
 
-// Farben pro Kategorie-Badge — alle aus der Lila-Familie, leicht variiert
 const CATEGORY_COLORS: Record<string, string> = {
   'Grundlagen':      '#7c3aed',
   'Hooks':           '#9333ea',
@@ -32,7 +34,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Praxisprojekt':   '#6d28d9',
 }
 
-function LessonView({ lesson, totalLessons, onPrev, onNext }: LessonViewProps) {
+function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEdit, editedCodes, onEditChange, onResetEdit }: LessonViewProps) {
   const color = CATEGORY_COLORS[lesson.category] ?? '#7c3aed'
   const progress = Math.round((lesson.id / totalLessons) * 100)
 
@@ -105,7 +107,14 @@ function LessonView({ lesson, totalLessons, onPrev, onNext }: LessonViewProps) {
           <h3 style={{ fontSize: '14px', color: '#9d8bc0', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             💻 Code
           </h3>
-          <CodeViewer files={lesson.files} preview={lesson.preview} />
+          <CodeViewer
+            files={lesson.files}
+            editMode={editMode}
+            onToggleEdit={onToggleEdit}
+            editedCodes={editedCodes}
+            onEditChange={onEditChange}
+            onResetEdit={onResetEdit}
+          />
         </div>
       )}
 
