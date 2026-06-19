@@ -38,7 +38,10 @@ function renderExplanation(text: string) {
   const parts = text.split('\n')
   return parts.map((line, i) => {
     const formatted = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    const withCode = formatted.replace(/`([^`]+)`/g, '<code style="background:#f3edfb;padding:2px 6px;border-radius:3px;font-size:0.9em;color:#7c3aed">$1</code>')
+    const withCode = formatted.replace(/`([^`]+)`/g, (_, m) => {
+      const escaped = m.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      return `<code style="background:#f3edfb;padding:2px 6px;border-radius:3px;font-size:0.9em;color:#7c3aed">${escaped}</code>`
+    })
     return (
       <p key={i} style={{ marginBottom: '8px', lineHeight: '1.7', color: '#6b5b8c' }}
          dangerouslySetInnerHTML={{ __html: withCode }} />

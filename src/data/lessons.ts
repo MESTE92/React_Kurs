@@ -11,20 +11,36 @@ export const chapters: Chapter[] = [
         id: 0,
         title: 'Projekt aufsetzen — React + Vite',
         category: 'Grundlagen',
-        explanation: `Bevor du React-Code schreiben kannst, brauchst du ein Projekt.
-**Vite** ist das empfohlene Build-Tool für neue React-Projekte — es startet in Millisekunden und unterstützt TypeScript von Haus aus.
-Du brauchst nur **Node.js** (ab Version 18) auf deinem Rechner — dann reicht ein einziger Befehl im Terminal.`,
+        explanation: `Bevor du React-Code schreiben kannst, brauchst du ein Projekt. Mit einem einzigen Terminal-Befehl erstellt **Vite** das komplette Gerüst — inklusive TypeScript, React und einer funktionierenden Grundstruktur.
+
+Nach \`npm create vite@latest\` und \`npm install\` entsteht folgende Ordnerstruktur:
+
+**Einstiegspunkte — der Ladeweg von außen nach innen:**
+
+**\`index.html\`** ist die einzige HTML-Datei der gesamten App. Der Browser lädt sie als erstes. Sie enthält ein leeres \`<div id="root">\` und einen \`<script>\`-Tag der auf \`main.tsx\` zeigt — mehr steht da absichtlich nicht drin, den Rest erledigt React.
+
+**\`src/main.tsx\`** ist der JavaScript-Einstiegspunkt. Er sucht das \`<div id="root">\` aus der HTML-Datei und übergibt es an React mit \`createRoot(...).render(...)\`. Hier wird auch das globale CSS (\`index.css\`) geladen. Nach dieser Datei übernimmt React vollständig die Kontrolle über die Seite.
+
+**\`src/App.tsx\`** ist deine erste eigene React-Komponente — der Startpunkt für dein UI. Alles was du im Browser siehst, kommt letztendlich von hier. Diese Datei wirst du am häufigsten bearbeiten.
+
+**Konfigurationsdateien — einmal einrichten, selten anfassen:**
+
+**\`vite.config.ts\`** konfiguriert das Build-Tool. Das React-Plugin darin aktiviert JSX-Unterstützung und sorgt für Fast Refresh (automatisches Neuladen beim Speichern). Als Einsteiger musst du diese Datei nicht verändern.
+
+**\`tsconfig.json\`** konfiguriert den TypeScript-Compiler — welche Dateien geprüft werden, wie streng TypeScript sein soll und welche modernen Features erlaubt sind. Auch diese Datei bleibt am Anfang unangetastet.
+
+**\`package.json\`** listet alle Abhängigkeiten des Projekts und die verfügbaren npm-Befehle. \`npm install\` liest diese Datei und lädt alles herunter was darin steht. Neue Pakete landen hier automatisch wenn du sie mit \`npm install paketname\` hinzufügst.`,
         keyPoints: [
-          'Node.js installieren: nodejs.org (Version 18 oder neuer)',
-          '`npm create vite@latest` erstellt das komplette Projektgerüst',
-          '`--template react-ts` = React + TypeScript voreingestellt',
-          '`npm install` lädt alle Abhängigkeiten (React, Vite, TypeScript...)',
-          '`npm run dev` startet den Server — App läuft unter localhost:5173',
+          '`index.html` → `main.tsx` → `App.tsx` — das ist der Ladeweg der App',
+          '`<div id="root">` in index.html ist der Einhängepunkt für React',
+          '`createRoot(...).render(...)` in main.tsx startet React',
+          '`npm run dev` startet den Dev-Server unter localhost:5173',
+          '`src/` ist der Ordner für deinen gesamten React-Code',
         ],
         learningGoals: [
           'Ein neues React-Projekt mit Vite und TypeScript aufsetzen',
           'Die wichtigsten Dateien und Ordner eines Vite-Projekts verstehen',
-          'Die Entwicklungsumgebung starten und im Browser aufrufen',
+          'Den Ladeweg von index.html über main.tsx bis App.tsx erklären',
         ],
         files: [
           {
@@ -37,10 +53,7 @@ npm create vite@latest
 # → Variant wählen:   TypeScript
 
 # Weg 2: Direkt — alles auf einmal, kein Dialog
-# "meine-app" = Projektname, react-ts = React + TypeScript
 npm create vite@latest meine-app -- --template react-ts
-
-# Ab hier identisch für beide Wege:
 
 # In den Projektordner wechseln
 cd meine-app
@@ -52,36 +65,76 @@ npm install
 npm run dev`,
           },
           {
-            name: 'package.json',
-            language: 'json',
-            code: `{
-  "name": "meine-app",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.0.0",
-    "typescript": "^5.0.0",
-    "vite": "^6.0.0"
-  }
-}`,
+            name: 'Projektstruktur',
+            language: 'bash',
+            code: `meine-app/
+├── public/                  # Statische Assets (werden 1:1 kopiert)
+│   └── vite.svg
+│
+├── src/                     # Dein gesamter React-Code
+│   ├── assets/              # Bilder, Icons die importiert werden
+│   │   └── react.svg
+│   ├── App.css              # Styles für App.tsx
+│   ├── App.tsx              # Deine Haupt-Komponente (hier fängst du an)
+│   ├── index.css            # Globale Styles (body, *, ...)
+│   ├── main.tsx             # Einstiegspunkt — hängt React in index.html ein
+│   └── vite-env.d.ts        # TypeScript-Typen für Vite (nicht anfassen)
+│
+├── index.html               # Die einzige HTML-Datei der App
+├── package.json             # Abhängigkeiten + npm-Skripte
+├── tsconfig.json            # TypeScript-Konfiguration
+├── tsconfig.app.json        # TS-Config speziell für den src/-Code
+├── tsconfig.node.json       # TS-Config für vite.config.ts
+└── vite.config.ts           # Vite-Konfiguration`,
+          },
+          {
+            name: 'index.html',
+            language: 'html',
+            code: `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+  </head>
+  <body>
+
+    <!-- Hier hängt React die gesamte App ein -->
+    <div id="root"></div>
+
+    <!-- Einstiegspunkt: Vite lädt main.tsx als ES-Modul -->
+    <script type="module" src="/src/main.tsx"></script>
+
+  </body>
+</html>`,
+          },
+          {
+            name: 'main.tsx',
+            language: 'tsx',
+            code: `import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'     // globale Styles laden
+import App from './App.tsx'
+
+// Das <div id="root"> aus index.html als React-Wurzel verwenden
+createRoot(document.getElementById('root')!).render(
+  // StrictMode aktiviert extra Warnungen in der Entwicklung
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)`,
           },
           {
             name: 'App.tsx',
             language: 'tsx',
-            code: `// src/App.tsx — Startpunkt deiner App nach "npm create vite"
+            code: `import './App.css'
+
+// Die Haupt-Komponente — hier fängst du an zu entwickeln
 function App() {
   return (
-    <div className="app">
-      <h1>Mein erstes React-Projekt</h1>
-      <p>Projekt läuft — bearbeite diese Datei und speichere.</p>
-      <p className="hint">Datei: <code>src/App.tsx</code></p>
+    <div>
+      <h1>Hallo React!</h1>
     </div>
   )
 }
@@ -89,40 +142,36 @@ function App() {
 export default App`,
           },
           {
-            name: 'App.css',
-            language: 'css',
-            code: `.app {
-  max-width: 480px;
-  margin: 40px auto;
-  padding: 32px;
-  border-radius: 12px;
-  background: #f7f3fc;
-  border: 1px solid #e6ddf3;
-  text-align: center;
-}
+            name: 'vite.config.ts',
+            language: 'ts',
+            code: `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-.app h1 {
-  font-size: 22px;
-  color: #2d1b4e;
-  margin-bottom: 10px;
-}
-
-.app p {
-  color: #6b5b8c;
-  font-size: 15px;
-  margin-bottom: 6px;
-}
-
-.hint {
-  font-size: 13px;
-  color: #9d8bc0;
-}
-
-.hint code {
-  background: #ede9fe;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: monospace;
+// Vite-Konfiguration
+// Das React-Plugin aktiviert JSX-Unterstützung und Fast Refresh
+export default defineConfig({
+  plugins: [react()],
+})`,
+          },
+          {
+            name: 'package.json',
+            language: 'json',
+            code: `{
+  "name": "meine-app",
+  "scripts": {
+    "dev":     "vite",              // Entwicklungsserver starten
+    "build":   "tsc -b && vite build", // Für Produktion bauen
+    "preview": "vite preview"       // Build lokal testen
+  },
+  "dependencies": {
+    "react":     "^19.0.0",  // React selbst
+    "react-dom": "^19.0.0"   // React für den Browser (DOM)
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0", // JSX + Fast Refresh
+    "typescript":           "^5.0.0", // TypeScript-Compiler
+    "vite":                 "^6.0.0"  // Build-Tool
+  }
 }`,
           },
         ],
