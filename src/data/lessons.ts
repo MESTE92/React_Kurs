@@ -261,11 +261,15 @@ export default App  // export default = App kann in main.tsx importiert werden`,
         id: 2,
         title: 'JSX — JavaScript + HTML',
         category: 'Grundlagen',
-        explanation: `**JSX** ist eine Syntax-Erweiterung: du schreibst HTML-ähnlichen Code direkt in JavaScript/TypeScript.
-TypeScript kompiliert JSX zu normalen \`React.createElement()\`-Aufrufen — du siehst davon nichts.
-Wichtig: JSX ist kein echtes HTML. Attribute heißen anders (z.B. \`className\` statt \`class\`).`,
+        explanation: `**JSX** steht für **JavaScript XML** — XML weil die Syntax an HTML/XML erinnert. JSX ist eine Syntax-Erweiterung für JavaScript/TypeScript: du schreibst HTML-ähnlichen Code direkt in deinen JS-Dateien. TypeScript kompiliert das im Hintergrund zu normalen \`React.createElement()\`-Aufrufen — davon siehst du nichts, es passiert automatisch.
+
+**JSX vs. HTML — die wichtigsten Unterschiede:**
+JSX sieht aus wie HTML, ist es aber nicht. Das fällt besonders bei Attributen auf: \`class\` heißt in JSX \`className\` (weil \`class\` ein reserviertes Keyword in JavaScript ist), und \`for\` bei \`<label>\`-Elementen heißt \`htmlFor\`. Außerdem muss jede Komponente genau **ein** Wurzelelement zurückgeben — mehrere nebeneinanderstehende Elemente müssen in ein \`<div>\` oder ein leeres Fragment \`<></>\` eingewickelt werden.
+
+**JavaScript-Ausdrücke mit \`{}\` einbetten:**
+Überall wo du in JSX einen dynamischen Wert brauchst, schreibst du geschweifte Klammern \`{}\`. Darin kannst du Variablen, Berechnungen oder Bedingungen einsetzen — zum Beispiel \`{name}\` für eine Variable, \`{2 + 2}\` für eine Berechnung, oder \`{isLoggedIn ? 'Eingeloggt' : 'Gast'}\` für eine Bedingung. Alles was zwischen \`{}\` steht wird als JavaScript ausgewertet.`,
         preview: `<div>
-  <h1>Hallo, Steven!</h1>
+  <h1>Hallo, Welt!</h1>
   <p>Eingeloggt</p>
   <span style="color:blue;font-size:18px">Blauer Text</span>
 </div>`,
@@ -288,7 +292,7 @@ Wichtig: JSX ist kein echtes HTML. Attribute heißen anders (z.B. \`className\` 
             code: `import './App.css'
 
 function App() {
-  const name = "Steven"          // JS-Variable
+  const name = "Welt"             // JS-Variable
   const isLoggedIn = true        // Boolean
 
   return (
@@ -328,9 +332,13 @@ export default App`,
         id: 3,
         title: 'Komponenten — Funktionen als UI',
         category: 'Grundlagen',
-        explanation: `Eine **Komponente** ist eine TypeScript-Funktion, die JSX zurückgibt.
-Name beginnt immer mit **Großbuchstabe** — React unterscheidet so zwischen HTML-Tags (\`div\`) und Komponenten (\`Button\`).
-Komponenten können andere Komponenten enthalten — so entsteht ein **Komponentenbaum**.`,
+        explanation: `Eine **Komponente** ist eine ganz normale TypeScript-Funktion — sie gibt JSX zurück und beschreibt damit einen Teil der Benutzeroberfläche. Komponenten müssen immer mit einem **Großbuchstaben** beginnen: So unterscheidet React zwischen einem HTML-Tag wie \`<div>\` und einer eigenen Komponente wie \`<Header />\`. Eine Datei enthält üblicherweise genau eine Komponente, die am Ende mit \`export default\` exportiert wird.
+
+**Komponenten in anderen Komponenten verwenden:**
+Du kannst Komponenten genauso wie HTML-Tags ineinander verschachteln. In \`App.tsx\` importierst du \`<Header />\` und \`<Footer />\` und verwendest sie einfach als Tags — React baut daraus einen **Komponentenbaum**. Jede Komponente ist dabei für ihren eigenen Bereich der UI verantwortlich.
+
+**Komponente vs. HTML-Element:**
+\`<div>\` ist ein echtes HTML-Element — der Browser kennt es direkt. \`<Header />\` ist eine React-Komponente — React ruft die Funktion auf, bekommt JSX zurück und rendert das Ergebnis. Der Großbuchstabe ist das Erkennungsmerkmal: alles mit Kleinbuchstaben ist HTML, alles mit Großbuchstaben ist eine Komponente.`,
         preview: `<header style="border-bottom:1px solid #e5e7eb;padding-bottom:12px;margin-bottom:12px">
   <h1>Meine App</h1>
   <nav><a href="#">Home</a><a href="#">Über uns</a></nav>
@@ -460,9 +468,13 @@ export default App`,
         id: 4,
         title: 'Props — Daten an Komponenten übergeben',
         category: 'Grundlagen',
-        explanation: `**Props** (Properties) sind Parameter, die du einer Komponente von außen mitgibst — wie Funktionsargumente.
-Die Komponente empfängt Props als Objekt. Mit TypeScript definierst du ein **Interface** für die erlaubten Props.
-Props fließen immer **von oben nach unten** (Parent → Child) — niemals umgekehrt.`,
+        explanation: `**Props** (kurz für Properties) sind wie Funktionsargumente für Komponenten — du übergibst Daten von außen, die Komponente nutzt sie intern. Du schreibst Props wie HTML-Attribute: \`<Card title="React" badge="Neu" />\`. Innerhalb der Komponente kommen die Props als Objekt an, das du per **Destructuring** direkt entpacken kannst: \`function Card({ title, badge }: CardProps)\`.
+
+**Typen für Props mit TypeScript:**
+Mit einem \`interface\` legst du fest welche Props erlaubt sind und welchen Typ sie haben. Pflicht-Props schreibst du ohne \`?\`, optionale Props mit \`?\` — zum Beispiel \`badge?: string\`. TypeScript zeigt dir sofort einen Fehler wenn du eine Pflicht-Prop vergisst oder den falschen Typ übergibst.
+
+**Props fließen nur von oben nach unten:**
+Daten wandern in React immer **von der Elternkomponente zur Kindkomponente** — niemals umgekehrt. Das ist Absicht: so bleibt der Datenfluss vorhersehbar und leicht nachvollziehbar. Eine Komponente kann ihre eigenen Props nicht verändern — sie sind readonly. Wenn Daten "nach oben" sollen, brauchst du State Lifting (kommt in Lektion 10).`,
         preview: `<div style="display:flex;gap:16px;flex-wrap:wrap">
   <div style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;min-width:180px">
     <h2>React lernen</h2>
@@ -579,9 +591,13 @@ export default App`,
         id: 5,
         title: 'Props — children',
         category: 'Grundlagen',
-        explanation: `**children** ist ein spezielles Prop: alles was zwischen öffnendem und schließendem Tag steht.
-So baust du Layout-Komponenten (Container, Card, Modal), die beliebigen Inhalt umhüllen.
-In TypeScript nutzt du \`React.ReactNode\` als Typ für children.`,
+        explanation: `**children** ist ein besonderes Prop in React: es enthält alles was du zwischen den öffnenden und schließenden Tag einer Komponente schreibst. Wenn du also \`<Box><p>Hallo</p></Box>\` schreibst, ist der \`<p>\`-Absatz das \`children\` der \`Box\`-Komponente. Im TypeScript-Interface deklarierst du es als \`children: ReactNode\` — \`ReactNode\` ist der Typ für "alles was React rendern kann": Text, JSX-Elemente, Arrays oder auch \`null\`.
+
+**Unterschied zwischen regulären Props und children:**
+Reguläre Props übergibst du explizit als Attribute: \`<Card title="Hallo" color="blau" />\`. Children schreibst du dagegen zwischen die Tags — das ist der Inhalt der Komponente, nicht ihre Konfiguration. Du kannst natürlich beides kombinieren: eine Komponente kann sowohl eigene Props haben als auch children enthalten.
+
+**Wrapper-Komponenten mit children:**
+Das klassische Einsatzgebiet für children ist eine **Wrapper-Komponente**: eine Komponente die nur Styling oder Struktur liefert, aber nicht weiß was drin sein wird. Eine \`Box\`-Komponente kümmert sich nur um Hintergrundfarbe und Abstände — welcher Inhalt rein kommt, entscheidet die Elternkomponente. Das macht solche Wrapper extrem wiederverwendbar.`,
         preview: `<div style="display:flex;flex-direction:column;gap:12px">
   <div style="background:lightblue;padding:16px;border-radius:8px">
     <h2>Titel im Kasten</h2>
@@ -662,9 +678,13 @@ export default App`,
         id: 6,
         title: 'props.children — Der CSS-Wrapper',
         category: 'Grundlagen',
-        explanation: `**props.children** ist der Inhalt den du zwischen die Tags einer Komponente schreibst.
-Jede Komponente bekommt \`children\` automatisch — du musst es nur im Interface als \`ReactNode\` deklarieren und dann rendern.
-Ein CSS-Wrapper ist das klassische Beispiel: er gibt dem Inhalt einen Rahmen, ohne selbst zu wissen was drin ist.`,
+        explanation: `Eine **Layout-Komponente mit children** ist der CSS-Wrapper-Klassiker in React: Die Komponente definiert das Aussehen (Rahmen, Abstände, Hintergrund), aber der Inhalt kommt komplett von außen. Du baust einmal eine \`Wrapper\`-Komponente mit den gewünschten CSS-Klassen und kannst sie dann beliebig oft mit unterschiedlichem Inhalt befüllen.
+
+**Styles über className weitergeben:**
+Der Wrapper gibt seine CSS-Klasse \`className="wrapper"\` an das äußere \`<div>\` — das Styling gilt damit automatisch für alles was als \`children\` übergeben wird. Der Inhalt selbst bekommt keine extra Klassen; er liegt einfach innerhalb des gestylten Containers. So trennt du Struktur und Inhalt sauber voneinander.
+
+**Wie children die Wiederverwendbarkeit erhöht:**
+Ohne children müsstest du für jeden Karteninhalt eine eigene Komponente schreiben oder den Inhalt als Prop übergeben — das wird schnell unübersichtlich. Mit children verwendest du denselben Wrapper für beliebig viele verschiedene Inhalte. Das ist das **Kompositions-Prinzip** in React: kleine, fokussierte Komponenten die man flexibel zusammensetzen kann.`,
         keyPoints: [
           '`children` muss im Interface als `ReactNode` deklariert werden',
           'Zugriff via `props.children` oder kürzer per Destructuring `{ children }`',
@@ -739,9 +759,13 @@ export default App`,
         id: 7,
         title: 'useState — Zustand in Komponenten',
         category: 'Grundlagen',
-        explanation: `**useState** ist ein React Hook — eine Funktion die einer Komponente "Gedächtnis" gibt.
-Ohne State würde React nichts neu rendern wenn sich Daten ändern. State löst das.
-Immer über den Setter verändern (\`setCount\`), nie direkt die Variable — sonst kein Re-render.`,
+        explanation: `**useState** ist ein React Hook — eine spezielle Funktion die einer Komponente "Gedächtnis" gibt. Der Aufruf \`const [count, setCount] = useState(0)\` gibt dir zwei Dinge zurück: den aktuellen Wert (\`count\`) und eine Funktion zum Ändern dieses Werts (\`setCount\`). Den initialen Wert — hier \`0\` — übergibst du als Argument an \`useState\`.
+
+**Eine interaktive Zähler-Komponente bauen:**
+Buttons rufen im \`onClick\`-Handler den Setter auf: \`setCount(count + 1)\`. Jeder Setter-Aufruf löst ein **Re-render** aus — React ruft die Komponente erneut auf, berechnet was sich geändert hat, und aktualisiert gezielt nur die betroffenen Stellen im DOM. So sieht der User immer den aktuellen Wert.
+
+**Warum React bei State-Änderungen neu rendert:**
+React verfolgt alle State-Werte intern. Wenn du \`setCount\` aufrufst, weiß React: "Diese Komponente hat sich verändert — ich muss sie neu rendern." Würdest du stattdessen die Variable direkt ändern (\`count = count + 1\`), würde React das nicht mitbekommen und der Bildschirm bliebe unverändert. Deshalb gilt die Regel: **State immer über den Setter ändern**.`,
         preview: `<div>
   <h1 style="margin-bottom:12px">State-Demo</h1>
   <div style="display:inline-flex;flex-direction:column;align-items:center;gap:8px;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-right:12px">
@@ -899,9 +923,13 @@ export default App`,
         id: 8,
         title: 'useState — mit Objekten und Arrays',
         category: 'Grundlagen',
-        explanation: `State kann jeden Typ halten: Strings, Numbers, Objekte, Arrays.
-Bei Objekten und Arrays **niemals** direkt mutieren — immer neue Kopien erstellen (Spread-Operator \`...\`).
-React erkennt Änderungen über Referenzvergleich — nur eine neue Referenz löst Re-render aus.`,
+        explanation: `State kann nicht nur einfache Werte wie Zahlen oder Strings halten — du kannst genauso gut **Objekte und Arrays** als State verwenden. Das ist praktisch wenn mehrere zusammengehörige Daten gemeinsam verwaltet werden sollen, zum Beispiel ein Profil mit Name und Rolle.
+
+**Den Spread-Operator zum Updaten einsetzen:**
+Beim Ändern eines State-Objekts darfst du das Objekt nie direkt verändern. Stattdessen erstellst du eine neue Kopie mit dem **Spread-Operator** \`...\` und überschreibst nur das geänderte Feld: \`setProfile({ ...profile, role: 'Senior' })\`. Der Spread kopiert alle bisherigen Felder, danach kommt nur das eine Feld das sich ändert. Bei Arrays funktioniert es ähnlich: \`setSkills([...skills, 'TypeScript'])\` hängt ein neues Element an eine Kopie des Arrays.
+
+**Warum State nie direkt verändert werden darf:**
+React erkennt State-Änderungen über **Referenzvergleich**: Ist das neue Objekt eine andere Referenz als das alte? Wenn du direkt \`profile.role = 'Senior'\` schreibst, ändert sich das Objekt zwar, aber die Referenz bleibt dieselbe — React merkt nichts und rendert nicht neu. Nur wenn du ein komplett neues Objekt per Setter übergibst, sieht React die Änderung und aktualisiert das UI.`,
         keyPoints: [
           'Spread ... erstellt flache Kopie: { ...obj, key: newVal }',
           'Arrays: [...arr, newItem] statt arr.push()',
@@ -1109,9 +1137,13 @@ export default App`,
         id: 9,
         title: 'Event Handling',
         category: 'Grundlagen',
-        explanation: `Events in React funktionieren wie in JavaScript — aber mit camelCase (\`onClick\` statt \`onclick\`).
-Handler-Funktionen erhalten ein **Event-Objekt** mit Infos über das Event (z.B. den Wert eines Inputs).
-TypeScript erwartet den richtigen Event-Typ — VS Code schlägt ihn beim Hover vor.`,
+        explanation: `**Event-Handler** in React funktionieren ähnlich wie in HTML — nur dass du sie als camelCase-Props übergibst: \`onClick\`, \`onChange\`, \`onSubmit\`. Wichtig: du übergibst die Funktion als **Referenz**, nicht als Aufruf — also \`onClick={handleClick}\` ohne Klammern dahinter. Mit Klammern (\`onClick={handleClick()}\`) würde die Funktion sofort beim Rendern ausgeführt werden statt erst beim Klick.
+
+**Den MouseEvent-Typ in TypeScript:**
+Event-Handler erhalten automatisch ein **Event-Objekt** als Parameter. In TypeScript musst du dem Parameter den richtigen Typ geben. Für Buttons ist das \`React.MouseEvent<HTMLButtonElement>\` — VS Code schlägt dir den richtigen Typ vor wenn du mit der Maus über den Parameter hoverst. Aus dem Event-Objekt kannst du z.B. mit \`e.target\` auf das auslösende Element zugreifen oder mit \`e.preventDefault()\` das Standard-Browser-Verhalten unterbinden.
+
+**Der \`&&\` Operator als vereinfachtes if:**
+In JSX kannst du kein normales \`if\`-Statement schreiben — aber du kannst den \`&&\`-Operator nutzen: \`{clicked && <p>Button wurde geklickt!</p>}\`. Das bedeutet: "Zeige den Absatz nur wenn \`clicked\` true ist." Wenn \`clicked\` false ist, rendert React nichts. Das ist die kürzeste Form von bedingtem Rendern wenn du keinen else-Zweig brauchst.`,
         keyPoints: [
           'camelCase: onClick, onChange, onSubmit, onKeyDown',
           'Handler als Referenz übergeben: onClick={handleClick} — kein () dahinter',
@@ -1191,9 +1223,13 @@ export default EventDemo`,
         id: 10,
         title: 'State Lifting — Zustand nach oben heben',
         category: 'Grundlagen',
-        explanation: `Wenn zwei Komponenten denselben State teilen müssen, wandert der State nach oben — in den gemeinsamen Elternteil.
-Der Elternteil hält den State und gibt ihn nach unten weiter: den **Wert** an die lesende Komponente, den **Setter** an die schreibende.
-Dieses Muster heißt **Lifting State Up** und ist eines der wichtigsten Konzepte in React.`,
+        explanation: `**State Lifting** bedeutet: wenn zwei Geschwisterkomponenten denselben State teilen müssen, zieht der State nach oben — in den gemeinsamen Elternteil (Parent). Der Parent hält den State und gibt ihn als Props nach unten weiter. So kann eine Komponente den State lesen und eine andere ihn verändern, ohne dass sie direkt miteinander kommunizieren müssen.
+
+**State und Setter als Props weitergeben:**
+Der Parent gibt den **Wert** als Prop an die lesende Komponente (z.B. \`<Anzeige text={text} />\`) und die **Setter-Funktion** als Prop an die schreibende Komponente (z.B. \`<Inputfeld onChange={setText} />\`). Das Kind ruft dann \`onChange(e.target.value)\` auf — und damit \`setText\` im Parent. Der State selbst lebt immer nur an einem Ort: beim Parent.
+
+**Wann State Lifting sinnvoll ist:**
+State Lifting lohnt sich immer dann wenn **mehrere Komponenten auf dieselben Daten angewiesen sind**. Als Faustregel gilt: State lebt immer so weit unten im Baum wie möglich — aber so weit oben wie nötig. Solange ein State nur von einer einzigen Komponente gebraucht wird, bleibt er in dieser Komponente.`,
         keyPoints: [
           'State immer im niedrigsten gemeinsamen Elternteil halten',
           'Setter als Prop nach unten geben → Kind kann State ändern',
@@ -2635,9 +2671,13 @@ export default FocusInput`,
         id: 19,
         title: 'useContext — zentraler Datenspeicher',
         category: 'Hooks',
-        explanation: `**Context** löst das "Prop Drilling" Problem — statt Props durch viele Ebenen zu reichen, landen alle Daten in einem zentralen Store.
-Jede Komponente die Zugriff braucht, holt sich genau das was sie benötigt über \`useContext()\`.
-Der **Provider** umhüllt den Komponentenbaum und stellt die Daten für alle Kinder bereit.`,
+        explanation: `**Context** löst das Problem des **Prop Drilling**: Wenn Daten durch viele Komponenten-Ebenen weitergereicht werden müssen — auch durch Ebenen die die Daten gar nicht brauchen — wird der Code schnell unübersichtlich. Mit Context stellst du Daten zentral bereit, und jede Komponente holt sich direkt was sie braucht, egal wie tief sie im Baum sitzt.
+
+**Einen Context anlegen mit createContext und useContext:**
+\`createContext()\` erstellt den zentralen Datenspeicher — du gibst dabei Standardwerte an, die als Typen-Vorlage dienen. Eine \`Provider\`-Komponente hält den State und stellt ihn per \`value={}\`-Prop bereit. Jede Komponente innerhalb des Providers kann dann mit \`useContext(DeinContext)\` direkt auf diese Daten zugreifen.
+
+**Prop Drilling vermeiden:**
+Ohne Context müsstest du z.B. einen eingeloggten User als Prop durch App → Navbar → UserMenu → UserAvatar durchreichen — auch wenn nur UserAvatar ihn wirklich braucht. Mit Context importiert UserAvatar einfach den Context und holt sich den User direkt. Das ist besonders nützlich für Dinge die viele Komponenten brauchen: eingeloggter User, Theme (hell/dunkel), Sprache.`,
         keyPoints: [
           'createContext() erstellt den zentralen Datenspeicher',
           'DataProvider hält den State und gibt ihn per value={} weiter',
@@ -2845,9 +2885,13 @@ export default App`,
         id: 20,
         title: 'useContext — gestapelte Kontexte',
         category: 'Hooks',
-        explanation: `Jede Komponente kann ihren eigenen Kontext und Provider **selbst definieren und exportieren** — nicht alles muss in eine zentrale Datei.
-In \`App()\` werden die Provider einfach **ineinander geschachtelt** — jeder stellt seinen eigenen Bereich bereit.
-Eine Komponente die Daten aus mehreren Kontexten braucht, ruft \`useContext()\` einfach mehrfach auf.`,
+        explanation: `Eine App kann **mehrere unabhängige Kontexte** haben — zum Beispiel einen für den eingeloggten User, einen anderen für das aktuelle Theme. Jeder Kontext ist komplett unabhängig: Änderungen im einen berühren den anderen nicht. Du kannst Kontext und Provider direkt in der Datei der jeweiligen Komponente definieren und exportieren — es muss nicht alles in einer zentralen Datei sein.
+
+**Provider stacken:**
+In \`App.tsx\` schachtelst du die Provider einfach ineinander: \`<NameProvider><AlterProvider>...</AlterProvider></NameProvider>\`. React sucht beim Aufruf von \`useContext(AlterContext)\` immer den **nächsten passenden Provider** im Baum nach oben — jeder Context findet seinen eigenen Provider, unabhängig von den anderen.
+
+**Den \`||\` Fallback-Wert erklären:**
+In der Anzeige-Komponente siehst du oft Muster wie \`{name || '...'}\`. Das ist der **Oder-Operator als Fallback**: Wenn \`name\` ein leerer String oder \`0\` ist (beides gilt als "falsy" in JavaScript), wird stattdessen der Fallback-Wert \`'...'\` angezeigt. Sobald der User etwas eingibt, ist der String nicht mehr leer — und der echte Wert erscheint.`,
         keyPoints: [
           'Kontext und Provider können direkt in der Komponenten-Datei definiert werden',
           'Provider stapeln: <NameProvider><StadtProvider>...</StadtProvider></NameProvider>',
@@ -3059,9 +3103,13 @@ export default App`,
         id: 21,
         title: 'useMemo & useCallback — Performance',
         category: 'Hooks',
-        explanation: `**useMemo** cached das Ergebnis einer Berechnung — wird nur neu berechnet wenn sich Abhängigkeiten ändern.
-**useCallback** cached eine Funktion — verhindert dass bei jedem Render eine neue Funktion erstellt wird.
-Beide sind Optimierungen — erst einsetzen wenn Performance-Probleme auftreten (Premature Optimization vermeiden).`,
+        explanation: `**useMemo** speichert das Ergebnis einer Berechnung im Cache — die Berechnung wird nur dann neu durchgeführt, wenn sich eine der angegebenen Abhängigkeiten ändert. Das ist nützlich bei teuren Operationen wie dem Filtern oder Sortieren großer Datensätze: ohne \`useMemo\` würde React die Berechnung bei jedem Re-render komplett neu ausführen, auch wenn sich die relevanten Daten gar nicht geändert haben.
+
+**useCallback für stabile Funktionsreferenzen:**
+Bei jedem Render erstellt React neue Funktionen für alle Handler — das ist meistens kein Problem. Wenn du aber eine Funktion als Prop an eine \`React.memo\`-Komponente weitergibst, würde eine neue Funktion bei jedem Render dazu führen dass das memo nichts bringt (weil die Prop sich "geändert" hat). \`useCallback\` löst das: \`const handleFilter = useCallback((e) => setFilter(e.target.value), [])\` — diese Funktion wird einmal erstellt und bleibt dann stabil.
+
+**Wann diese Hooks sinnvoll sind:**
+Die wichtigste Regel: **nicht blind einsetzen**. Sowohl \`useMemo\` als auch \`useCallback\` haben selbst einen kleinen Performance-Overhead. Nutze sie erst wenn du ein messbares Performance-Problem hast — zum Beispiel wenn React DevTools zeigen dass eine Komponente zu oft rendert. Für normale Komponenten und einfache Berechnungen braucht man sie nicht.`,
         keyPoints: [
           'useMemo: teure Berechnungen cachen',
           'useCallback: Funktionsreferenzen stabil halten (für React.memo)',
@@ -3116,9 +3164,13 @@ export default ExpensiveList`,
         id: 22,
         title: 'Custom Hooks — wiederverwendbare Logik',
         category: 'Hooks',
-        explanation: `**Custom Hooks** sind eigene Funktionen die mit "use" beginnen und andere Hooks nutzen.
-Sie extrahieren wiederverwendbare Logik aus Komponenten — Komponente bleibt sauber, Logik ist testbar.
-Custom Hooks sind das React-Äquivalent zu Hilfs-Funktionen — nur für Hook-Logik.`,
+        explanation: `**Custom Hooks** sind eigene Funktionen die mit dem Präfix \`use\` beginnen und intern andere Hooks verwenden — zum Beispiel \`useState\`, \`useEffect\` oder andere Custom Hooks. Du kannst sie genau wie eingebaute Hooks aufrufen. Das \`use\`-Präfix ist dabei Pflicht: React erkennt daran, dass es sich um einen Hook handelt, und kann die Regeln für Hooks (nur in Komponenten/Hooks aufrufen, nicht in Schleifen) entsprechend prüfen.
+
+**Wiederverwendbare Logik auslagern:**
+Ein Custom Hook extrahiert Logik die in mehreren Komponenten gebraucht wird. Statt \`useState + useEffect\` für einen API-Fetch in jeder Komponente zu wiederholen, schreibst du einmal \`useFetch(url)\` und rufst ihn überall auf. Jede Komponente die den Hook nutzt, bekommt ihre eigene unabhängige State-Instanz — der State wird nicht geteilt, nur die Logik.
+
+**Custom Hook vs. Hilfsfunktion:**
+Eine normale Hilfsfunktion kann keine Hooks nutzen — sie hat keinen React-Kontext. Ein Custom Hook dagegen kann \`useState\`, \`useEffect\` und alle anderen Hooks verwenden. Der Unterschied: Hilfsfunktionen transformieren Daten, Custom Hooks verwalten State und Seiteneffekte. Wenn deine Funktion Hooks enthält, muss sie ein Custom Hook sein (also mit \`use\` beginnen).`,
         keyPoints: [
           'Name beginnt mit "use" — Pflicht für React-Regeln',
           'Kann useState, useEffect usw. intern nutzen',
@@ -3237,9 +3289,13 @@ export default App`,
         id: 23,
         title: 'React Router — Navigation',
         category: 'Fortgeschritten',
-        explanation: `**React Router** ermöglicht clientseitige Navigation ohne Seiten-Reload.
-Die URL ändert sich, aber nur die passende Komponente wird ausgetauscht — das ist eine **Single Page Application (SPA)**.
-Installation: \`npm install react-router-dom\``,
+        explanation: `**React Router** bringt Navigation in deine React-App — ohne dass der Browser die Seite neu lädt. Wenn der User auf einen Link klickt, ändert sich die URL im Browser, aber React tauscht nur die passende Komponente aus. Das ist das Prinzip der **Single Page Application**: eine einzige HTML-Seite, aber das Gefühl mehrerer Seiten. Installation: \`npm install react-router-dom\`.
+
+**Routen definieren und navigieren:**
+Den \`BrowserRouter\` legst du in \`main.tsx\` um die gesamte App. In \`App.tsx\` definierst du mit \`<Routes>\` und \`<Route path="..." element={<Komponente />} />\` welche Komponente bei welcher URL angezeigt wird. Für Links in der Navigation verwendest du \`<Link to="/about">\` statt \`<a href>\` — damit bleibt es eine SPA ohne Seiten-Reload. Für programmatische Navigation (z.B. nach dem Login) nutzt du den \`useNavigate\`-Hook.
+
+**URL-Parameter mit useParams:**
+Mit dem Muster \`/user/:id\` in der Route-Definition kannst du dynamische URLs erstellen. Der \`:id\`-Teil ist ein Platzhalter für beliebige Werte. In der Zielkomponente liest du den Wert mit \`const { id } = useParams()\` aus. So kannst du z.B. eine User-Detailseite für jeden User unter \`/user/42\` oder \`/user/99\` erreichbar machen.`,
         keyPoints: [
           'BrowserRouter: umhüllt die App, aktiviert Routing',
           'Routes + Route: definiert URL → Komponente Zuordnungen',
@@ -3330,9 +3386,13 @@ export default User`,
         id: 24,
         title: 'Formulare — kontrolliert vs. unkontrolliert',
         category: 'Fortgeschritten',
-        explanation: `**Kontrollierte Inputs** — React State ist die einzige Datenquelle, DOM wird gesteuert.
-**Unkontrollierte Inputs** — DOM verwaltet den Wert selbst, React liest ihn per Ref wenn nötig.
-Für komplexe Formulare empfiehlt sich React Hook Form (\`npm install react-hook-form\`).`,
+        explanation: `Es gibt zwei Ansätze für Formulare in React: **kontrolliert** und **unkontrolliert**. Bei kontrollierten Inputs speichert React den Wert in State und steuert damit das Eingabefeld: \`value={state}\` + \`onChange={setter}\`. Bei unkontrollierten Inputs verwaltet der Browser den Wert selbst — React liest ihn nur bei Bedarf über eine Ref aus.
+
+**useRef für unkontrollierte Formulare:**
+Bei unkontrollierten Inputs hängst du eine Ref an das Input-Element: \`<input ref={inputRef} />\`. Beim Absenden liest du den Wert einmalig aus: \`inputRef.current.value\`. Kein \`onChange\`, kein State-Update bei jeder Eingabe. Das bedeutet weniger Boilerplate — aber auch weniger Kontrolle: du kannst den Wert nicht live validieren oder anzeigen.
+
+**Wann welcher Ansatz passt:**
+Kontrollierte Inputs sind der React-Standard und empfehlenswert für die meisten Situationen — besonders wenn du Validierung während der Eingabe brauchst oder den Wert anderweitig verwenden willst. Unkontrollierte Inputs eignen sich für einfache Formulare wo du den Wert wirklich nur beim Absenden brauchst. Für komplexe Formulare mit Validierung lohnt sich eine Bibliothek wie \`react-hook-form\`.`,
         keyPoints: [
           'Kontrolliert: value={state} + onChange={setter} — immer synchron',
           'Unkontrolliert: ref.current.value — nur bei Bedarf lesen',
@@ -3427,9 +3487,13 @@ export default LoginForm`,
         id: 25,
         title: 'useReducer — komplexer State',
         category: 'Fortgeschritten',
-        explanation: `**useReducer** ist Alternative zu useState für komplexen State mit mehreren Aktionen.
-Konzept: eine **Reducer-Funktion** empfängt aktuellen State + Aktion und gibt neuen State zurück.
-Kommt aus dem Redux-Pattern — gut wenn State-Logik zu komplex für useState wird.`,
+        explanation: `**useReducer** ist eine Alternative zu \`useState\` wenn der State komplex wird — zum Beispiel wenn mehrere Felder zusammengehören und viele verschiedene Aktionen möglich sind. Statt direkter Setter-Aufrufe schickst du **Aktionen** (Actions) an einen zentralen **Reducer**: \`dispatch({ type: 'ADD_ITEM', payload: item })\`. Der Reducer entscheidet dann wie der neue State aussieht.
+
+**Eine Reducer-Funktion mit Actions und Switch-Cases:**
+Der Reducer ist eine reine Funktion mit dem Muster \`(state, action) => newState\`. Ein \`switch\`-Statement teilt die Logik nach \`action.type\` auf: \`case 'ADD_ITEM'\`, \`case 'REMOVE_ITEM'\`, \`case 'CLEAR'\` usw. Jeder Case gibt einen neuen State zurück — niemals den alten State direkt mutieren. Das macht die Logik übersichtlich und leicht testbar.
+
+**useReducer vs. useState:**
+\`useState\` ist einfacher und reicht für die meisten Fälle. \`useReducer\` lohnt sich wenn der State aus mehreren zusammengehörenden Werten besteht (z.B. ein Warenkorb mit Items und Gesamtanzahl), wenn viele verschiedene Aktionen möglich sind, oder wenn die Update-Logik komplex ist und an einem Ort gebündelt sein soll.`,
         keyPoints: [
           'useReducer(reducer, initialState) → [state, dispatch]',
           'dispatch({ type: "ACTION", payload: data }) → löst Reducer aus',
@@ -3530,9 +3594,13 @@ export default Cart`,
         id: 26,
         title: 'TypeScript mit React — Typen & Generics',
         category: 'Fortgeschritten',
-        explanation: `TypeScript macht React-Code robuster: Fehler werden beim Schreiben erkannt, nicht erst zur Laufzeit.
-**Generics** ermöglichen typsichere wiederverwendbare Komponenten für beliebige Datentypen.
-Wichtige React-Typen: \`React.FC\`, \`ReactNode\`, \`ComponentProps\`, \`HTMLAttributes\`.`,
+        explanation: `TypeScript macht React-Code deutlich robuster: Fehler werden direkt im Editor angezeigt, nicht erst wenn der User sie in der fertigen App auslöst. Für Props, State und Event-Handler gibt es jeweils passende TypeScript-Typen. Event-Typen wie \`React.ChangeEvent<HTMLInputElement>\` oder \`React.FormEvent\` sorgen dafür, dass du auf \`e.target.value\` zugreifen kannst ohne TypeScript-Fehler.
+
+**Generics in React-Hooks korrekt einsetzen:**
+Viele eingebaute Hooks akzeptieren **Generics**: \`useState<User | null>(null)\` sagt TypeScript dass dieser State entweder ein \`User\`-Objekt oder \`null\` ist. \`useRef<HTMLInputElement>(null)\` stellt sicher dass \`ref.current\` als \`HTMLInputElement\` behandelt wird. Bei eigenen generischen Komponenten schreibst du \`<T,>\` (mit Komma, damit TypeScript es nicht als JSX-Tag missversteht).
+
+**Interface vs. Type für Komponenten-Props:**
+Beide funktionieren für Komponenten-Props — es gibt keinen technischen Unterschied für einfache Fälle. Convention: \`interface\` für Objekte die erweitert werden könnten (Props, API-Responses), \`type\` für alles andere (Unions, Aliases, Primitive). In React ist die Wahl meistens \`interface CardProps { ... }\` für Props — aber wenn das Projekt schon eine Konvention hat, bleib dabei. Konsistenz ist wichtiger als die Wahl selbst.`,
         keyPoints: [
           'Interface für Props — immer, auch bei wenigen Props',
           'Generics: <T> in Komponenten für flexible Typen',
@@ -3619,9 +3687,13 @@ export default App`,
         id: 27,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
-        explanation: `**React.memo** ist ein Higher-Order Component (HOC) — es "merkt" sich Props und rendert nur neu wenn Props sich ändern.
-Ohne memo: Jedes Render des Parents rendert ALLE Children neu.
-Mit memo: Children re-rendern nur wenn ihre Props sich wirklich geändert haben.`,
+        explanation: `**React.memo** ist eine Funktion die eine Komponente "einwickelt" und ihr ein Gedächtnis für ihre Props gibt. Ohne \`memo\` rendert React eine Kindkomponente jedes Mal neu, wenn der Parent rendert — auch wenn die Props der Kindkomponente sich gar nicht geändert haben. Mit \`memo\` merkt sich React die letzten Props und überspringt das Re-render wenn sie gleich geblieben sind.
+
+**Wann React.memo sinnvoll ist:**
+\`React.memo\` lohnt sich nur für Komponenten die **teuer zu rendern** sind und deren **Parent häufig neu rendert**. Ein gutes Beispiel: eine große Listenkomponente die viel berechnet, während der Parent seinen eigenen State laufend ändert. Für einfache Komponenten mit wenigen Elementen bringt \`memo\` keinen messbaren Vorteil — es fügt sogar einen kleinen Overhead durch den Props-Vergleich hinzu.
+
+**Das Zusammenspiel mit useCallback:**
+\`React.memo\` vergleicht Props mit **Shallow Comparison** — es prüft ob zwei Werte dieselbe Referenz haben. Für Zahlen und Strings funktioniert das prima. Für Funktionen aber nicht: bei jedem Render des Parents entsteht eine neue Funktion — eine neue Referenz — und \`memo\` denkt die Prop hat sich geändert. Deshalb musst du Handler-Props mit \`useCallback\` stabilisieren, damit \`memo\` seinen Zweck erfüllt.`,
         keyPoints: [
           'React.memo(Component) — Komponente merkt sich Props',
           'Shallow Comparison — Objekte/Arrays brauchen stabile Referenzen',
@@ -3694,9 +3766,13 @@ export default App`,
         id: 28,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
-        explanation: `**Error Boundaries** fangen JavaScript-Fehler in Kindkomponenten ab und zeigen Fallback-UI.
-Sie müssen als **Klassen-Komponenten** geschrieben werden — Hooks unterstützen diese Funktion nicht.
-Gut für: Produktions-Apps, API-Fehler, defekte 3rd-Party-Komponenten.`,
+        explanation: `**Error Boundaries** sind Komponenten die JavaScript-Fehler in ihrem Kindbaum abfangen und statt einem abstürzenden UI eine benutzerfreundliche Fehlermeldung anzeigen. Ohne Error Boundary würde ein Laufzeitfehler in einer tief verschachtelten Komponente die gesamte App zum Absturz bringen — mit Error Boundary bleibt nur der betroffene Bereich kaputt, der Rest funktioniert weiter.
+
+**Eine Error Boundary implementieren:**
+Error Boundaries müssen als **Klassen-Komponenten** geschrieben werden — das ist der einzige Bereich in React wo Klassen nach wie vor notwendig sind, weil Hooks diese Lifecycle-Methoden nicht abbilden können. Du implementierst zwei Methoden: \`getDerivedStateFromError()\` setzt einen Fehler-State (damit der Fallback angezeigt wird), und \`componentDidCatch()\` kann den Fehler loggen (z.B. an einen Monitoring-Dienst wie Sentry schicken).
+
+**Laufzeitfehler abfangen und Fallback anzeigen:**
+Sobald eine Kindkomponente einen Fehler wirft, wechselt die Error Boundary in den Fehler-Zustand und rendert stattdessen die Fallback-UI. Du kannst eine eigene \`fallback\`-Prop anbieten (\`<ErrorBoundary fallback={<p>Fehler!</p>}>\`) oder eine Standard-Fehlermeldung definieren. Wichtig: Async-Fehler (z.B. in \`fetch()\`) werden von Error Boundaries **nicht** gefangen — dafür brauchst du \`try/catch\` im \`useEffect\`.`,
         keyPoints: [
           'Nur Klassen-Komponenten können Error Boundaries sein',
           'getDerivedStateFromError → Fallback-State setzen',
@@ -3789,9 +3865,13 @@ export default App`,
         id: 29,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
-        explanation: `**React.lazy()** lädt eine Komponente erst wenn sie gebraucht wird — Code-Splitting.
-**Suspense** zeigt eine Fallback-UI während die Komponente noch geladen wird.
-Ergebnis: Kleineres initiales Bundle, schnellere erste Ladezeit.`,
+        explanation: `Wenn eine React-App groß wird, lädt der Browser beim ersten Besuch das gesamte JavaScript herunter — auch Code für Seiten die der User vielleicht nie besucht. **Code-Splitting** löst dieses Problem: der Code wird in kleinere Chunks aufgeteilt, und jeder Chunk wird erst geladen wenn er gebraucht wird. Vite unterstützt Code-Splitting automatisch, du musst es nur aktivieren.
+
+**Komponenten mit React.lazy laden:**
+\`React.lazy(() => import('./HeavyChart'))\` erstellt eine Komponente die erst beim ersten Render geladen wird. Vite erzeugt dafür automatisch einen eigenen JavaScript-Chunk. Das ist besonders sinnvoll für schwere Komponenten (Charts, Editoren) oder für Seiten hinter einer Login-Schranke — diese braucht kein User der noch gar nicht eingeloggt ist.
+
+**Suspense mit einem Fallback:**
+Während die lazy-Komponente noch heruntergeladen wird, zeigt \`<Suspense fallback={<p>Wird geladen...</p>}>\` den Fallback an. Sobald der Chunk geladen ist, tauscht React den Fallback gegen die echte Komponente aus. Du kannst mehrere lazy-Komponenten unter einem einzigen \`<Suspense>\` bündeln — der Fallback wird so lange angezeigt bis alle bereit sind.`,
         keyPoints: [
           'React.lazy(() => import("./Heavy")) — dynamischer Import',
           '<Suspense fallback={<Loader />}> — während Laden',
@@ -3838,8 +3918,13 @@ export default App`,
         id: 30,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
-        explanation: `**Portals** rendern Kinder in einen anderen DOM-Knoten als den Parent — aber bleiben im React-Komponentenbaum.
-Haupteinsatz: Modals, Tooltips, Dropdowns — diese müssen oft über anderen Elementen liegen (z-index/overflow Probleme).`,
+        explanation: `Normalerweise rendert React jede Komponente innerhalb ihres Parents im DOM. **Portale** durchbrechen diese Regel: \`createPortal(jsx, domNode)\` rendert JSX direkt in einen anderen DOM-Knoten — typischerweise \`document.body\`. Im React-Komponentenbaum bleibt die Komponente trotzdem an ihrem Platz (Events bubblen wie erwartet durch den React-Baum), aber im echten DOM erscheint sie woanders.
+
+**Typische Anwendungsfälle:**
+Portale werden vor allem für **Modals, Tooltips und Dropdowns** verwendet. Der Grund: Diese Elemente müssen visuell über allem anderen liegen (\`z-index\`), aber wenn sie tief in einem Container mit \`overflow: hidden\` oder einem niedrigen \`z-index\` liegen, würden sie abgeschnitten oder verdeckt. Indem das Modal direkt in \`document.body\` gerendert wird, umgeht es alle CSS-Beschränkungen der Parent-Elemente.
+
+**Warum Portale für Modals nützlich sind:**
+Ohne Portal: du hast ein Modal tief in deiner Komponenten-Hierarchie, aber sein Parent-Container hat \`overflow: hidden\` — das Modal wird abgeschnitten. Mit Portal: das Modal rendert direkt in \`document.body\`, hat vollen Zugriff auf den Viewport, und der Backdrop (\`position: fixed; inset: 0\`) deckt die gesamte Seite ab. Die React-Logik (State, Props, Events) bleibt dabei vollständig erhalten.`,
         keyPoints: [
           'createPortal(jsx, domNode) — rendert jsx in domNode',
           'Events bubblen trotzdem durch React-Komponentenbaum',
@@ -3924,9 +4009,13 @@ export default Modal`,
         id: 31,
         title: 'Projektübersicht & Architektur',
         category: 'Praxisprojekt',
-        explanation: `Wir bauen **SportsDash** — eine App mit Login/Register und Fußball-Ergebnissen via API.
-Die App nutzt React Router für Navigation, Context für Auth-State, und fetch() für API-Daten.
-**Datenfluss**: AuthContext → Router → geschützte Seiten → API-Komponenten.`,
+        explanation: `**SportsDash** ist unser Praxisprojekt: eine App mit Login/Registrierung und Fußball-Ergebnissen aus einer echten API. Das Projekt verbindet alles aus dem Kurs — React Router für Navigation, Context für den Auth-State, und \`fetch()\` für API-Daten. Der Datenfluss ist: AuthContext stellt den eingeloggten User bereit → Router steuert welche Seite angezeigt wird → geschützte Seiten laden API-Daten.
+
+**Die Ordnerstruktur verstehen:**
+Das Projekt ist in klare Bereiche unterteilt: \`src/pages/\` enthält die vollständigen Seiten (Login, Dashboard), \`src/components/\` enthält wiederverwendbare Bausteine (MatchCard, Layout, PrivateRoute), \`src/context/\` enthält den AuthContext, \`src/hooks/\` enthält Custom Hooks, und \`src/types/\` enthält alle TypeScript-Typen. Diese Struktur ist ein verbreitetes Muster in React-Projekten.
+
+**Pages vs. Components:**
+Der Unterschied: **Pages** sind vollständige Seiten die einer Route zugeordnet sind — sie kombinieren mehrere Komponenten zu einer kompletten Ansicht. **Components** sind wiederverwendbare Bausteine die auf verschiedenen Seiten eingesetzt werden können. Eine \`MatchCard\` ist eine Komponente (zeigt ein Spiel an), das \`DashboardPage\` ist eine Seite (zeigt alle Spiele und den Header zusammen).`,
         keyPoints: [
           'Ordnerstruktur: src/components, src/pages, src/context, src/hooks, src/types',
           'AuthContext: verwaltet eingeloggten User global',
@@ -3968,8 +4057,13 @@ Die App nutzt React Router für Navigation, Context für Auth-State, und fetch()
         id: 32,
         title: 'Projekt: Types & Interfaces',
         category: 'Praxisprojekt',
-        explanation: `Alle TypeScript-Typen zentral in einer Datei — so haben alle Komponenten dieselben Definitionen.
-User-Daten, API-Response-Typen und Auth-Context-Typ sind hier definiert.`,
+        explanation: `In einem Projekt mit mehreren Dateien lohnt es sich, alle gemeinsamen TypeScript-Typen **zentral** zu definieren — in \`src/types/index.ts\`. So müssen Typen nicht in jeder Datei neu definiert werden, und wenn sich ein Typ ändert (z.B. die API liefert ein neues Feld), musst du nur an einer Stelle editieren.
+
+**Interfaces für API-Responses und State-Objekte:**
+Für API-Responses schaust du in die API-Dokumentation und baust die Typen nach — nur die Felder die du wirklich brauchst. \`interface Match\` beschreibt ein Spielobjekt mit Teams, Toren und Status. \`interface ApiResponse<T>\` ist ein generisches Interface für die Wrapper-Struktur der API. Für Auth-Daten definierst du \`interface User\`, \`interface LoginData\` und \`interface AuthContextType\`.
+
+**Typen projektübergreifend importieren:**
+Alle Typen werden mit \`export interface\` exportiert. In anderen Dateien importierst du sie gezielt: \`import type { User, Match } from '../types'\`. Das \`import type\` (statt \`import\`) ist eine TypeScript-Optimierung — es signalisiert dass nur der Typ gebraucht wird, kein Laufzeit-Code. Wenn TypeScript-Fehler auftauchen weil ein Feld fehlt oder den falschen Typ hat, findest du die Definition immer an einer Stelle.`,
         keyPoints: [
           'Zentrale types/index.ts verhindert doppelte Definitionen',
           'API-Typen exakt nach API-Dokumentation benennen',
@@ -4060,9 +4154,13 @@ export interface ApiResponse<T> {
         id: 33,
         title: 'Projekt: AuthContext',
         category: 'Praxisprojekt',
-        explanation: `Der AuthContext verwaltet den eingeloggten User global — alle Komponenten können darauf zugreifen.
-Für diese Demo simulieren wir Login/Register lokal (kein Backend nötig). In einer echten App wäre das ein API-Call.
-Der User wird im localStorage gespeichert — bleibt auch nach Seiten-Reload erhalten.`,
+        explanation: `Der **AuthContext** ist das Herzstück der User-Verwaltung: Er hält den eingeloggten User als State und stellt Login-, Logout- und Register-Funktionen für die gesamte App bereit. Alle Komponenten die wissen müssen ob jemand eingeloggt ist, konsumieren diesen Context — ohne Props durch die Hierarchie reichen zu müssen.
+
+**Login- und Logout-Logik zentral verwalten:**
+Im AuthProvider leben alle Auth-Funktionen: \`register()\` erstellt einen neuen User und speichert ihn im \`localStorage\`, \`login()\` prüft die Eingabe gegen den gespeicherten User und setzt den State, \`logout()\` löscht den User aus dem State und aus dem \`localStorage\`. Der \`useEffect\` beim Start liest den gespeicherten User aus dem \`localStorage\` — so bleibt die Session auch nach einem Seiten-Reload erhalten.
+
+**Den AuthContext konsumieren:**
+Der Custom Hook \`useAuth()\` macht den Zugriff komfortabel: \`const { user, login, logout } = useAuth()\` — fertig. Der Hook wirft einen Fehler wenn er außerhalb des Providers verwendet wird, was Bugs durch falsche Verwendung früh aufdeckt. In einer echten App würden \`login()\` und \`register()\` echte API-Calls machen (\`fetch('/api/login', ...)\`) statt lokal zu simulieren.`,
         keyPoints: [
           'localStorage: User-Session persistieren',
           'JSON.parse/stringify: Objekte in localStorage konvertieren',
@@ -4139,8 +4237,13 @@ export function useAuth(): AuthContextType {
         id: 34,
         title: 'Projekt: PrivateRoute & Layout',
         category: 'Praxisprojekt',
-        explanation: `**PrivateRoute** schützt Seiten die nur eingeloggte User sehen dürfen — leitet sonst zum Login um.
-**Layout** stellt den gemeinsamen Header/Nav für alle Seiten bereit.`,
+        explanation: `Eine **PrivateRoute-Komponente** schützt Seiten die nur für eingeloggte User zugänglich sein sollen. Die Logik ist simpel: wenn kein User eingeloggt ist, wird mit \`<Navigate to="/login" replace />\` sofort zum Login weitergeleitet. Wenn ein User eingeloggt ist, rendert \`<Outlet />\` die eigentliche Kind-Route. Das \`replace\` sorgt dafür dass die geschützte URL nicht im Browser-Verlauf landet — der Zurück-Button führt nicht zurück zur geschützten Seite.
+
+**Nicht eingeloggte User weiterleiten:**
+Der Auth-State kommt aus dem \`useAuth()\`-Hook. Während der State noch aus dem \`localStorage\` geladen wird (\`isLoading\`), zeigt die PrivateRoute einen Ladehinweis — sonst würde kurz die Login-Seite aufblitzen bevor die Session erkannt wird. Erst wenn klar ist dass kein User eingeloggt ist, wird weitergeleitet.
+
+**Ein gemeinsames Layout für alle Seiten:**
+Die \`Layout\`-Komponente liefert den gemeinsamen Header mit Navigation und Logout-Button. Sie verwendet \`<Outlet />\` als Platzhalter für den eigentlichen Seiteninhalt — React Router tauscht dort die aktuelle Seite ein. Indem du Layout als Wrapper-Route in deiner Routen-Konfiguration verwendest, bekommen alle Kind-Routen automatisch den Header, ohne dass jede Seite ihn selbst importieren muss.`,
         keyPoints: [
           'Navigate component: programmatische Umleitung in Router',
           'replace: ersetzt History-Eintrag (kein Zurück-Button zur geschützten Seite)',
@@ -4277,8 +4380,13 @@ export default Layout`,
         id: 35,
         title: 'Projekt: Login & Register Pages',
         category: 'Praxisprojekt',
-        explanation: `Login und Register sind kontrollierte Formulare die den AuthContext nutzen.
-Fehler werden in einem lokalen Error-State angezeigt. Nach Erfolg wird zur Dashboard-Seite navigiert.`,
+        explanation: `Die Login- und Registrierungsseiten sind kontrollierte Formulare die auf den AuthContext zugreifen. Das Formular hält die Eingaben in einem State-Objekt (\`{ email: '', password: '' }\`) und nutzt einen generischen \`handleChange\`-Handler mit computed property syntax. Die Auth-Logik selbst (Login/Register) liegt komplett im Context — die Seite ruft nur \`login(form)\` oder \`register(form)\` auf.
+
+**Formulardaten validieren und Fehler anzeigen:**
+Fehler können auf zwei Arten entstehen: durch Client-seitige Validierung (z.B. "Passwort min. 6 Zeichen" vor dem Submit) oder durch Fehler aus dem Context (z.B. "E-Mail stimmt nicht überein"). Beide landen in einem lokalen \`error\`-State. Das \`try/catch\` um den \`await login()\`-Aufruf fängt Fehler ab die der Context mit \`throw new Error(...)\` wirft. Der Fehler wird dann einfach als String in einer \`<p>\`-Zeile angezeigt.
+
+**Nach erfolgreichem Login navigieren:**
+Nach einem erfolgreichen Login oder einer Registrierung rufst du \`navigate('/dashboard')\` auf. Das ist programmatische Navigation mit dem \`useNavigate\`-Hook — der User landet sofort auf dem Dashboard ohne dass er auf einen Link klicken muss. Ein \`loading\`-State während des async-Aufrufs verhindert dass der User mehrfach absendet.`,
         keyPoints: [
           'try/catch um login()/register() — fängt Fehler aus AuthContext',
           'navigate("/dashboard") nach erfolgreichem Login',
@@ -4487,8 +4595,13 @@ export default RegisterPage`,
         id: 36,
         title: 'Projekt: Dashboard & API',
         category: 'Praxisprojekt',
-        explanation: `Das Dashboard lädt Live-Fußballdaten von der API. Wir nutzen einen Mock-Datensatz falls kein API-Key vorhanden.
-Die Daten werden als Karten-Grid angezeigt mit Team-Namen, Logos, Ergebnis und Status.`,
+        explanation: `Das Dashboard ist das Herzstück der App: es lädt Spielergebnisse und zeigt sie als Karten-Grid an. Für die Entwicklung ohne API-Key gibt es Mock-Daten die dieselbe Struktur wie die echte API haben — so kannst du das UI entwickeln ohne sofort einen Account beim API-Anbieter zu brauchen. Ein Toggle-Button wechselt zwischen Mock und Live.
+
+**Loading- und Error-States sauber implementieren:**
+Der Custom Hook \`useFetch\` gibt drei Werte zurück: \`data\`, \`loading\` und \`error\`. Im Template prüfst du alle drei Fälle: \`{loading && <p>Lade Spiele...</p>}\`, \`{error && <p>Fehler: {error}</p>}\`, und das Karten-Grid nur wenn Daten vorhanden sind. Außerdem gibst du eine leere-Liste-Meldung aus wenn der Fetch erfolgreich war aber keine Spiele zurückgegeben hat — drei verschiedene Zustände, sauber getrennt.
+
+**Daten in wiederverwendbaren Komponenten:**
+Die \`MatchCard\`-Komponente bekommt ein einzelnes \`match\`-Objekt als Prop und kümmert sich komplett um die Darstellung: Team-Logos, Spielstand, Liga-Name und Status-Badge. Das Dashboard iteriert mit \`.map()\` über die Spiele und rendert für jedes eine \`MatchCard\` — klare Trennung zwischen Daten laden (Dashboard) und Daten anzeigen (MatchCard).`,
         keyPoints: [
           'Echter API-Key von api-football.com — kostenloser Plan verfügbar',
           'Mock-Daten als Fallback für Entwicklung ohne Key',
@@ -4820,8 +4933,13 @@ export default useFetch`,
         id: 37,
         title: 'Projekt: App.tsx — Router zusammenbauen',
         category: 'Praxisprojekt',
-        explanation: `Jetzt verbinden wir alles: Router, Auth-Provider, Layout, Private Routes und alle Seiten.
-Diese Datei ist der zentrale Dreh- und Angelpunkt — hier ist die Struktur der ganzen App definiert.`,
+        explanation: `In \`App.tsx\` fließen alle Teile der App zusammen: Router-Konfiguration, Layout-Wrapper, öffentliche Routen und geschützte Routen. Diese Datei ist der zentrale Ort wo du auf einen Blick siehst wie die gesamte Anwendung strukturiert ist. In \`main.tsx\` werden \`BrowserRouter\` und \`AuthProvider\` um die App gewickelt — so stehen Navigation und Auth-State überall zur Verfügung.
+
+**Öffentliche und geschützte Routen verschachteln:**
+Die Routen-Struktur verwendet **verschachtelte Routes**: \`<Route element={<Layout />}>\` ist der äußere Wrapper der den Header für alle Seiten liefert. Darin gibt es öffentliche Routen (\`/login\`, \`/register\`) und einen \`<Route element={<PrivateRoute />}>\`-Block für geschützte Routen. Dieser Block enthält \`/dashboard\` — nur eingeloggte User kommen hier rein, alle anderen werden zum Login weitergeleitet.
+
+**Den fertigen Router der gesamten Anwendung:**
+Die Root-URL \`/\` und alle unbekannten URLs werden per \`<Navigate to="/login" replace />\` zum Login weitergeleitet. Das \`replace\` verhindert dass diese Weiterleitungen im Browser-Verlauf landen. Die vollständige Kette ist: \`BrowserRouter\` → \`AuthProvider\` → \`App\` → \`Routes\` → \`Layout\` → \`PrivateRoute\` → Seite. Jede Ebene hat eine klare Verantwortung.`,
         keyPoints: [
           'Verschachtelte Routes: Layout als Wrapper für alle Seiten',
           'PrivateRoute schützt /dashboard',
