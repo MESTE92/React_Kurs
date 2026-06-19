@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react'
 import { chapters } from './data/lessons'
 import Sidebar from './components/Sidebar'
 import LessonView from './components/LessonView'
+import NotesPanel from './components/NotesPanel'
 
 // Alle Lektionen als flaches Array
 const allLessons = chapters.flatMap(ch => ch.lessons)
@@ -11,6 +12,7 @@ const totalLessons = allLessons.length
 function App() {
   const [currentId, setCurrentId] = useState(1)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [notesOpen, setNotesOpen] = useState(false)
 
   // Aktuelle Lektion aus ID ermitteln
   const lesson = useMemo(
@@ -38,6 +40,13 @@ function App() {
         onSelect={setCurrentId}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(o => !o)}
+      />
+
+      {/* Notizen-Panel */}
+      <NotesPanel
+        lessonId={currentId}
+        isOpen={notesOpen}
+        onToggle={() => setNotesOpen(o => !o)}
       />
 
       {/* Haupt-Content */}
