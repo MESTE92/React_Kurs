@@ -1,4 +1,5 @@
 // Rendert den Inhalt einer einzelnen Lektion
+import { useState, useEffect } from 'react'
 import type { Lesson } from '../types'
 import CodeViewer from './CodeViewer'
 
@@ -12,9 +13,27 @@ interface LessonViewProps {
   editedCodes: string[]
   onEditChange: (fileIndex: number, code: string) => void
   onResetEdit: () => void
+  isCompleted: boolean
+  onToggleComplete: () => void
 }
 
-// Markdown-ähnliches Rendering für Erklärungstext
+// Keyframe-Animation einmalig in den DOM injizieren
+function injectAnimationStyle() {
+  if (document.getElementById('rk-progress-style')) return
+  const style = document.createElement('style')
+  style.id = 'rk-progress-style'
+  style.textContent = `
+    @keyframes rk-pop {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.13); }
+      70%  { transform: scale(0.96); }
+      100% { transform: scale(1); }
+    }
+    .rk-pop { animation: rk-pop 0.38s ease; }
+  `
+  document.head.appendChild(style)
+}
+
 function renderExplanation(text: string) {
   const parts = text.split('\n')
   return parts.map((line, i) => {
@@ -34,9 +53,25 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Praxisprojekt':   '#6d28d9',
 }
 
-function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEdit, editedCodes, onEditChange, onResetEdit }: LessonViewProps) {
+function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEdit, editedCodes, onEditChange, onResetEdit, isCompleted, onToggleComplete }: LessonViewProps) {
   const color = CATEGORY_COLORS[lesson.category] ?? '#7c3aed'
   const progress = Math.round((lesson.id / totalLessons) * 100)
+  const [popAnim, setPopAnim] = useState(false)
+
+  useEffect(() => { injectAnimationStyle() }, [])
+
+  function handleToggleComplete() {
+    const willComplete = !isCompleted
+    onToggleComplete()
+    if (willComplete) {
+      setPopAnim(false)
+      // kurzes Timeout damit die Klasse neu gesetzt wird auch wenn sie schon drauf war
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setPopAnim(true))
+      })
+      setTimeout(() => setPopAnim(false), 400)
+    }
+  }
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px' }}>
@@ -120,8 +155,8 @@ function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEd
 
       {/* Navigation */}
       <div style={{
-        display: 'flex', justifyContent: 'space-between', marginTop: '40px',
-        paddingTop: '20px', borderTop: '1px solid #e6ddf3',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #e6ddf3',
       }}>
         <button
           onClick={onPrev}
@@ -136,9 +171,29 @@ function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEd
           ← Vorherige
         </button>
 
-        <span style={{ color: '#9d8bc0', fontSize: '13px', alignSelf: 'center' }}>
-          {lesson.id} / {totalLessons}
-        </span>
+        {/* Abgeschlossen-Toggle — Mitte der Navigationsleiste */}
+        <button
+          onClick={handleToggleComplete}
+          className={popAnim ? 'rk-pop' : ''}
+          style={{
+            padding: '10px 24px',
+            borderRadius: '24px',
+            border: isCompleted ? 'none' : '2px solid #d1d5db',
+            background: isCompleted ? '#16a34a' : 'transparent',
+            color: isCompleted ? '#fff' : '#6b7280',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'background 0.25s, color 0.25s, border-color 0.25s, box-shadow 0.25s',
+            boxShadow: isCompleted ? '0 2px 12px rgba(22,163,74,0.35)' : 'none',
+          }}
+        >
+          <span style={{ fontSize: '16px' }}>{isCompleted ? '✓' : '○'}</span>
+          {isCompleted ? 'Abgeschlossen' : 'Als Abgeschlossen markieren'}
+        </button>
 
         <button
           onClick={onNext}

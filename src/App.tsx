@@ -20,25 +20,44 @@ function getUserId(): string {
   return id
 }
 
+// ── Edits ──────────────────────────────────────────────────────────────────
+
 function loadEditedCodes(userId: string): Record<number, string[]> {
   try {
     const raw = localStorage.getItem(`rk_edit_codes_${userId}`)
     if (!raw) return {}
     const parsed = JSON.parse(raw)
-    if (parsed.expiresAt < Date.now()) {
-      localStorage.removeItem(`rk_edit_codes_${userId}`)
-      return {}
-    }
+    if (parsed.expiresAt < Date.now()) { localStorage.removeItem(`rk_edit_codes_${userId}`); return {} }
     return parsed.data ?? {}
   } catch { return {} }
 }
 
 function saveEditedCodes(userId: string, codes: Record<number, string[]>) {
   localStorage.setItem(`rk_edit_codes_${userId}`, JSON.stringify({
-    data: codes,
+    data: codes, expiresAt: Date.now() + ONE_YEAR,
+  }))
+}
+
+// ── Fortschritt ────────────────────────────────────────────────────────────
+
+function loadProgress(userId: string): Set<number> {
+  try {
+    const raw = localStorage.getItem(`rk_progress_${userId}`)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw)
+    if (parsed.expiresAt < Date.now()) { localStorage.removeItem(`rk_progress_${userId}`); return new Set() }
+    return new Set<number>(parsed.data ?? [])
+  } catch { return new Set() }
+}
+
+function saveProgress(userId: string, completed: Set<number>) {
+  localStorage.setItem(`rk_progress_${userId}`, JSON.stringify({
+    data: Array.from(completed),
     expiresAt: Date.now() + ONE_YEAR,
   }))
 }
+
+// ──────────────────────────────────────────────────────────────────────────
 
 function App() {
   const [currentId, setCurrentId] = useState(1)
@@ -47,8 +66,12 @@ function App() {
   const [editMode, setEditMode] = useState(false)
 
   const userId = getUserId()
+
   const [editedCodes, setEditedCodes] = useState<Record<number, string[]>>(
     () => loadEditedCodes(userId)
+  )
+  const [completed, setCompleted] = useState<Set<number>>(
+    () => loadProgress(userId)
   )
 
   const lesson = useMemo(
@@ -56,9 +79,8 @@ function App() {
     [currentId]
   )
 
-  useEffect(() => {
-    saveEditedCodes(userId, editedCodes)
-  }, [editedCodes, userId])
+  useEffect(() => { saveEditedCodes(userId, editedCodes) }, [editedCodes, userId])
+  useEffect(() => { saveProgress(userId, completed) }, [completed, userId])
 
   function goNext() {
     if (currentId < totalLessons) setCurrentId(id => id + 1)
@@ -67,7 +89,6 @@ function App() {
     if (currentId > 1) setCurrentId(id => id - 1)
   }
 
-  // Edits der aktuellen Lektion — falls noch keine: Originalcode als Startwert
   const currentEditedCodes = editedCodes[currentId] ?? lesson.files.map(f => f.code)
 
   function handleEditChange(fileIndex: number, code: string) {
@@ -80,9 +101,14 @@ function App() {
   }
 
   function handleResetEdit() {
-    setEditedCodes(prev => {
-      const next = { ...prev }
-      delete next[currentId]
+    setEditedCodes(prev => { const next = { ...prev }; delete next[currentId]; return next })
+  }
+
+  function handleToggleComplete() {
+    setCompleted(prev => {
+      const next = new Set(prev)
+      if (next.has(currentId)) next.delete(currentId)
+      else next.add(currentId)
       return next
     })
   }
@@ -99,6 +125,7 @@ function App() {
         onSelect={setCurrentId}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(o => !o)}
+        completedIds={completed}
       />
 
       <NotesPanel
@@ -118,6 +145,8 @@ function App() {
           editedCodes={currentEditedCodes}
           onEditChange={handleEditChange}
           onResetEdit={handleResetEdit}
+          isCompleted={completed.has(currentId)}
+          onToggleComplete={handleToggleComplete}
         />
       </div>
     </div>
