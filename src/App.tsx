@@ -60,12 +60,14 @@ function saveProgress(userId: string, completed: Set<number>) {
 // ──────────────────────────────────────────────────────────────────────────
 
 function App() {
-  const [currentId, setCurrentId] = useState(1)
+  const userId = getUserId()
+  const [currentId, setCurrentId] = useState(() => {
+    const saved = localStorage.getItem(`rk_last_lesson_${userId}`)
+    return saved ? Number(saved) : 1
+  })
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [notesOpen, setNotesOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
-
-  const userId = getUserId()
 
   const [editedCodes, setEditedCodes] = useState<Record<number, string[]>>(
     () => loadEditedCodes(userId)
@@ -81,6 +83,7 @@ function App() {
 
   useEffect(() => { saveEditedCodes(userId, editedCodes) }, [editedCodes, userId])
   useEffect(() => { saveProgress(userId, completed) }, [completed, userId])
+  useEffect(() => { localStorage.setItem(`rk_last_lesson_${userId}`, String(currentId)) }, [currentId, userId])
 
   function goNext() {
     if (currentId < totalLessons) setCurrentId(id => id + 1)

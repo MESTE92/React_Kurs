@@ -12,7 +12,6 @@
 
 ## Für den Lerneffekt
 
-- **Quiz pro Lektion** — 2–3 Multiple-Choice-Fragen als Daten in `lessons.ts` hinterlegt, erscheinen nach dem Code-Bereich; fördert Retention
 - **Schwierigkeitsgrad-Badge** — "Einsteiger / Mittel / Fortgeschritten" pro Lektion, sichtbar in Sidebar und Lektionskopf
 - **"Nach dieser Lektion kannst du..."** — explizite Lernziele ganz oben in jeder Lektion vor dem Erklärungstext; gibt Orientierung bevor man einsteigt
 - **Verwandte Lektionen** — 2–3 Links am Ende einer Lektion zu thematisch verwandten Lektionen (z.B. bei useState → State Lifting, useEffect)
@@ -21,9 +20,3 @@
 ## Kleinigkeiten mit Wirkung
 
 - **Schriftgröße** — `A-` / `A+` Toggle im Header, Präferenz im `localStorage` speichern; Barrierefreiheit
-
-## Bewusst nicht umgesetzt
-
-- **Dark Mode** — wird nicht kommen
-- **Suchfunktion** — nicht relevant für diesen Anwendungsfall
-- **Claude/ChatGPT Chat-Seitenleiste** — kein öffentlicher OAuth für Drittanbieter; würde API Key oder Backend-Proxy benötigen
