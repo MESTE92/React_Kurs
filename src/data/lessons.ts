@@ -1357,9 +1357,13 @@ export default App`,
         id: 11,
         title: 'Conditional Rendering',
         category: 'Grundlagen',
-        explanation: `React rendert nur was du zurückgibst — du kannst mit normalen JS-Bedingungen steuern was angezeigt wird.
-Die drei gängigen Muster: **ternärer Operator**, **&&-Kurzschluss**, **early return**.
-\`null\` oder \`undefined\` rendern nichts — nützlich um Elemente auszublenden.`,
+        explanation: `React rendert immer genau das was eine Komponente zurückgibt — und das kannst du mit normalen JavaScript-Bedingungen steuern. Du entscheidest also im Code welche Elemente überhaupt im DOM landen, je nach aktuellem State oder Props.
+
+**Der ternäre Operator — if/else in JSX:**
+Innerhalb von \`{}\` in JSX musst du kurze Ausdrücke schreiben — ein mehrzeiliger \`if/else\` Block passt dort nicht rein. Der **ternäre Operator** ist die kompakte Alternative: \`bedingung ? wahr : falsch\`. \`{isLoggedIn ? <Dashboard /> : <Login />}\` zeigt entweder das Dashboard oder die Login-Seite — je nach Zustand. Er ist die erste Wahl wenn du zwischen zwei verschiedenen Ausgaben wechseln möchtest.
+
+**Der && Operator — bedingtes Rendern ohne else:**
+Wenn du etwas nur anzeigen willst wenn eine Bedingung wahr ist — aber nichts anzeigen wenn sie falsch ist — ist \`&&\` die kürzere Variante: \`{isAdmin && <AdminPanel />}\`. Ist \`isAdmin\` falsch, rendert React einfach nichts. Wichtig: Verwende \`&&\` nur mit echten Boolean-Werten — bei Zahlen wie \`{count && <Liste />}\` würde React bei \`count = 0\` die Zahl \`0\` rendern statt nichts.`,
         keyPoints: [
           'Ternär: condition ? wahr : falsch — z.B. isLoggedIn ? <Dashboard /> : <Login />',
           'Kurzschluss: condition && <A /> (false = nichts)',
@@ -1502,9 +1506,13 @@ export default App`,
         id: 12,
         title: 'Formulare — Eingaben verarbeiten',
         category: 'Grundlagen',
-        explanation: `In React wird jedes Eingabefeld durch **State** gesteuert — man spricht von einem "controlled input".
-Der State speichert immer den aktuellen Wert des Felds, \`onChange\` aktualisiert ihn bei jeder Eingabe.
-\`onSubmit\` fängt das Absenden ab — \`e.preventDefault()\` verhindert dabei den Browser-Reload.`,
+        explanation: `In React wird jedes Eingabefeld durch **State** gesteuert — man spricht von einem **controlled input**. Das bedeutet: der State hält immer den aktuellen Wert des Felds (\`value={name}\`), und bei jeder Eingabe des Nutzers wird der State sofort aktualisiert (\`onChange={e => setName(e.target.value)}\`). React und das Eingabefeld sind damit immer synchron — React weiß zu jedem Zeitpunkt was im Feld steht.
+
+**Formulardaten mit onSubmit verarbeiten:**
+Wenn der Nutzer das Formular absendet, feuert das \`onSubmit\`-Event. Der erste Schritt im Handler ist immer \`e.preventDefault()\` — ohne das würde der Browser die Seite neu laden und alle State-Werte gehen verloren. Danach kannst du die State-Variablen direkt verwenden, zum Beispiel um die Daten anzuzeigen oder an einen Server zu schicken.
+
+**htmlFor und id — barrierefreie Labels:**
+Ein \`<label>\` sollte immer mit seinem Eingabefeld verknüpft sein. Das erreichst du indem du dem \`<input>\` eine \`id\` gibst und dem \`<label>\` ein \`htmlFor\` mit demselben Wert. Der Vorteil: ein Klick auf den Label-Text fokussiert automatisch das zugehörige Eingabefeld — das verbessert die Bedienbarkeit, besonders auf mobilen Geräten.`,
         keyPoints: [
           'Controlled Input: value={state} + onChange → React kontrolliert den Wert',
           'e.preventDefault() verhindert den Standard-Reload beim Absenden',
@@ -1721,9 +1729,13 @@ export default App`,
         id: 13,
         title: 'Formulare — Formulardatenobjekt',
         category: 'Grundlagen',
-        explanation: `Statt für jedes Feld einen eigenen \`useState\` zu nutzen, fasst man alle Felder in einem **Objekt-State** zusammen.
-Ein einziger \`handleChange\` reicht für alle Inputs — er liest den Feldnamen über \`event.target.name\` und aktualisiert gezielt nur dieses Feld.
-Der **Spread-Operator** kopiert alle bestehenden Felder, der berechnete Schlüssel \`[name]\` überschreibt nur das geänderte.`,
+        explanation: `Bei Formularen mit mehreren Feldern wird es schnell unübersichtlich wenn jedes Feld seinen eigenen \`useState\` bekommt. Die sauberere Lösung: alle Felder in einem einzigen **Objekt-State** zusammenfassen. Das Objekt hat für jedes Eingabefeld einen Schlüssel — zum Beispiel \`{ name: '', email: '', message: '' }\`. So bleiben alle zusammengehörigen Formulardaten an einem Ort.
+
+**Mehrere Inputs über einen gemeinsamen onChange-Handler:**
+Statt für jedes Feld eine eigene Handler-Funktion zu schreiben, reicht ein einziger \`handleChange\`. Er liest über \`e.target.name\` welches Feld sich geändert hat — dafür muss jedes \`<input>\` ein \`name\`-Attribut haben das mit dem Schlüssel im State-Objekt übereinstimmt. So weiß der Handler automatisch welches Feld aktualisiert werden soll.
+
+**Die computed property Syntax \`[name]: value\`:**
+Beim Aktualisieren des Objekt-States willst du nur das eine geänderte Feld überschreiben und alle anderen behalten. Der Spread-Operator \`...prev\` kopiert alle bestehenden Felder, und \`[name]: value\` überschreibt gezielt nur das geänderte. Die eckigen Klammern um \`name\` sind entscheidend: sie sagen JavaScript "benutze den *Inhalt* dieser Variable als Schlüssel" — ohne Klammern würde der String \`"name"\` als Schlüssel verwendet, nicht der Variablenwert.`,
         keyPoints: [
           'Ein Objekt-State für alle Felder statt vieler einzelner useState',
           'event.target.name liest den name-Attribut des Inputs — damit weiß handleChange welches Feld sich änderte',
@@ -1894,9 +1906,13 @@ export default App`,
         id: 14,
         title: 'Lists & .map() — Listen rendern',
         category: 'Grundlagen',
-        explanation: `Arrays in JSX renderst du mit \`.map()\` — jedes Element wird in JSX umgewandelt.
-Jedes Element in einer Liste braucht ein **key**-Prop: ein eindeutiger String oder Number.
-Key hilft React beim effizienten Update des DOM — ohne key gibt es Warnungen und mögliche Bugs.`,
+        explanation: `Um ein Array von Daten als UI darzustellen, verwendest du \`.map()\`. Die Methode geht jedes Element durch und gibt ein JSX-Element zurück — das Ergebnis ist ein Array aus JSX-Elementen das React direkt rendern kann. Das Muster sieht so aus: \`{products.map(p => <div>{p.name}</div>)}\`.
+
+**Die key-Prop — warum sie Pflicht ist:**
+Jedes Element in einer gerenderten Liste braucht ein \`key\`-Prop mit einem eindeutigen Wert — typischerweise eine ID aus den Daten: \`key={product.id}\`. React nutzt diese Keys intern um bei Änderungen zu erkennen welche Elemente neu gerendert, verschoben oder entfernt werden müssen. Ohne \`key\` muss React im Zweifel die gesamte Liste neu aufbauen statt nur das geänderte Element — das kostet Performance und kann zu sichtbaren Bugs führen. Den Array-Index als Key zu verwenden ist möglich, aber problematisch wenn sich die Reihenfolge der Liste ändern kann.
+
+**Listen mit .filter() vorher filtern:**
+Oft willst du nicht alle Elemente anzeigen sondern nur eine gefilterte Auswahl. \`.filter()\` gibt ein neues Array zurück das nur die Elemente enthält die die Bedingung erfüllen. Du kannst \`.filter()\` direkt vor \`.map()\` ketten: \`products.filter(p => p.inStock).map(p => ...)\` — erst filtern, dann rendern.`,
         keyPoints: [
           '.map() → wandelt jedes Array-Element in ein JSX-Element um',
           'key={item.id} — eindeutig, stabil, aus den Daten (nicht Index wenn vermeidbar)',
@@ -2012,9 +2028,13 @@ export default ProductList`,
         id: 15,
         title: 'Listen — Todo-App',
         category: 'Grundlagen',
-        explanation: `Eine Todo-App zeigt wie \`.map()\`, \`.filter()\` und der Spread-Operator zusammenspielen.
-Jedes Todo bekommt eine eindeutige \`id\` über \`Date.now()\` — damit hat React immer einen stabilen \`key\`.
-State wird nie direkt verändert — immer neue Arrays über \`map()\` und \`filter()\` erstellen.`,
+        explanation: `Die Todo-App ist ein klassisches Übungsprojekt weil sie drei grundlegende State-Operationen auf einmal vereint: Einträge **hinzufügen**, **abhaken** und **löschen**. Das Herzstück ist ein Array von Todo-Objekten im State — jede Aktion erzeugt daraus ein neues Array, ohne das alte direkt zu verändern.
+
+**\`Date.now()\` als eindeutige ID:**
+Jedes Todo braucht eine eindeutige \`id\` als stabilen \`key\` für React. \`Date.now()\` gibt die aktuelle Zeit in Millisekunden zurück — das ist eine einfache und zuverlässige Lösung für kleine Apps, weil zwei Todos praktisch nie zur exakt gleichen Millisekunde angelegt werden. Für größere Projekte würde man \`crypto.randomUUID()\` verwenden, aber \`Date.now()\` reicht hier vollkommen aus.
+
+**\`.filter()\` zum Löschen, \`.map()\` + Spread zum Updaten:**
+Löschen funktioniert mit \`.filter()\`: du erzeugst ein neues Array das alle Todos außer dem zu löschenden enthält — \`todos.filter(t => t.id !== id)\`. Abhaken funktioniert mit \`.map()\`: du gehst alle Todos durch und kippst bei dem einen das \`done\`-Feld mit dem Spread-Operator um — \`todos.map(t => t.id === id ? { ...t, done: !t.done } : t)\`. Der Spread kopiert alle anderen Felder unverändert und nur \`done\` wird überschrieben.`,
         keyPoints: [
           'Date.now() als einfache eindeutige ID — besser als Array-Index',
           'filter() löscht: neues Array ohne das Element mit der passenden ID',
@@ -2255,9 +2275,13 @@ export default TodoApp`,
         id: 16,
         title: 'useEffect — Seiteneffekte',
         category: 'Hooks',
-        explanation: `**useEffect** führt Code aus, nachdem React die Komponente gerendert hat.
-Typische Einsatzbereiche: API-Aufrufe, Event-Listener registrieren, Timer setzen.
-Das **Dependency Array** \`[]\` bestimmt wann der Effekt erneut läuft.`,
+        explanation: `**useEffect** ist ein Hook für **Seiteneffekte** — also alles was über das reine Rendern von JSX hinausgeht: Timer starten, API-Aufrufe machen, Event-Listener registrieren. React führt den Code in \`useEffect\` aus nachdem die Komponente gerendert wurde, nicht währenddessen. So bleibt das Rendern schnell und die Nebeneffekte laufen separat.
+
+**Das Dependency Array korrekt befüllen:**
+Das zweite Argument von \`useEffect\` ist das **Dependency Array** — es steuert wann der Effekt erneut läuft. Ein leeres Array \`[]\` bedeutet: nur einmal ausführen wenn die Komponente zum ersten Mal erscheint. \`[wert]\` bedeutet: jedes Mal neu ausführen wenn sich \`wert\` ändert. Kein Array bedeutet: nach jedem Render ausführen — das führt fast immer zu einer Endlosschleife und sollte vermieden werden. Als Faustregel gilt: alle Variablen die du im Effekt verwendest, gehören ins Array.
+
+**Die Cleanup-Funktion — Seiteneffekte sauber beenden:**
+Manche Effekte müssen aufgeräumt werden wenn die Komponente verschwindet — ein laufender Timer zum Beispiel würde sonst im Hintergrund weiterlaufen. Dafür gibt \`useEffect\` eine Funktion zurück: \`return () => clearInterval(id)\`. React ruft diese Cleanup-Funktion automatisch auf bevor die Komponente aus dem DOM entfernt wird oder bevor der Effekt erneut läuft.`,
         keyPoints: [
           '[] = nur einmal beim Mounten (componentDidMount)',
           '[value] = bei jedem value-Wechsel',
@@ -2422,9 +2446,13 @@ export default Stopwatch`,
         id: 17,
         title: 'useEffect — API-Fetch mit PokéAPI',
         category: 'Hooks',
-        explanation: `API-Aufrufe gehören in \`useEffect\` — nicht direkt in die Komponente (würde bei jedem Render feuern).
-\`fetch()\` gibt ein Promise zurück — mit \`.then()\` werden die Schritte hintereinander ausgeführt sobald das Ergebnis bereit ist.
-Der \`loading\`-State sorgt dafür dass die Komponente während des Ladens einen Platzhalter zeigt.`,
+        explanation: `API-Aufrufe gehören immer in \`useEffect\` — nie direkt in den Funktionsrumpf einer Komponente. Der Grund: ohne \`useEffect\` würde der Fetch bei jedem Render neu ausgelöst werden, was zu einer Endlosschleife führt. Mit \`useEffect\` und leerem Dependency Array \`[]\` wird der Aufruf genau einmal ausgeführt, wenn die Komponente das erste Mal erscheint.
+
+**\`.then()\` Chains für asynchrone Daten:**
+\`fetch()\` gibt ein **Promise** zurück — eine Art Versprechen dass irgendwann ein Ergebnis kommt. Mit \`.then()\` legst du fest was passieren soll sobald das Ergebnis eintrifft. Die Schritte werden hintereinander gekettet: \`.then(res => res.json())\` wandelt die HTTP-Antwort in ein JavaScript-Objekt um, \`.then(data => setPokemon(data))\` speichert es im State. Jedes \`.then()\` bekommt das Ergebnis des vorherigen Schritts übergeben.
+
+**Loading-State — Feedback während des Wartens:**
+Ein API-Aufruf dauert eine gewisse Zeit — in dieser Lücke sollte die Komponente nicht leer sein. Dafür setzt du einen \`loading\`-State: vor dem Fetch auf \`true\`, nach dem Fetch auf \`false\`. Solange \`loading\` wahr ist, zeigst du einen Platzhalter wie "Lade Daten..." — danach die eigentlichen Daten. Das gibt dem Nutzer sofortiges Feedback dass etwas passiert.`,
         keyPoints: [
           '[] als Dependency → Fetch wird nur einmal beim Mounten ausgeführt',
           '.then(antwort => antwort.json()) wandelt die HTTP-Antwort in ein JS-Objekt um',
@@ -2541,9 +2569,13 @@ export default PokemonFetch`,
         id: 18,
         title: 'useRef — DOM-Zugriff ohne Re-render',
         category: 'Hooks',
-        explanation: `**useRef** gibt eine veränderliche Box (\`.current\`) die zwischen Renders erhalten bleibt — aber kein Re-render auslöst.
-Haupteinsatz 1: Direkter Zugriff auf DOM-Elemente (z.B. Input fokussieren).
-Haupteinsatz 2: Werte speichern die sich ändern dürfen ohne Re-render (z.B. Timer-IDs).`,
+        explanation: `**useRef** erstellt eine Art Box mit einer \`.current\`-Eigenschaft — der Wert darin bleibt über alle Renders erhalten und kann jederzeit gelesen oder geändert werden. Der entscheidende Unterschied zu \`useState\`: eine Änderung von \`ref.current\` löst **kein Re-render** aus. React bemerkt die Änderung gar nicht.
+
+**useRef vs. useState — wann was?**
+\`useState\` ist die richtige Wahl wenn eine Wertänderung die UI aktualisieren soll — React rendert neu und der Nutzer sieht das Ergebnis. \`useRef\` ist die richtige Wahl wenn du einen Wert speichern willst ohne dass React davon weiß: zum Beispiel eine Timer-ID die du später zum Stoppen brauchst, oder eine direkte Referenz auf ein DOM-Element.
+
+**Ein Input-Element programmatisch fokussieren:**
+Der häufigste Anwendungsfall für \`useRef\` ist der direkte Zugriff auf ein DOM-Element. Du hängst das Ref mit \`ref={inputRef}\` an ein JSX-Element — nach dem ersten Render enthält \`inputRef.current\` dann das echte DOM-Element. Darüber kannst du Methoden wie \`.focus()\` aufrufen die in React normalerweise nicht direkt verfügbar sind. Das ist nützlich wenn ein Eingabefeld beim Laden der Seite oder nach einer Aktion automatisch fokussiert werden soll.`,
         keyPoints: [
           'ref.current = direkte DOM-Referenz nach dem Mount',
           'Wertänderung löst KEIN Re-render aus (Unterschied zu useState)',
