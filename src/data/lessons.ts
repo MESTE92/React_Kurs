@@ -759,7 +759,7 @@ export default App`,
         id: 7,
         title: 'useState — Zustand in Komponenten',
         category: 'Grundlagen',
-        explanation: `**useState** ist ein React Hook — eine spezielle Funktion die einer Komponente "Gedächtnis" gibt. Der Aufruf \`const [count, setCount] = useState(0)\` gibt dir zwei Dinge zurück: den aktuellen Wert (\`count\`) und eine Funktion zum Ändern dieses Werts (\`setCount\`). Den initialen Wert — hier \`0\` — übergibst du als Argument an \`useState\`.
+        explanation: `**useState** ist eine React Hook — eine spezielle Funktion die einer Komponente "Gedächtnis" gibt. Der Aufruf \`const [count, setCount] = useState(0)\` gibt dir zwei Dinge zurück: den aktuellen Wert (\`count\`) und eine Funktion zum Ändern dieses Werts (\`setCount\`). Den initialen Wert — hier \`0\` — übergibst du als Argument an \`useState\`.
 
 **Eine interaktive Zähler-Komponente bauen:**
 Buttons rufen im \`onClick\`-Handler den Setter auf: \`setCount(count + 1)\`. Jeder Setter-Aufruf löst ein **Re-render** aus — React ruft die Komponente erneut auf, berechnet was sich geändert hat, und aktualisiert gezielt nur die betroffenen Stellen im DOM. So sieht der User immer den aktuellen Wert.
@@ -3133,67 +3133,580 @@ export default App`,
       },
       {
         id: 21,
-        title: 'useMemo & useCallback — Performance',
+        title: 'useMemo — berechnete Werte cachen',
         category: 'Hooks',
-        explanation: `**useMemo** speichert das Ergebnis einer Berechnung im Cache — die Berechnung wird nur dann neu durchgeführt, wenn sich eine der angegebenen Abhängigkeiten ändert. Das ist nützlich bei teuren Operationen wie dem Filtern oder Sortieren großer Datensätze: ohne \`useMemo\` würde React die Berechnung bei jedem Re-render komplett neu ausführen, auch wenn sich die relevanten Daten gar nicht geändert haben.
+        explanation: `**useMemo** speichert das Ergebnis einer Berechnung im Cache — React führt die Berechnung nur dann neu aus, wenn sich eine der Abhängigkeiten im Dependency Array ändert. Bei allen anderen Re-renders gibt React einfach den gecachten Wert zurück.
 
-**useCallback für stabile Funktionsreferenzen:**
-Bei jedem Render erstellt React neue Funktionen für alle Handler — das ist meistens kein Problem. Wenn du aber eine Funktion als Prop an eine \`React.memo\`-Komponente weitergibst, würde eine neue Funktion bei jedem Render dazu führen dass das memo nichts bringt (weil die Prop sich "geändert" hat). \`useCallback\` löst das: \`const handleFilter = useCallback((e) => setFilter(e.target.value), [])\` — diese Funktion wird einmal erstellt und bleibt dann stabil.
+**Wann ist das nützlich?**
+Stell dir vor du hast eine aufwändige Berechnung die von einem bestimmten Wert abhängt — zum Beispiel \`zahl * 2\`. Ohne \`useMemo\` würde React diese Berechnung bei *jedem* Re-render neu ausführen, auch wenn sich ein völlig unabhängiger State wie \`dunkel\` ändert. Mit \`useMemo(() => zahl * 2, [zahl])\` passiert die Berechnung nur wenn sich \`zahl\` tatsächlich ändert — das Umschalten des Themes löst sie nicht aus.
 
-**Wann diese Hooks sinnvoll sind:**
-Die wichtigste Regel: **nicht blind einsetzen**. Sowohl \`useMemo\` als auch \`useCallback\` haben selbst einen kleinen Performance-Overhead. Nutze sie erst wenn du ein messbares Performance-Problem hast — zum Beispiel wenn React DevTools zeigen dass eine Komponente zu oft rendert. Für normale Komponenten und einfache Berechnungen braucht man sie nicht.`,
+**Wann useMemo nicht nötig ist:**
+Für einfache Berechnungen wie \`zahl * 2\` macht \`useMemo\` keinen spürbaren Unterschied — die Hook selbst hat auch einen kleinen Overhead. Er lohnt sich erst bei wirklich teuren Operationen, zum Beispiel beim Filtern oder Sortieren sehr großer Arrays. Als Einsteiger: erst einsetzen wenn ein echtes Performance-Problem sichtbar wird.`,
         keyPoints: [
-          'useMemo: teure Berechnungen cachen',
-          'useCallback: Funktionsreferenzen stabil halten (für React.memo)',
-          'Dependency Array wie bei useEffect',
-          'Kein blinder Einsatz — erst bei messbarem Performance-Problem',
+          'useMemo(() => berechnung, [abhaengigkeit]) → cached den Rückgabewert',
+          'Berechnung läuft nur wenn sich eine Abhängigkeit ändert',
+          'Dependency Array wie bei useEffect — alles was genutzt wird, muss rein',
+          'Nicht blind einsetzen — erst bei messbarem Performance-Problem',
         ],
         learningGoals: [
-          'useMemo für teure Berechnungen einsetzen',
-          'useCallback für stabile Funktionsreferenzen verwenden',
-          'Erklären wann diese Hooks sinnvoll sind und wann nicht',
+          'useMemo für gecachte Berechnungen einsetzen',
+          'Das Dependency Array von useMemo korrekt befüllen',
+          'Erklären wann useMemo sinnvoll ist und wann nicht',
         ],
         files: [
           {
-            name: 'ExpensiveList.tsx',
+            name: 'App.tsx',
             language: 'tsx',
-            code: `import { useState, useMemo, useCallback } from 'react'
+            code: `import { useState, useMemo } from "react"
+import "./App.css"
 
-const numbers = Array.from({ length: 10000 }, (_, i) => i + 1)
+function App() {
+  const [zahl, setZahl] = useState(1)
+  const [dunkel, setDunkel] = useState(false)
 
-function ExpensiveList() {
-  const [filter, setFilter] = useState('')
-  const [count, setCount] = useState(0)
-
-  // useMemo: filteredNumbers wird nur neu berechnet wenn filter sich ändert
-  // Ohne useMemo: bei JEDEM Re-render (auch bei count++) neu berechnet
-  const filteredNumbers = useMemo(() => {
-    console.log('Filtern...')  // Zeigt wann wirklich gefiltert wird
-    return numbers.filter(n => n.toString().includes(filter))
-  }, [filter])  // Nur bei filter-Änderung neu berechnen
-
-  // useCallback: handleFilter ist immer dieselbe Funktion-Referenz
-  const handleFilter = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value)
-  }, [])  // Leeres Array: Funktion wird einmal erstellt
+  // wird nur neu berechnet wenn zahl sich ändert
+  // Theme-Wechsel (dunkel) löst KEINE Neuberechnung aus
+  const ergebnis = useMemo(() => zahl * 2, [zahl])
 
   return (
-    <div>
-      <input onChange={handleFilter} placeholder="Zahlen filtern..." />
-      <button onClick={() => setCount(c => c + 1)}>
-        Re-render ({count})
+    <div className={dunkel ? "app dark" : "app"}>
+      <h2>useMemo</h2>
+      <input
+        type="number"
+        value={zahl}
+        onChange={e => setZahl(Number(e.target.value))}
+        onFocus={e => e.target.select()}
+      />
+      <p className="result">{zahl} × 2 = <strong>{ergebnis}</strong></p>
+      <button onClick={() => setDunkel(!dunkel)}>
+        Theme: {dunkel ? "Dunkel" : "Hell"}
       </button>
-      <p>{filteredNumbers.length} Ergebnisse</p>
     </div>
   )
 }
 
-export default ExpensiveList`,
+export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.app {
+  max-width: 320px;
+  margin: 48px auto;
+  padding: 32px;
+  border-radius: 16px;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  font-family: sans-serif;
+  text-align: center;
+  transition: background 0.3s, color 0.3s;
+}
+
+.app.dark {
+  background: #1e1b2e;
+  border-color: #4c1d95;
+  color: #e9d5ff;
+}
+
+.app h2 {
+  font-size: 14px;
+  color: #6d28d9;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 20px;
+}
+
+.app.dark h2 { color: #a78bfa; }
+
+.app input {
+  width: 100%;
+  padding: 10px;
+  font-size: 20px;
+  text-align: center;
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.app.dark input {
+  background: #2d1b4e;
+  border-color: #6d28d9;
+  color: #e9d5ff;
+}
+
+.result {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #4c1d95;
+}
+
+.app.dark .result { color: #c4b5fd; }
+
+.app button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.app button:hover { background: #6d28d9; }`,
           },
         ],
       },
       {
         id: 22,
+        title: 'useCallback — Funktionen stabil halten',
+        category: 'Hooks',
+        explanation: `**useCallback** gibt dir eine stabile Referenz auf eine Funktion — sie wird nur dann neu erstellt wenn sich eine Abhängigkeit im Dependency Array ändert. Bei allen anderen Re-renders gibt React dieselbe Funktion zurück.
+
+**Warum ist das relevant — Renderkaskaden vermeiden:**
+In JavaScript ist jede Funktion die du definierst ein neues Objekt — auch wenn sie identischen Code enthält. Bei jedem Re-render einer Komponente entstehen also neue Funktionen. Das kann zu einer **Renderkaskade** führen: die Elternkomponente rendert neu, erzeugt dabei eine neue Funktionsreferenz, gibt sie als Prop weiter — und die Kindkomponente rendert deshalb ebenfalls neu, obwohl sich für sie inhaltlich nichts geändert hat. Mit \`useCallback\` bleibt die Funktionsreferenz stabil, die Kindkomponente "sieht" keine Änderung und rendert nicht unnötig neu. Damit das funktioniert muss die Kindkomponente mit \`React.memo\` gewrappt sein — sonst rendert sie ohnehin bei jedem Render der Elternkomponente.
+
+**useMemo vs. useCallback:**
+\`useMemo\` cached einen **Wert** — das Ergebnis einer Berechnung. \`useCallback\` cached eine **Funktion** selbst. Man könnte sagen: \`useCallback(fn, deps)\` ist eine Kurzform für \`useMemo(() => fn, deps)\`. Auch hier gilt: nicht blind einsetzen — erst wenn ein messbares Problem besteht.`,
+        keyPoints: [
+          'useCallback(() => fn, [deps]) → gibt stabile Funktionsreferenz zurück',
+          'Nützlich wenn Funktion als Prop an React.memo-Komponente geht',
+          'useMemo cached einen Wert, useCallback cached eine Funktion',
+          'Nicht blind einsetzen — erst bei messbarem Performance-Problem',
+        ],
+        learningGoals: [
+          'useCallback für stabile Funktionsreferenzen einsetzen',
+          'Den Unterschied zwischen useMemo und useCallback erklären',
+          'Erklären wann useCallback sinnvoll ist und wann nicht',
+        ],
+        files: [
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { useState, useCallback } from "react"
+import "./App.css"
+
+function App() {
+  const [zahl, setZahl] = useState(1)
+  const [dunkel, setDunkel] = useState(false)
+  const [ergebnis, setErgebnis] = useState(null)
+
+  // wird nur neu erstellt wenn zahl sich ändert
+  // Theme-Wechsel (dunkel) erstellt KEINE neue Funktion
+  const verdoppeln = useCallback(() => zahl * 2, [zahl])
+
+  return (
+    <div className={dunkel ? "app dark" : "app"}>
+      <h2>useCallback</h2>
+      <input
+        type="number"
+        value={zahl}
+        onChange={e => setZahl(Number(e.target.value))}
+        onFocus={e => e.target.select()}
+      />
+      <button onClick={() => setErgebnis(verdoppeln())}>Ergebnis berechnen</button>
+      {ergebnis !== null && (
+        <p className="result">{zahl} × 2 = <strong>{ergebnis}</strong></p>
+      )}
+      <button onClick={() => setDunkel(!dunkel)}>
+        Theme: {dunkel ? "Dunkel" : "Hell"}
+      </button>
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.app {
+  max-width: 320px;
+  margin: 48px auto;
+  padding: 32px;
+  border-radius: 16px;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  font-family: sans-serif;
+  text-align: center;
+  transition: background 0.3s, color 0.3s;
+}
+
+.app.dark {
+  background: #1e1b2e;
+  border-color: #4c1d95;
+  color: #e9d5ff;
+}
+
+.app h2 {
+  font-size: 14px;
+  color: #6d28d9;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 20px;
+}
+
+.app.dark h2 { color: #a78bfa; }
+
+.app input {
+  width: 100%;
+  padding: 10px;
+  font-size: 20px;
+  text-align: center;
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.app.dark input {
+  background: #2d1b4e;
+  border-color: #6d28d9;
+  color: #e9d5ff;
+}
+
+.app button {
+  display: block;
+  width: 100%;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: background 0.15s;
+}
+
+.app button:hover { background: #6d28d9; }`,
+          },
+        ],
+      },
+      {
+        id: 23,
+        title: 'useReducer — komplexer State',
+        category: 'Hooks',
+        explanation: `**useReducer** ist ein Hook der eine Alternative zu \`useState\` bietet — er ist besonders nützlich wenn mehrere verschiedene Aktionen denselben State verändern können. Statt einen Wert direkt zu setzen schickst du eine **Aktion** ab: \`dispatch({ type: "erhoehen" })\`. Eine zentrale Funktion — der **Reducer** — entscheidet dann anhand der Aktion wie der neue State aussieht.
+
+**Eine Reducer-Funktion mit Actions und Switch-Cases:**
+Der Reducer ist eine ganz normale Funktion mit zwei Parametern: dem aktuellen State und der Aktion. Ein \`switch\`-Statement teilt die Logik nach \`aktion.type\` auf — jeder \`case\` beschreibt eine mögliche Aktion und gibt den neuen State zurück. Der \`default\`-Fall gibt den unveränderten State zurück wenn keine Aktion passt. Das Schöne daran: alle State-Logik ist an einem Ort gebündelt und leicht nachvollziehbar.
+
+**dispatch — Aktionen abschicken:**
+\`dispatch\` ist die Funktion mit der du den Reducer auslöst. Du rufst sie mit einem **Aktionsobjekt** auf: \`dispatch({ type: "erhoehen" })\`. Das Objekt hat mindestens ein \`type\`-Feld das beschreibt was passieren soll — der Reducer empfängt dieses Objekt und entscheidet anhand von \`type\` welcher \`case\` ausgeführt wird. Du "setzt" keinen Wert direkt, sondern beschreibst eine Absicht — und der Reducer übersetzt das in einen neuen State.
+
+**useReducer vs. useState:**
+Für einfache Werte würde man normalerweise \`useState\` nehmen — der Code ist kürzer. \`useReducer\` lohnt sich sobald mehrere verschiedene Aktionen möglich sind (wie hier: erhöhen, verringern, zurücksetzen) oder wenn der State aus mehreren zusammengehörenden Werten besteht. Der Vorteil: du musst nicht überlegen "wo setze ich diesen Wert" — du beschreibst einfach was passieren soll und der Reducer kümmert sich um das Wie.`,
+        keyPoints: [
+          'useReducer(reducer, startwert) → [state, dispatch]',
+          'dispatch({ type: "aktion" }) → schickt eine Aktion an den Reducer',
+          'Reducer: switch(aktion.type) → gibt immer einen neuen State zurück',
+          'default-Case: unbekannte Aktionen → State unverändert zurückgeben',
+        ],
+        learningGoals: [
+          'useReducer für komplexen State einsetzen',
+          'Eine Reducer-Funktion mit Actions und Switch-Cases schreiben',
+          'Den Unterschied zwischen useReducer und useState erklären',
+        ],
+        files: [
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { useReducer } from "react"
+import "./App.css"
+
+// Reducer – nimmt den aktuellen State und eine Aktion
+// gibt den neuen State zurück
+function reducer(state, aktion) {
+  switch (aktion.type) {
+    case "erhoehen":
+      return state + 1
+    case "verringern":
+      return state - 1
+    case "zuruecksetzen":
+      return 0
+    default:
+      return state  // keine passende Aktion → unveränderter State
+  }
+}
+
+function App() {
+  // count = aktueller State
+  // dispatch = Funktion um eine Aktion zu schicken
+  // 0 = Startwert
+  const [count, dispatch] = useReducer(reducer, 0)
+
+  return (
+    <div className="counter">
+      <h2>useReducer Zähler</h2>
+      <p className="counter-value">{count}</p>
+      <div className="counter-buttons">
+        <button onClick={() => dispatch({ type: "verringern" })}>−</button>
+        <button className="reset" onClick={() => dispatch({ type: "zuruecksetzen" })}>Reset</button>
+        <button onClick={() => dispatch({ type: "erhoehen" })}>+</button>
+      </div>
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.counter {
+  max-width: 320px;
+  margin: 48px auto;
+  padding: 36px 32px;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 16px;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.counter h2 {
+  font-size: 16px;
+  color: #6d28d9;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 20px;
+}
+
+.counter-value {
+  font-size: 72px;
+  font-weight: 700;
+  color: #2d1b4e;
+  margin: 0 0 28px;
+  line-height: 1;
+}
+
+.counter-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.counter-buttons button {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.counter-buttons button:hover {
+  background: #6d28d9;
+  transform: scale(1.08);
+}
+
+.counter-buttons button.reset {
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.counter-buttons button.reset:hover {
+  background: #d1d5db;
+}`,
+          },
+        ],
+      },
+      {
+        id: 24,
+        title: 'useReducer — mehrere Reducer in einer Komponente',
+        category: 'Hooks',
+        explanation: `Eine Komponente kann beliebig viele \`useReducer\`-Aufrufe haben — jeder davon ist völlig unabhängig. Das ist nützlich wenn eine Komponente mehrere klar voneinander getrennte Zustandsbereiche hat: zum Beispiel einen Zähler und ein Formular. Jeder Reducer hat seinen eigenen State und seine eigene \`dispatch\`-Funktion — sie beeinflussen sich gegenseitig nicht.
+
+**Getrennte Verantwortlichkeiten:**
+Der \`counterReducer\` kennt nur Zahlen und die Aktionen \`"erhoehen"\`, \`"verringern"\` und \`"zuruecksetzen"\`. Der \`formReducer\` kennt nur das Formular-Objekt mit \`name\` und \`mail\` und die Aktionen \`"setName"\`, \`"setMail"\` und \`"reset"\`. Beide Reducer sind isoliert — eine Aktion die an \`dispatchCount\` geschickt wird landet ausschließlich im \`counterReducer\`, und umgekehrt.
+
+**dispatch mit payload:**
+Im \`formReducer\` siehst du ein neues Muster: die Aktion trägt zusätzlich einen Wert mit — \`dispatch({ type: "setName", value: e.target.value })\`. Dieses zusätzliche Feld nennt man **payload**. Der Reducer liest ihn mit \`aktion.value\` aus und aktualisiert damit gezielt nur ein Feld des Objekts über den Spread-Operator: \`{ ...state, name: aktion.value }\`.`,
+        keyPoints: [
+          'Mehrere useReducer in einer Komponente sind unabhängig voneinander',
+          'Jeder useReducer hat seinen eigenen State und sein eigenes dispatch',
+          'payload = zusätzliche Daten in der Aktion (z.B. { type: "setName", value: "..." })',
+          'Spread-Operator im Reducer: nur das geänderte Feld überschreiben',
+        ],
+        learningGoals: [
+          'Mehrere unabhängige Reducer in einer Komponente einsetzen',
+          'Aktionen mit payload-Werten an einen Reducer schicken',
+          'Den Spread-Operator im Reducer zum gezielten Updaten von Objekt-State einsetzen',
+        ],
+        files: [
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { useReducer } from "react"
+import "./App.css"
+
+// Reducer 1 – zuständig für den Zähler
+function counterReducer(state, aktion) {
+  switch (aktion.type) {
+    case "erhoehen":      return state + 1
+    case "verringern":    return state - 1
+    case "zuruecksetzen": return 0
+    default:              return state
+  }
+}
+
+// Reducer 2 – zuständig für das Formular
+function formReducer(state, aktion) {
+  switch (aktion.type) {
+    case "setName": return { ...state, name: aktion.value }
+    case "setMail": return { ...state, mail: aktion.value }
+    case "reset":   return { name: "", mail: "" }
+    default:        return state
+  }
+}
+
+function App() {
+  // jeder useReducer hat seinen eigenen dispatch
+  const [count, dispatchCount] = useReducer(counterReducer, 0)
+  const [form, dispatchForm] = useReducer(formReducer, { name: "", mail: "" })
+
+  return (
+    <div className="wrapper">
+
+      {/* Zähler */}
+      <div className="card">
+        <h2>Zähler</h2>
+        <p className="count-value">{count}</p>
+        <div className="btn-row">
+          <button onClick={() => dispatchCount({ type: "verringern" })}>−</button>
+          <button className="reset" onClick={() => dispatchCount({ type: "zuruecksetzen" })}>Reset</button>
+          <button onClick={() => dispatchCount({ type: "erhoehen" })}>+</button>
+        </div>
+      </div>
+
+      {/* Formular */}
+      <div className="card">
+        <h2>Formular</h2>
+        <input
+          type="text"
+          placeholder="Name"
+          value={form.name}
+          onChange={e => dispatchForm({ type: "setName", value: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Mail"
+          value={form.mail}
+          onChange={e => dispatchForm({ type: "setMail", value: e.target.value })}
+        />
+        <button className="reset" onClick={() => dispatchForm({ type: "reset" })}>
+          Formular leeren
+        </button>
+        <p className="preview">Name: <strong>{form.name || "—"}</strong></p>
+        <p className="preview">Mail: <strong>{form.mail || "—"}</strong></p>
+      </div>
+
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.wrapper {
+  display: flex;
+  gap: 24px;
+  padding: 40px;
+  justify-content: center;
+  font-family: sans-serif;
+}
+
+.card {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 16px;
+  padding: 28px 24px;
+  min-width: 220px;
+  text-align: center;
+}
+
+.card h2 {
+  font-size: 14px;
+  color: #6d28d9;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+
+.count-value {
+  font-size: 64px;
+  font-weight: 700;
+  color: #2d1b4e;
+  margin: 0 0 20px;
+  line-height: 1;
+}
+
+.btn-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.card button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.card button:hover { background: #6d28d9; }
+
+.card button.reset {
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 13px;
+}
+
+.card button.reset:hover { background: #d1d5db; }
+
+.card input {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.card input:focus { border-color: #7c3aed; }
+
+.preview {
+  font-size: 13px;
+  color: #6b5b8c;
+  margin: 6px 0 0;
+}`,
+          },
+        ],
+      },
+      {
+        id: 25,
         title: 'Custom Hooks — wiederverwendbare Logik',
         category: 'Hooks',
         explanation: `**Custom Hooks** sind eigene Funktionen die mit dem Präfix \`use\` beginnen und intern andere Hooks verwenden — zum Beispiel \`useState\`, \`useEffect\` oder andere Custom Hooks. Du kannst sie genau wie eingebaute Hooks aufrufen. Das \`use\`-Präfix ist dabei Pflicht: React erkennt daran, dass es sich um einen Hook handelt, und kann die Regeln für Hooks (nur in Komponenten/Hooks aufrufen, nicht in Schleifen) entsprechend prüfen.
@@ -3318,7 +3831,7 @@ export default App`,
     title: '3. Fortgeschritten',
     lessons: [
       {
-        id: 23,
+        id: 26,
         title: 'React Router — Navigation',
         category: 'Fortgeschritten',
         explanation: `**React Router** bringt Navigation in deine React-App — ohne dass der Browser die Seite neu lädt. Wenn der User auf einen Link klickt, ändert sich die URL im Browser, aber React tauscht nur die passende Komponente aus. Das ist das Prinzip der **Single Page Application**: eine einzige HTML-Seite, aber das Gefühl mehrerer Seiten. Installation: \`npm install react-router-dom\`.
@@ -3415,7 +3928,7 @@ export default User`,
         ],
       },
       {
-        id: 24,
+        id: 27,
         title: 'Formulare — kontrolliert vs. unkontrolliert',
         category: 'Fortgeschritten',
         explanation: `Es gibt zwei Ansätze für Formulare in React: **kontrolliert** und **unkontrolliert**. Bei kontrollierten Inputs speichert React den Wert in State und steuert damit das Eingabefeld: \`value={state}\` + \`onChange={setter}\`. Bei unkontrollierten Inputs verwaltet der Browser den Wert selbst — React liest ihn nur bei Bedarf über eine Ref aus.
@@ -3516,114 +4029,7 @@ export default LoginForm`,
         ],
       },
       {
-        id: 25,
-        title: 'useReducer — komplexer State',
-        category: 'Fortgeschritten',
-        explanation: `**useReducer** ist eine Alternative zu \`useState\` wenn der State komplex wird — zum Beispiel wenn mehrere Felder zusammengehören und viele verschiedene Aktionen möglich sind. Statt direkter Setter-Aufrufe schickst du **Aktionen** (Actions) an einen zentralen **Reducer**: \`dispatch({ type: 'ADD_ITEM', payload: item })\`. Der Reducer entscheidet dann wie der neue State aussieht.
-
-**Eine Reducer-Funktion mit Actions und Switch-Cases:**
-Der Reducer ist eine reine Funktion mit dem Muster \`(state, action) => newState\`. Ein \`switch\`-Statement teilt die Logik nach \`action.type\` auf: \`case 'ADD_ITEM'\`, \`case 'REMOVE_ITEM'\`, \`case 'CLEAR'\` usw. Jeder Case gibt einen neuen State zurück — niemals den alten State direkt mutieren. Das macht die Logik übersichtlich und leicht testbar.
-
-**useReducer vs. useState:**
-\`useState\` ist einfacher und reicht für die meisten Fälle. \`useReducer\` lohnt sich wenn der State aus mehreren zusammengehörenden Werten besteht (z.B. ein Warenkorb mit Items und Gesamtanzahl), wenn viele verschiedene Aktionen möglich sind, oder wenn die Update-Logik komplex ist und an einem Ort gebündelt sein soll.`,
-        keyPoints: [
-          'useReducer(reducer, initialState) → [state, dispatch]',
-          'dispatch({ type: "ACTION", payload: data }) → löst Reducer aus',
-          'Reducer: reine Funktion — kein API-Call, kein Side Effect',
-          'Gut wenn viele States zusammengehören',
-        ],
-        learningGoals: [
-          'useReducer für komplexen State einsetzen',
-          'Eine Reducer-Funktion mit Actions und Switch-Cases schreiben',
-          'Den Unterschied zwischen useReducer und useState erklären',
-        ],
-        files: [
-          {
-            name: 'cartReducer.ts',
-            language: 'tsx',
-            code: `// Typen für State und Aktionen
-interface CartItem {
-  id: number
-  name: string
-  quantity: number
-}
-
-interface CartState {
-  items: CartItem[]
-  total: number
-}
-
-// Discriminated Union — jede Aktion hat ihren eigenen Typ
-type CartAction =
-  | { type: 'ADD_ITEM';    payload: CartItem }
-  | { type: 'REMOVE_ITEM'; payload: number }   // payload = id
-  | { type: 'CLEAR' }
-
-// Reducer: reine Funktion — (currentState, action) → newState
-export function cartReducer(state: CartState, action: CartAction): CartState {
-  switch (action.type) {
-    case 'ADD_ITEM':
-      return { ...state, items: [...state.items, action.payload], total: state.total + 1 }
-
-    case 'REMOVE_ITEM':
-      return {
-        ...state,
-        items: state.items.filter(item => item.id !== action.payload),
-        total: state.total - 1,
-      }
-
-    case 'CLEAR':
-      return { items: [], total: 0 }
-
-    default:
-      return state  // Unbekannte Aktionen: State unverändert zurückgeben
-  }
-}
-
-export const initialCartState: CartState = { items: [], total: 0 }`,
-          },
-          {
-            name: 'Cart.tsx',
-            language: 'tsx',
-            code: `import { useReducer } from 'react'
-import { cartReducer, initialCartState } from './cartReducer'
-
-function Cart() {
-  // useReducer statt useState
-  const [state, dispatch] = useReducer(cartReducer, initialCartState)
-
-  function addItem() {
-    dispatch({
-      type: 'ADD_ITEM',
-      payload: { id: Date.now(), name: 'Artikel ' + (state.items.length + 1), quantity: 1 }
-    })
-  }
-
-  return (
-    <div>
-      <h2>Warenkorb ({state.total} Artikel)</h2>
-      <button onClick={addItem}>Artikel hinzufügen</button>
-      <button onClick={() => dispatch({ type: 'CLEAR' })}>Leeren</button>
-      <ul>
-        {state.items.map(item => (
-          <li key={item.id}>
-            {item.name}
-            <button onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: item.id })}>
-              ✕
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
-export default Cart`,
-          },
-        ],
-      },
-      {
-        id: 26,
+        id: 28,
         title: 'TypeScript mit React — Typen & Generics',
         category: 'Fortgeschritten',
         explanation: `TypeScript macht React-Code deutlich robuster: Fehler werden direkt im Editor angezeigt, nicht erst wenn der User sie in der fertigen App auslöst. Für Props, State und Event-Handler gibt es jeweils passende TypeScript-Typen. Event-Typen wie \`React.ChangeEvent<HTMLInputElement>\` oder \`React.FormEvent\` sorgen dafür, dass du auf \`e.target.value\` zugreifen kannst ohne TypeScript-Fehler.
@@ -3716,7 +4122,7 @@ export default App`,
         ],
       },
       {
-        id: 27,
+        id: 29,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
         explanation: `**React.memo** ist eine Funktion die eine Komponente "einwickelt" und ihr ein Gedächtnis für ihre Props gibt. Ohne \`memo\` rendert React eine Kindkomponente jedes Mal neu, wenn der Parent rendert — auch wenn die Props der Kindkomponente sich gar nicht geändert haben. Mit \`memo\` merkt sich React die letzten Props und überspringt das Re-render wenn sie gleich geblieben sind.
@@ -3795,7 +4201,7 @@ export default App`,
         ],
       },
       {
-        id: 28,
+        id: 30,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
         explanation: `**Error Boundaries** sind Komponenten die JavaScript-Fehler in ihrem Kindbaum abfangen und statt einem abstürzenden UI eine benutzerfreundliche Fehlermeldung anzeigen. Ohne Error Boundary würde ein Laufzeitfehler in einer tief verschachtelten Komponente die gesamte App zum Absturz bringen — mit Error Boundary bleibt nur der betroffene Bereich kaputt, der Rest funktioniert weiter.
@@ -3894,7 +4300,7 @@ export default App`,
         ],
       },
       {
-        id: 29,
+        id: 31,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
         explanation: `Wenn eine React-App groß wird, lädt der Browser beim ersten Besuch das gesamte JavaScript herunter — auch Code für Seiten die der User vielleicht nie besucht. **Code-Splitting** löst dieses Problem: der Code wird in kleinere Chunks aufgeteilt, und jeder Chunk wird erst geladen wenn er gebraucht wird. Vite unterstützt Code-Splitting automatisch, du musst es nur aktivieren.
@@ -3947,7 +4353,7 @@ export default App`,
         ],
       },
       {
-        id: 30,
+        id: 32,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
         explanation: `Normalerweise rendert React jede Komponente innerhalb ihres Parents im DOM. **Portale** durchbrechen diese Regel: \`createPortal(jsx, domNode)\` rendert JSX direkt in einen anderen DOM-Knoten — typischerweise \`document.body\`. Im React-Komponentenbaum bleibt die Komponente trotzdem an ihrem Platz (Events bubblen wie erwartet durch den React-Baum), aber im echten DOM erscheint sie woanders.
@@ -4038,7 +4444,7 @@ export default Modal`,
     title: '4. Praxisprojekt: SportsDash',
     lessons: [
       {
-        id: 31,
+        id: 33,
         title: 'Projektübersicht & Architektur',
         category: 'Praxisprojekt',
         explanation: `**SportsDash** ist unser Praxisprojekt: eine App mit Login/Registrierung und Fußball-Ergebnissen aus einer echten API. Das Projekt verbindet alles aus dem Kurs — React Router für Navigation, Context für den Auth-State, und \`fetch()\` für API-Daten. Der Datenfluss ist: AuthContext stellt den eingeloggten User bereit → Router steuert welche Seite angezeigt wird → geschützte Seiten laden API-Daten.
@@ -4086,7 +4492,7 @@ Der Unterschied: **Pages** sind vollständige Seiten die einer Route zugeordnet 
         ],
       },
       {
-        id: 32,
+        id: 34,
         title: 'Projekt: Types & Interfaces',
         category: 'Praxisprojekt',
         explanation: `In einem Projekt mit mehreren Dateien lohnt es sich, alle gemeinsamen TypeScript-Typen **zentral** zu definieren — in \`src/types/index.ts\`. So müssen Typen nicht in jeder Datei neu definiert werden, und wenn sich ein Typ ändert (z.B. die API liefert ein neues Feld), musst du nur an einer Stelle editieren.
@@ -4183,7 +4589,7 @@ export interface ApiResponse<T> {
         ],
       },
       {
-        id: 33,
+        id: 35,
         title: 'Projekt: AuthContext',
         category: 'Praxisprojekt',
         explanation: `Der **AuthContext** ist das Herzstück der User-Verwaltung: Er hält den eingeloggten User als State und stellt Login-, Logout- und Register-Funktionen für die gesamte App bereit. Alle Komponenten die wissen müssen ob jemand eingeloggt ist, konsumieren diesen Context — ohne Props durch die Hierarchie reichen zu müssen.
@@ -4266,7 +4672,7 @@ export function useAuth(): AuthContextType {
         ],
       },
       {
-        id: 34,
+        id: 36,
         title: 'Projekt: PrivateRoute & Layout',
         category: 'Praxisprojekt',
         explanation: `Eine **PrivateRoute-Komponente** schützt Seiten die nur für eingeloggte User zugänglich sein sollen. Die Logik ist simpel: wenn kein User eingeloggt ist, wird mit \`<Navigate to="/login" replace />\` sofort zum Login weitergeleitet. Wenn ein User eingeloggt ist, rendert \`<Outlet />\` die eigentliche Kind-Route. Das \`replace\` sorgt dafür dass die geschützte URL nicht im Browser-Verlauf landet — der Zurück-Button führt nicht zurück zur geschützten Seite.
@@ -4409,7 +4815,7 @@ export default Layout`,
         ],
       },
       {
-        id: 35,
+        id: 37,
         title: 'Projekt: Login & Register Pages',
         category: 'Praxisprojekt',
         explanation: `Die Login- und Registrierungsseiten sind kontrollierte Formulare die auf den AuthContext zugreifen. Das Formular hält die Eingaben in einem State-Objekt (\`{ email: '', password: '' }\`) und nutzt einen generischen \`handleChange\`-Handler mit computed property syntax. Die Auth-Logik selbst (Login/Register) liegt komplett im Context — die Seite ruft nur \`login(form)\` oder \`register(form)\` auf.
@@ -4624,7 +5030,7 @@ export default RegisterPage`,
         ],
       },
       {
-        id: 36,
+        id: 38,
         title: 'Projekt: Dashboard & API',
         category: 'Praxisprojekt',
         explanation: `Das Dashboard ist das Herzstück der App: es lädt Spielergebnisse und zeigt sie als Karten-Grid an. Für die Entwicklung ohne API-Key gibt es Mock-Daten die dieselbe Struktur wie die echte API haben — so kannst du das UI entwickeln ohne sofort einen Account beim API-Anbieter zu brauchen. Ein Toggle-Button wechselt zwischen Mock und Live.
@@ -4962,7 +5368,7 @@ export default useFetch`,
         ],
       },
       {
-        id: 37,
+        id: 39,
         title: 'Projekt: App.tsx — Router zusammenbauen',
         category: 'Praxisprojekt',
         explanation: `In \`App.tsx\` fließen alle Teile der App zusammen: Router-Konfiguration, Layout-Wrapper, öffentliche Routen und geschützte Routen. Diese Datei ist der zentrale Ort wo du auf einen Blick siehst wie die gesamte Anwendung strukturiert ist. In \`main.tsx\` werden \`BrowserRouter\` und \`AuthProvider\` um die App gewickelt — so stehen Navigation und Auth-State überall zur Verfügung.
