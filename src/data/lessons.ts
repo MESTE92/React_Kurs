@@ -3390,6 +3390,162 @@ export default App`,
       },
       {
         id: 23,
+        title: 'React.memo + useCallback — Renderkaskaden vermeiden',
+        category: 'Hooks',
+        explanation: `In der vorherigen Lektion haben wir gesehen dass \`useCallback\` stabile Funktionsreferenzen erzeugt. Aber wann macht das einen echten Unterschied? Erst wenn die Kindkomponente mit **\`React.memo\`** gewrappt ist. \`React.memo\` verhindert dass eine Komponente neu rendert wenn sich ihre Props nicht geändert haben. Ohne \`React.memo\` rendert die Kindkomponente bei jedem Render der Elternkomponente — egal ob useCallback verwendet wird oder nicht.
+
+**Wie die Kombination funktioniert:**
+\`React.memo\` vergleicht bei jedem Render ob sich die Props geändert haben. Bei normalen Werten (Zahlen, Strings) ist das einfach. Bei Funktionen vergleicht JavaScript die **Referenz** — zwei identische Funktionen sind trotzdem unterschiedliche Objekte. Ohne \`useCallback\` entsteht bei jedem Eltern-Render eine neue Funktion → \`React.memo\` sieht eine neue Prop → Kindkomponente rendert trotzdem neu. Mit \`useCallback\` bleibt die Referenz stabil → \`React.memo\` sieht keine Änderung → Kindkomponente bleibt ruhig.
+
+**Render-Counter mit useRef:**
+Um sichtbar zu machen wann die Kindkomponente rendert, nutzen wir \`useRef\` als Render-Zähler. \`useRef\` löst selbst kein Re-render aus — der Wert in \`.current\` wird einfach bei jedem Render hochgezählt. So siehst du direkt: Zähler erhöhen → Eltern rendert, Kind bleibt bei 1. Name ändern → beide rendern neu.`,
+        keyPoints: [
+          'React.memo: Kindkomponente rendert nur neu wenn Props sich ändern',
+          'useCallback allein reicht nicht — die Kindkomponente muss mit memo gewrappt sein',
+          'useRef als Render-Zähler: ändert sich ohne Re-render auszulösen',
+          'Zähler erhöhen → stabile Funktion → Kind rendert NICHT neu',
+        ],
+        learningGoals: [
+          'React.memo und useCallback gemeinsam einsetzen',
+          'Verstehen warum React.memo Voraussetzung für useCallback ist',
+          'Renderkaskaden mit memo + useCallback gezielt verhindern',
+        ],
+        files: [
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { useState, useCallback } from "react"
+import Kind from "./Kind"
+import "./App.css"
+
+function App() {
+  const [count, setCount] = useState(0)
+  const [nachricht, setNachricht] = useState("")
+
+  // stabile Referenz — ändert sich nie (leeres Dependency Array)
+  // → Kind rendert nicht neu wenn count sich ändert
+  const handleKlick = useCallback(() => {
+    setNachricht("Nachricht vom Kind empfangen!")
+  }, [])
+
+  return (
+    <div className="app">
+      <div className="eltern">
+        <h2>Elternkomponente</h2>
+        <p>Zähler: <strong>{count}</strong></p>
+        <button onClick={() => setCount(vorheriger => vorheriger + 1)}>
+          Zähler erhöhen
+        </button>
+        {nachricht && <p className="msg">✓ {nachricht}</p>}
+      </div>
+      <Kind onKlick={handleKlick} />
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'Kind.tsx',
+            language: 'tsx',
+            code: `import { useRef, memo } from "react"
+
+// memo = React.memo: diese Komponente rendert nur neu
+// wenn sich ihre Props (onKlick) tatsächlich ändern
+const Kind = memo(({ onKlick }) => {
+  const renderZaehler = useRef(0)
+  renderZaehler.current++  // zählt Renders ohne selbst einen auszulösen
+
+  return (
+    <div className="kind">
+      <h2>Kindkomponente</h2>
+      <p>Renders: <strong>{renderZaehler.current}</strong></p>
+      <button onClick={onKlick}>Nachricht senden</button>
+    </div>
+  )
+})
+
+export default Kind`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.app {
+  display: flex;
+  gap: 20px;
+  padding: 36px;
+  justify-content: center;
+  font-family: sans-serif;
+  flex-wrap: wrap;
+}
+
+.eltern, .kind {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 16px;
+  padding: 24px;
+  min-width: 200px;
+  text-align: center;
+}
+
+.kind {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.eltern h2, .kind h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+.eltern h2 { color: #6d28d9; }
+.kind h2   { color: #16a34a; }
+
+.eltern p, .kind p {
+  font-size: 15px;
+  color: #4b5563;
+  margin-bottom: 12px;
+}
+
+.kind p strong {
+  font-size: 28px;
+  color: #16a34a;
+  display: block;
+}
+
+button {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button:hover { background: #6d28d9; }
+
+.kind button {
+  background: #16a34a;
+}
+
+.kind button:hover { background: #15803d; }
+
+.msg {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #16a34a;
+  font-weight: 600;
+}`,
+          },
+        ],
+      },
+      {
+        id: 24,
         title: 'useReducer — komplexer State',
         category: 'Hooks',
         explanation: `**useReducer** ist ein Hook der eine Alternative zu \`useState\` bietet — er ist besonders nützlich wenn mehrere verschiedene Aktionen denselben State verändern können. Statt einen Wert direkt zu setzen schickst du eine **Aktion** ab: \`dispatch({ type: "erhoehen" })\`. Eine zentrale Funktion — der **Reducer** — entscheidet dann anhand der Aktion wie der neue State aussieht.
@@ -3524,7 +3680,7 @@ export default App`,
         ],
       },
       {
-        id: 24,
+        id: 25,
         title: 'useReducer — mehrere Reducer in einer Komponente',
         category: 'Hooks',
         explanation: `Eine Komponente kann beliebig viele \`useReducer\`-Aufrufe haben — jeder davon ist völlig unabhängig. Das ist nützlich wenn eine Komponente mehrere klar voneinander getrennte Zustandsbereiche hat: zum Beispiel einen Zähler und ein Formular. Jeder Reducer hat seinen eigenen State und seine eigene \`dispatch\`-Funktion — sie beeinflussen sich gegenseitig nicht.
@@ -3706,7 +3862,7 @@ export default App`,
         ],
       },
       {
-        id: 25,
+        id: 26,
         title: 'Custom Hooks — wiederverwendbare Logik',
         category: 'Hooks',
         explanation: `**Custom Hooks** sind eigene Funktionen die mit dem Präfix \`use\` beginnen und intern andere Hooks verwenden — zum Beispiel \`useState\`, \`useEffect\` oder andere Custom Hooks. Du kannst sie genau wie eingebaute Hooks aufrufen. Das \`use\`-Präfix ist dabei Pflicht: React erkennt daran, dass es sich um einen Hook handelt, und kann die Regeln für Hooks (nur in Komponenten/Hooks aufrufen, nicht in Schleifen) entsprechend prüfen.
@@ -3729,95 +3885,88 @@ Eine normale Hilfsfunktion kann keine Hooks nutzen — sie hat keinen React-Kont
         ],
         files: [
           {
-            name: 'useLocalStorage.ts',
+            name: 'useDoppelt.ts',
             language: 'tsx',
-            code: `import { useState, useEffect } from 'react'
+            code: `import { useState } from "react"
 
-// Custom Hook: State der im localStorage gespeichert wird
-function useLocalStorage<T>(key: string, initialValue: T) {
-  const [value, setValue] = useState<T>(() => {
-    // Initializer-Funktion: liest beim ersten Render aus localStorage
-    const stored = localStorage.getItem(key)
-    return stored ? JSON.parse(stored) : initialValue
-  })
+// Custom Hook — Name muss mit "use" beginnen
+function useDoppelt(startwert: number) {
+  const [zahl, setZahl] = useState(startwert)  // eigener State im Hook
+  const doppelt = zahl * 2                      // berechneter Wert
 
-  useEffect(() => {
-    // Bei jeder Wertänderung in localStorage speichern
-    localStorage.setItem(key, JSON.stringify(value))
-  }, [key, value])
-
-  return [value, setValue] as const  // as const: korrekte Tuple-Typen
+  return { zahl, doppelt, setZahl }  // alles was die Komponente braucht
 }
 
-export default useLocalStorage`,
-          },
-          {
-            name: 'useFetch.ts',
-            language: 'tsx',
-            code: `import { useState, useEffect } from 'react'
-
-// Generic Custom Hook: für beliebige API-Aufrufe
-function useFetch<T>(url: string) {
-  const [data, setData]     = useState<T | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError]   = useState<string | null>(null)
-
-  useEffect(() => {
-    async function load() {
-      try {
-        setLoading(true)
-        const res = await fetch(url)
-        if (!res.ok) throw new Error('HTTP ' + res.status)
-        const json: T = await res.json()
-        setData(json)
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Fehler')
-      } finally {
-        setLoading(false)
-      }
-    }
-    load()
-  }, [url])  // Bei URL-Änderung neu laden
-
-  return { data, loading, error }
-}
-
-export default useFetch`,
+export default useDoppelt`,
           },
           {
             name: 'App.tsx',
             language: 'tsx',
-            code: `import useLocalStorage from './useLocalStorage'
-import useFetch from './useFetch'
-
-interface Post { id: number; title: string }
+            code: `import useDoppelt from "./useDoppelt"
+import "./App.css"
 
 function App() {
-  // Custom Hook — nutzt sich wie useState
-  const [name, setName] = useLocalStorage('username', '')
-
-  // Custom Hook — lädt Daten, gibt loading/error/data zurück
-  const { data, loading, error } = useFetch<Post[]>(
-    'https://jsonplaceholder.typicode.com/posts?_limit=3'
-  )
+  // Hook aufrufen — Startwert 1, gibt State und Setter zurück
+  const { zahl, doppelt, setZahl } = useDoppelt(1)
 
   return (
-    <div>
+    <div className="app">
+      <h2>Custom Hook</h2>
       <input
-        value={name}
-        onChange={e => setName(e.target.value)}
-        placeholder="Name (wird gespeichert)"
+        type="number"
+        value={zahl}
+        onChange={e => setZahl(Number(e.target.value))}  // Setter aus dem Hook
+        onFocus={e => e.target.select()}
       />
-      <p>Hallo {name || 'Unbekannt'}!</p>
-
-      {loading && <p>Laden...</p>}
-      {error   && <p>Fehler: {error}</p>}
-      {data?.map(post => <p key={post.id}>{post.title}</p>)}
+      <p className="result">{zahl} × 2 = <strong>{doppelt}</strong></p>
     </div>
   )
 }
 
 export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px;
+  font-family: sans-serif;
+}
+
+h2 {
+  font-size: 18px;
+  color: #6d28d9;
+  margin: 0;
+}
+
+input[type="number"] {
+  width: 100px;
+  padding: 10px 14px;
+  font-size: 20px;
+  text-align: center;
+  border: 2px solid #ddd6fe;
+  border-radius: 8px;
+  outline: none;
+  color: #2d1b4e;
+}
+
+input[type="number"]:focus {
+  border-color: #7c3aed;
+}
+
+.result {
+  font-size: 20px;
+  color: #4b5563;
+  margin: 0;
+}
+
+.result strong {
+  color: #7c3aed;
+}`,
           },
         ],
       },
@@ -3831,7 +3980,7 @@ export default App`,
     title: '3. Fortgeschritten',
     lessons: [
       {
-        id: 26,
+        id: 27,
         title: 'React Router — Navigation',
         category: 'Fortgeschritten',
         explanation: `**React Router** bringt Navigation in deine React-App — ohne dass der Browser die Seite neu lädt. Wenn der User auf einen Link klickt, ändert sich die URL im Browser, aber React tauscht nur die passende Komponente aus. Das ist das Prinzip der **Single Page Application**: eine einzige HTML-Seite, aber das Gefühl mehrerer Seiten. Installation: \`npm install react-router-dom\`.
@@ -3928,7 +4077,7 @@ export default User`,
         ],
       },
       {
-        id: 27,
+        id: 28,
         title: 'Formulare — kontrolliert vs. unkontrolliert',
         category: 'Fortgeschritten',
         explanation: `Es gibt zwei Ansätze für Formulare in React: **kontrolliert** und **unkontrolliert**. Bei kontrollierten Inputs speichert React den Wert in State und steuert damit das Eingabefeld: \`value={state}\` + \`onChange={setter}\`. Bei unkontrollierten Inputs verwaltet der Browser den Wert selbst — React liest ihn nur bei Bedarf über eine Ref aus.
@@ -4029,7 +4178,7 @@ export default LoginForm`,
         ],
       },
       {
-        id: 28,
+        id: 29,
         title: 'TypeScript mit React — Typen & Generics',
         category: 'Fortgeschritten',
         explanation: `TypeScript macht React-Code deutlich robuster: Fehler werden direkt im Editor angezeigt, nicht erst wenn der User sie in der fertigen App auslöst. Für Props, State und Event-Handler gibt es jeweils passende TypeScript-Typen. Event-Typen wie \`React.ChangeEvent<HTMLInputElement>\` oder \`React.FormEvent\` sorgen dafür, dass du auf \`e.target.value\` zugreifen kannst ohne TypeScript-Fehler.
@@ -4122,7 +4271,7 @@ export default App`,
         ],
       },
       {
-        id: 29,
+        id: 30,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
         explanation: `**React.memo** ist eine Funktion die eine Komponente "einwickelt" und ihr ein Gedächtnis für ihre Props gibt. Ohne \`memo\` rendert React eine Kindkomponente jedes Mal neu, wenn der Parent rendert — auch wenn die Props der Kindkomponente sich gar nicht geändert haben. Mit \`memo\` merkt sich React die letzten Props und überspringt das Re-render wenn sie gleich geblieben sind.
@@ -4201,7 +4350,7 @@ export default App`,
         ],
       },
       {
-        id: 30,
+        id: 31,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
         explanation: `**Error Boundaries** sind Komponenten die JavaScript-Fehler in ihrem Kindbaum abfangen und statt einem abstürzenden UI eine benutzerfreundliche Fehlermeldung anzeigen. Ohne Error Boundary würde ein Laufzeitfehler in einer tief verschachtelten Komponente die gesamte App zum Absturz bringen — mit Error Boundary bleibt nur der betroffene Bereich kaputt, der Rest funktioniert weiter.
@@ -4300,7 +4449,7 @@ export default App`,
         ],
       },
       {
-        id: 31,
+        id: 32,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
         explanation: `Wenn eine React-App groß wird, lädt der Browser beim ersten Besuch das gesamte JavaScript herunter — auch Code für Seiten die der User vielleicht nie besucht. **Code-Splitting** löst dieses Problem: der Code wird in kleinere Chunks aufgeteilt, und jeder Chunk wird erst geladen wenn er gebraucht wird. Vite unterstützt Code-Splitting automatisch, du musst es nur aktivieren.
@@ -4353,7 +4502,7 @@ export default App`,
         ],
       },
       {
-        id: 32,
+        id: 33,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
         explanation: `Normalerweise rendert React jede Komponente innerhalb ihres Parents im DOM. **Portale** durchbrechen diese Regel: \`createPortal(jsx, domNode)\` rendert JSX direkt in einen anderen DOM-Knoten — typischerweise \`document.body\`. Im React-Komponentenbaum bleibt die Komponente trotzdem an ihrem Platz (Events bubblen wie erwartet durch den React-Baum), aber im echten DOM erscheint sie woanders.
@@ -4444,7 +4593,7 @@ export default Modal`,
     title: '4. Praxisprojekt: SportsDash',
     lessons: [
       {
-        id: 33,
+        id: 34,
         title: 'Projektübersicht & Architektur',
         category: 'Praxisprojekt',
         explanation: `**SportsDash** ist unser Praxisprojekt: eine App mit Login/Registrierung und Fußball-Ergebnissen aus einer echten API. Das Projekt verbindet alles aus dem Kurs — React Router für Navigation, Context für den Auth-State, und \`fetch()\` für API-Daten. Der Datenfluss ist: AuthContext stellt den eingeloggten User bereit → Router steuert welche Seite angezeigt wird → geschützte Seiten laden API-Daten.
@@ -4492,7 +4641,7 @@ Der Unterschied: **Pages** sind vollständige Seiten die einer Route zugeordnet 
         ],
       },
       {
-        id: 34,
+        id: 35,
         title: 'Projekt: Types & Interfaces',
         category: 'Praxisprojekt',
         explanation: `In einem Projekt mit mehreren Dateien lohnt es sich, alle gemeinsamen TypeScript-Typen **zentral** zu definieren — in \`src/types/index.ts\`. So müssen Typen nicht in jeder Datei neu definiert werden, und wenn sich ein Typ ändert (z.B. die API liefert ein neues Feld), musst du nur an einer Stelle editieren.
@@ -4589,7 +4738,7 @@ export interface ApiResponse<T> {
         ],
       },
       {
-        id: 35,
+        id: 36,
         title: 'Projekt: AuthContext',
         category: 'Praxisprojekt',
         explanation: `Der **AuthContext** ist das Herzstück der User-Verwaltung: Er hält den eingeloggten User als State und stellt Login-, Logout- und Register-Funktionen für die gesamte App bereit. Alle Komponenten die wissen müssen ob jemand eingeloggt ist, konsumieren diesen Context — ohne Props durch die Hierarchie reichen zu müssen.
@@ -4672,7 +4821,7 @@ export function useAuth(): AuthContextType {
         ],
       },
       {
-        id: 36,
+        id: 37,
         title: 'Projekt: PrivateRoute & Layout',
         category: 'Praxisprojekt',
         explanation: `Eine **PrivateRoute-Komponente** schützt Seiten die nur für eingeloggte User zugänglich sein sollen. Die Logik ist simpel: wenn kein User eingeloggt ist, wird mit \`<Navigate to="/login" replace />\` sofort zum Login weitergeleitet. Wenn ein User eingeloggt ist, rendert \`<Outlet />\` die eigentliche Kind-Route. Das \`replace\` sorgt dafür dass die geschützte URL nicht im Browser-Verlauf landet — der Zurück-Button führt nicht zurück zur geschützten Seite.
@@ -4815,7 +4964,7 @@ export default Layout`,
         ],
       },
       {
-        id: 37,
+        id: 38,
         title: 'Projekt: Login & Register Pages',
         category: 'Praxisprojekt',
         explanation: `Die Login- und Registrierungsseiten sind kontrollierte Formulare die auf den AuthContext zugreifen. Das Formular hält die Eingaben in einem State-Objekt (\`{ email: '', password: '' }\`) und nutzt einen generischen \`handleChange\`-Handler mit computed property syntax. Die Auth-Logik selbst (Login/Register) liegt komplett im Context — die Seite ruft nur \`login(form)\` oder \`register(form)\` auf.
@@ -5030,7 +5179,7 @@ export default RegisterPage`,
         ],
       },
       {
-        id: 38,
+        id: 39,
         title: 'Projekt: Dashboard & API',
         category: 'Praxisprojekt',
         explanation: `Das Dashboard ist das Herzstück der App: es lädt Spielergebnisse und zeigt sie als Karten-Grid an. Für die Entwicklung ohne API-Key gibt es Mock-Daten die dieselbe Struktur wie die echte API haben — so kannst du das UI entwickeln ohne sofort einen Account beim API-Anbieter zu brauchen. Ein Toggle-Button wechselt zwischen Mock und Live.
@@ -5368,7 +5517,7 @@ export default useFetch`,
         ],
       },
       {
-        id: 39,
+        id: 40,
         title: 'Projekt: App.tsx — Router zusammenbauen',
         category: 'Praxisprojekt',
         explanation: `In \`App.tsx\` fließen alle Teile der App zusammen: Router-Konfiguration, Layout-Wrapper, öffentliche Routen und geschützte Routen. Diese Datei ist der zentrale Ort wo du auf einen Blick siehst wie die gesamte Anwendung strukturiert ist. In \`main.tsx\` werden \`BrowserRouter\` und \`AuthProvider\` um die App gewickelt — so stehen Navigation und Auth-State überall zur Verfügung.
