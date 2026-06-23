@@ -4187,107 +4187,248 @@ h1 {
       },
       {
         id: 28,
-        title: 'Formulare — kontrolliert vs. unkontrolliert',
+        title: 'Formulare — kontrollierte Inputs',
         category: 'Fortgeschritten',
-        explanation: `Es gibt zwei Ansätze für Formulare in React: **kontrolliert** und **unkontrolliert**. Bei kontrollierten Inputs speichert React den Wert in State und steuert damit das Eingabefeld: \`value={state}\` + \`onChange={setter}\`. Bei unkontrollierten Inputs verwaltet der Browser den Wert selbst — React liest ihn nur bei Bedarf über eine Ref aus.
+        explanation: `Bei **kontrollierten Inputs** übernimmt React die vollständige Kontrolle über den Wert eines Eingabefelds. Der aktuelle Wert wird in einem State gespeichert und über das \`value\`-Attribut an das Eingabefeld gebunden. Bei jeder Änderung des Felds wird über \`onChange\` der State aktualisiert — das Feld zeigt stets genau das was im State steht.
 
-**useRef für unkontrollierte Formulare:**
-Bei unkontrollierten Inputs hängst du eine Ref an das Input-Element: \`<input ref={inputRef} />\`. Beim Absenden liest du den Wert einmalig aus: \`inputRef.current.value\`. Kein \`onChange\`, kein State-Update bei jeder Eingabe. Das bedeutet weniger Boilerplate — aber auch weniger Kontrolle: du kannst den Wert nicht live validieren oder anzeigen.
+**Wie das zusammenspielt:**
+\`value={name}\` bindet den State an das Feld. \`onChange={e => setName(e.target.value)}\` aktualisiert den State bei jeder Eingabe. React und Eingabefeld sind damit immer synchron — der State ist die einzige Quelle der Wahrheit. Ohne \`onChange\` wäre das Feld schreibgeschützt, da React den Wert aus dem State nicht überschreiben würde.
 
-**Wann welcher Ansatz passt:**
-Kontrollierte Inputs sind der React-Standard und empfehlenswert für die meisten Situationen — besonders wenn du Validierung während der Eingabe brauchst oder den Wert anderweitig verwenden willst. Unkontrollierte Inputs eignen sich für einfache Formulare wo du den Wert wirklich nur beim Absenden brauchst. Für komplexe Formulare mit Validierung lohnt sich eine Bibliothek wie \`react-hook-form\`.`,
+**Jedes Feld hat seinen eigenen State:**
+Im Beispiel gibt es zwei unabhängige States: \`name\` und \`mail\`. Jedes Eingabefeld ist an seinen eigenen State gebunden und aktualisiert nur diesen. Beim Abschicken stehen beide Werte sofort zur Verfügung — kein Auslesen aus dem DOM nötig.
+
+**Warum kontrolliert?**
+Der State ist jederzeit der aktuelle Wert. Das macht Validierung, Vorschau oder Weiterverarbeitung der Eingabe während des Tippens möglich — ohne auf ein Submit-Event warten zu müssen.`,
         keyPoints: [
-          'Kontrolliert: value={state} + onChange={setter} — immer synchron',
-          'Unkontrolliert: ref.current.value — nur bei Bedarf lesen',
-          'Kontrolliert = mehr Code, aber volle Kontrolle',
-          'React Hook Form: spart Boilerplate, integriert Validierung',
+          'value={state}: React bestimmt was im Feld steht',
+          'onChange={e => setState(e.target.value)}: jede Eingabe aktualisiert den State',
+          'State und Eingabefeld sind immer synchron',
+          'Beim Abschicken sind alle Werte direkt im State verfügbar',
         ],
         learningGoals: [
-          'Den Unterschied zwischen kontrollierten und unkontrollierten Inputs erklären',
-          'useRef für unkontrollierte Formulare einsetzen',
-          'Entscheiden wann welcher Ansatz sinnvoller ist',
+          'Kontrollierte Inputs mit value und onChange umsetzen',
+          'Mehrere Felder mit eigenem State verwalten',
+          'Verstehen warum State und Eingabefeld immer synchron sind',
         ],
         files: [
           {
-            name: 'LoginForm.tsx',
+            name: 'App.tsx',
             language: 'tsx',
-            code: `import { useState } from 'react'
-import './LoginForm.css'
+            code: `import { useState } from "react"
+import "./App.css"
 
-interface FormData {
-  email: string
-  password: string
-}
+function App() {
+  const [name, setName] = useState("")
+  const [mail, setMail] = useState("")
+  const [ausgabe, setAusgabe] = useState("")
 
-function LoginForm() {
-  const [form, setForm]   = useState<FormData>({ email: '', password: '' })
-  const [errors, setErrors] = useState<Partial<FormData>>({})
-
-  // Generischer Handler für alle Inputs — nutzt name-Attribut
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))  // [name] = computed key
-    // Fehler beim Tippen löschen
-    setErrors(prev => ({ ...prev, [name]: undefined }))
-  }
-
-  function validate(): boolean {
-    const newErrors: Partial<FormData> = {}
-    if (!form.email.includes('@')) newErrors.email = 'Ungültige E-Mail'
-    if (form.password.length < 6)  newErrors.password = 'Min. 6 Zeichen'
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0  // true wenn keine Fehler
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (validate()) {
-      console.log('Login:', form)
-    }
+  function abschicken() {
+    // value kommt direkt aus dem State — kein Zugriff auf den DOM nötig
+    setAusgabe(\`Name: \${name} | Mail: \${mail}\`)
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <input
-          name="email"           // name-Attribut für generischen Handler
-          value={form.email}
-          onChange={handleChange}
-          placeholder="E-Mail"
-          type="email"
-        />
-        {errors.email && <span className="error-message">{errors.email}</span>}
-      </div>
-      <div>
-        <input
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-          placeholder="Passwort"
-          type="password"
-        />
-        {errors.password && <span className="error-message">{errors.password}</span>}
-      </div>
-      <button type="submit">Anmelden</button>
-    </form>
+    <div className="app">
+      <h2>Kontrolliertes Formular</h2>
+
+      {/* value kommt von useState – onChange updated useState */}
+      <input
+        type="text"
+        value={name}
+        onChange={e => setName(e.target.value)}
+        placeholder="Name"
+      />
+      <input
+        type="text"
+        value={mail}
+        onChange={e => setMail(e.target.value)}
+        placeholder="Mail"
+      />
+      <button onClick={abschicken}>Abschicken</button>
+
+      {ausgabe && <p className="ausgabe">{ausgabe}</p>}
+    </div>
   )
 }
 
-export default LoginForm`,
+export default App`,
           },
           {
-            name: 'LoginForm.css',
+            name: 'App.css',
             language: 'css',
-            code: `
-.error-message {
-  color: red;
+            code: `.app {
+  font-family: sans-serif;
+  max-width: 320px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-`,
+
+h2 {
+  font-size: 18px;
+  color: #2d1b4e;
+  margin: 0 0 4px;
+}
+
+input {
+  padding: 10px 14px;
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2d1b4e;
+  outline: none;
+}
+
+input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+}
+
+button {
+  padding: 10px;
+  background: #7c3aed;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover { background: #6d28d9; }
+
+.ausgabe {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #16a34a;
+  font-weight: 600;
+}`,
           },
         ],
       },
       {
         id: 29,
+        title: 'Formulare — unkontrollierte Inputs',
+        category: 'Fortgeschritten',
+        explanation: `Bei **unkontrollierten Inputs** verwaltet der Browser den Wert des Eingabefelds selbst — React greift nicht bei jeder Eingabe ein. Statt \`value\` und \`onChange\` wird eine **Ref** an das Element gehängt. React liest den Wert erst dann aus wenn er tatsächlich gebraucht wird, typischerweise beim Absenden des Formulars.
+
+**Wie useRef hier eingesetzt wird:**
+\`useRef<HTMLInputElement>(null)\` erstellt eine Referenz auf das DOM-Element. Das \`ref\`-Attribut hängt sie an das Eingabefeld. Beim Absenden liest \`inputRef.current?.value\` den aktuellen Wert direkt aus dem DOM — ohne dass React den State zwischendrin verwaltet hat.
+
+**Unterschied zu kontrollierten Inputs:**
+Bei kontrollierten Inputs ist React bei jeder Tastatureingabe beteiligt und hält den State aktuell. Bei unkontrollierten Inputs passiert das nicht — React fragt nur einmal beim Absenden nach dem Wert. Das bedeutet weniger Code und weniger Re-renders, aber auch keine Möglichkeit zur Live-Validierung während der Eingabe.
+
+**Wann welcher Ansatz:**
+Kontrollierte Inputs sind der React-Standard und für die meisten Formulare empfohlen — besonders wenn Validierung während der Eingabe gefragt ist. Unkontrollierte Inputs eignen sich für einfache Fälle, bei denen der Wert nur beim Absenden ausgelesen werden muss.`,
+        keyPoints: [
+          'useRef<HTMLInputElement>(null): Referenz auf das DOM-Element',
+          'ref={nameRef}: hängt die Ref an das jeweilige Eingabefeld',
+          'nameRef.current?.value: Wert wird erst beim Abschicken gelesen',
+          'Kein onChange, kein State-Update bei jeder Eingabe',
+        ],
+        learningGoals: [
+          'Unkontrollierte Inputs mit useRef umsetzen',
+          'Den Wert eines Felds beim Absenden per Ref auslesen',
+          'Den Unterschied zu kontrollierten Inputs erklären und abwägen',
+        ],
+        files: [
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { useRef, useState } from "react"
+import "./App.css"
+
+function App() {
+  const nameRef = useRef<HTMLInputElement>(null)
+  const mailRef = useRef<HTMLInputElement>(null)
+  const [ausgabe, setAusgabe] = useState("")
+
+  function abschicken() {
+    // Werte werden erst hier gelesen — nicht bei jeder Eingabe
+    const name = nameRef.current?.value ?? ""
+    const mail = mailRef.current?.value ?? ""
+    setAusgabe(\`Name: \${name} | Mail: \${mail}\`)
+  }
+
+  return (
+    <div className="app">
+      <h2>Unkontrolliertes Formular</h2>
+
+      {/* kein value, kein onChange – useRef greift direkt auf den DOM zu */}
+      <input
+        type="text"
+        ref={nameRef}
+        placeholder="Name"
+      />
+      <input
+        type="text"
+        ref={mailRef}
+        placeholder="Mail"
+      />
+      <button onClick={abschicken}>Abschicken</button>
+
+      {ausgabe && <p className="ausgabe">{ausgabe}</p>}
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.app {
+  font-family: sans-serif;
+  max-width: 320px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+h2 {
+  font-size: 18px;
+  color: #2d1b4e;
+  margin: 0 0 4px;
+}
+
+input {
+  padding: 10px 14px;
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2d1b4e;
+  outline: none;
+}
+
+input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+}
+
+button {
+  padding: 10px;
+  background: #7c3aed;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover { background: #6d28d9; }
+
+.ausgabe {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #16a34a;
+  font-weight: 600;
+}`,
+          },
+        ],
+      },
+      {
+        id: 30,
         title: 'TypeScript mit React — Typen & Generics',
         category: 'Fortgeschritten',
         explanation: `TypeScript macht React-Code deutlich robuster: Fehler werden direkt im Editor angezeigt, nicht erst wenn der User sie in der fertigen App auslöst. Für Props, State und Event-Handler gibt es jeweils passende TypeScript-Typen. Event-Typen wie \`React.ChangeEvent<HTMLInputElement>\` oder \`React.FormEvent\` sorgen dafür, dass du auf \`e.target.value\` zugreifen kannst ohne TypeScript-Fehler.
@@ -4380,7 +4521,7 @@ export default App`,
         ],
       },
       {
-        id: 30,
+        id: 31,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
         explanation: `**React.memo** ist eine Funktion die eine Komponente "einwickelt" und ihr ein Gedächtnis für ihre Props gibt. Ohne \`memo\` rendert React eine Kindkomponente jedes Mal neu, wenn der Parent rendert — auch wenn die Props der Kindkomponente sich gar nicht geändert haben. Mit \`memo\` merkt sich React die letzten Props und überspringt das Re-render wenn sie gleich geblieben sind.
@@ -4459,7 +4600,7 @@ export default App`,
         ],
       },
       {
-        id: 31,
+        id: 32,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
         explanation: `**Error Boundaries** sind Komponenten die JavaScript-Fehler in ihrem Kindbaum abfangen und statt einem abstürzenden UI eine benutzerfreundliche Fehlermeldung anzeigen. Ohne Error Boundary würde ein Laufzeitfehler in einer tief verschachtelten Komponente die gesamte App zum Absturz bringen — mit Error Boundary bleibt nur der betroffene Bereich kaputt, der Rest funktioniert weiter.
@@ -4558,7 +4699,7 @@ export default App`,
         ],
       },
       {
-        id: 32,
+        id: 33,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
         explanation: `Wenn eine React-App groß wird, lädt der Browser beim ersten Besuch das gesamte JavaScript herunter — auch Code für Seiten die der User vielleicht nie besucht. **Code-Splitting** löst dieses Problem: der Code wird in kleinere Chunks aufgeteilt, und jeder Chunk wird erst geladen wenn er gebraucht wird. Vite unterstützt Code-Splitting automatisch, du musst es nur aktivieren.
@@ -4611,7 +4752,7 @@ export default App`,
         ],
       },
       {
-        id: 33,
+        id: 34,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
         explanation: `Normalerweise rendert React jede Komponente innerhalb ihres Parents im DOM. **Portale** durchbrechen diese Regel: \`createPortal(jsx, domNode)\` rendert JSX direkt in einen anderen DOM-Knoten — typischerweise \`document.body\`. Im React-Komponentenbaum bleibt die Komponente trotzdem an ihrem Platz (Events bubblen wie erwartet durch den React-Baum), aber im echten DOM erscheint sie woanders.
@@ -4702,7 +4843,7 @@ export default Modal`,
     title: '4. Praxisprojekt: SportsDash',
     lessons: [
       {
-        id: 34,
+        id: 35,
         title: 'Projektübersicht & Architektur',
         category: 'Praxisprojekt',
         explanation: `**SportsDash** ist unser Praxisprojekt: eine App mit Login/Registrierung und Fußball-Ergebnissen aus einer echten API. Das Projekt verbindet alles aus dem Kurs — React Router für Navigation, Context für den Auth-State, und \`fetch()\` für API-Daten. Der Datenfluss ist: AuthContext stellt den eingeloggten User bereit → Router steuert welche Seite angezeigt wird → geschützte Seiten laden API-Daten.
@@ -4750,7 +4891,7 @@ Der Unterschied: **Pages** sind vollständige Seiten die einer Route zugeordnet 
         ],
       },
       {
-        id: 35,
+        id: 36,
         title: 'Projekt: Types & Interfaces',
         category: 'Praxisprojekt',
         explanation: `In einem Projekt mit mehreren Dateien lohnt es sich, alle gemeinsamen TypeScript-Typen **zentral** zu definieren — in \`src/types/index.ts\`. So müssen Typen nicht in jeder Datei neu definiert werden, und wenn sich ein Typ ändert (z.B. die API liefert ein neues Feld), musst du nur an einer Stelle editieren.
@@ -4847,7 +4988,7 @@ export interface ApiResponse<T> {
         ],
       },
       {
-        id: 36,
+        id: 37,
         title: 'Projekt: AuthContext',
         category: 'Praxisprojekt',
         explanation: `Der **AuthContext** ist das Herzstück der User-Verwaltung: Er hält den eingeloggten User als State und stellt Login-, Logout- und Register-Funktionen für die gesamte App bereit. Alle Komponenten die wissen müssen ob jemand eingeloggt ist, konsumieren diesen Context — ohne Props durch die Hierarchie reichen zu müssen.
@@ -4930,7 +5071,7 @@ export function useAuth(): AuthContextType {
         ],
       },
       {
-        id: 37,
+        id: 38,
         title: 'Projekt: PrivateRoute & Layout',
         category: 'Praxisprojekt',
         explanation: `Eine **PrivateRoute-Komponente** schützt Seiten die nur für eingeloggte User zugänglich sein sollen. Die Logik ist simpel: wenn kein User eingeloggt ist, wird mit \`<Navigate to="/login" replace />\` sofort zum Login weitergeleitet. Wenn ein User eingeloggt ist, rendert \`<Outlet />\` die eigentliche Kind-Route. Das \`replace\` sorgt dafür dass die geschützte URL nicht im Browser-Verlauf landet — der Zurück-Button führt nicht zurück zur geschützten Seite.
@@ -5073,7 +5214,7 @@ export default Layout`,
         ],
       },
       {
-        id: 38,
+        id: 39,
         title: 'Projekt: Login & Register Pages',
         category: 'Praxisprojekt',
         explanation: `Die Login- und Registrierungsseiten sind kontrollierte Formulare die auf den AuthContext zugreifen. Das Formular hält die Eingaben in einem State-Objekt (\`{ email: '', password: '' }\`) und nutzt einen generischen \`handleChange\`-Handler mit computed property syntax. Die Auth-Logik selbst (Login/Register) liegt komplett im Context — die Seite ruft nur \`login(form)\` oder \`register(form)\` auf.
@@ -5288,7 +5429,7 @@ export default RegisterPage`,
         ],
       },
       {
-        id: 39,
+        id: 40,
         title: 'Projekt: Dashboard & API',
         category: 'Praxisprojekt',
         explanation: `Das Dashboard ist das Herzstück der App: es lädt Spielergebnisse und zeigt sie als Karten-Grid an. Für die Entwicklung ohne API-Key gibt es Mock-Daten die dieselbe Struktur wie die echte API haben — so kannst du das UI entwickeln ohne sofort einen Account beim API-Anbieter zu brauchen. Ein Toggle-Button wechselt zwischen Mock und Live.
@@ -5626,7 +5767,7 @@ export default useFetch`,
         ],
       },
       {
-        id: 40,
+        id: 41,
         title: 'Projekt: App.tsx — Router zusammenbauen',
         category: 'Praxisprojekt',
         explanation: `In \`App.tsx\` fließen alle Teile der App zusammen: Router-Konfiguration, Layout-Wrapper, öffentliche Routen und geschützte Routen. Diese Datei ist der zentrale Ort wo du auf einen Blick siehst wie die gesamte Anwendung strukturiert ist. In \`main.tsx\` werden \`BrowserRouter\` und \`AuthProvider\` um die App gewickelt — so stehen Navigation und Auth-State überall zur Verfügung.
