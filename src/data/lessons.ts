@@ -4429,6 +4429,236 @@ button:hover { background: #6d28d9; }
       },
       {
         id: 30,
+        title: 'API-Fetch — Daten mit fetch() laden',
+        category: 'Fortgeschritten',
+        explanation: `Ein häufiger Anwendungsfall in React ist das Laden von Daten aus einer externen API. Dafür wird \`useEffect\` mit \`fetch()\` kombiniert. \`useEffect\` stellt sicher dass der API-Aufruf genau einmal ausgeführt wird — nämlich wenn die Komponente zum ersten Mal erscheint. Das leere Dependency Array \`[]\` ist dafür verantwortlich.
+
+**Die drei Zustände einer API-Anfrage:**
+Jeder API-Aufruf durchläuft drei mögliche Zustände: **Laden** (die Anfrage läuft), **Fehler** (etwas ist schiefgelaufen) und **Daten** (die Antwort ist da). Diese drei Zustände werden als separate States verwaltet: \`loading\`, \`error\` und der eigentliche Datenwert. Die Komponente rendert je nach Zustand unterschiedliche Inhalte.
+
+**fetch() und die .then()-Kette:**
+\`fetch()\` gibt ein Promise zurück. Mit \`.then()\` wird die Antwort verarbeitet: zuerst wird geprüft ob die Antwort erfolgreich war (\`result.ok\`), dann mit \`.json()\` in ein JavaScript-Objekt umgewandelt, und schließlich in den State gespeichert. Mit \`.catch()\` werden Netzwerkfehler abgefangen. Wichtig: \`fetch()\` wirft bei HTTP-Fehlern wie 404 keinen Fehler automatisch — deshalb muss \`result.ok\` manuell geprüft werden.
+
+**Custom Header mit fetch():**
+Manche APIs erwarten bestimmte Header. Im Beispiel wird \`Accept: "application/json"\` mitgeschickt damit die API weiß dass die Antwort als JSON erwartet wird — ohne diesen Header würde die icanhazdadjoke-API HTML zurückgeben.`,
+        keyPoints: [
+          'useEffect mit []: API-Aufruf läuft einmal beim ersten Render',
+          'loading / error / data: die drei Zustände jeder API-Anfrage',
+          'result.ok prüfen: fetch() wirft bei 404 etc. keinen Fehler automatisch',
+          'result.json(): wandelt die Antwort in ein JavaScript-Objekt um',
+          'fetch() mit headers: teilt der API mit welches Format erwartet wird',
+        ],
+        learningGoals: [
+          'fetch() innerhalb von useEffect für API-Aufrufe einsetzen',
+          'Die drei Zustände einer API-Anfrage mit separaten States verwalten',
+          'HTTP-Fehler mit result.ok erkennen und behandeln',
+        ],
+        files: [
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { useState, useEffect } from "react"
+import "./App.css"
+
+function App() {
+  const [witz, setWitz]   = useState("")
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch("https://icanhazdadjoke.com/", {
+      headers: { Accept: "application/json" },  // JSON statt HTML anfordern
+    })
+      .then(result => {
+        // fetch wirft keinen Fehler bei 404 etc. – manuell prüfen
+        if (!result.ok) throw new Error("Etwas ist schiefgelaufen")
+        return result.json()
+      })
+      .then(data => {
+        // Daten speichern und loading beenden
+        setWitz(data.joke)
+        setLoading(false)
+      })
+      .catch(err => {
+        // Fehler speichern und loading beenden
+        setError(err.message)
+        setLoading(false)
+      })
+  }, [])  // ← einmal laden wenn Komponente erscheint
+
+  // 1. Laden
+  if (loading) return <div className="app"><p className="status">Lädt...</p></div>
+
+  // 2. Fehler
+  if (error) return <div className="app"><p className="status fehler">Fehler: {error}</p></div>
+
+  // 3. Daten
+  return (
+    <div className="app">
+      <h2>Dad Joke des Tages</h2>
+      <p className="witz">{witz}</p>
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.app {
+  font-family: sans-serif;
+  max-width: 420px;
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+h2 {
+  font-size: 16px;
+  color: #7c3aed;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.witz {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #2d1b4e;
+  margin: 0;
+  padding: 20px;
+  background: #f7f3fc;
+  border-left: 4px solid #7c3aed;
+  border-radius: 0 8px 8px 0;
+}
+
+.status {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.fehler {
+  color: #dc2626;
+}`,
+          },
+        ],
+      },
+      {
+        id: 31,
+        title: 'API-Fetch — async/await mit useEffect',
+        category: 'Fortgeschritten',
+        explanation: `In der vorherigen Lektion wurde \`fetch()\` mit einer \`.then()\`-Kette verwendet. **\`async/await\`** ist eine modernere Schreibweise für denselben asynchronen Ablauf — der Code liest sich dabei wie synchroner Code von oben nach unten, obwohl er tatsächlich asynchron läuft.
+
+**Warum async nicht direkt in useEffect:**
+\`useEffect\` darf keine \`async\`-Funktion direkt als Callback erhalten, weil \`async\`-Funktionen immer ein Promise zurückgeben — \`useEffect\` erwartet aber entweder nichts oder eine Cleanup-Funktion. Die Lösung: eine \`async\`-Funktion innerhalb des \`useEffect\`-Callbacks definieren und sofort aufrufen.
+
+**try/catch statt .catch():**
+Mit \`async/await\` wird Fehlerbehandlung über \`try/catch\` abgewickelt. Der gesamte asynchrone Code steht im \`try\`-Block. Tritt ein Fehler auf — ob Netzwerkfehler oder manuell mit \`throw\` geworfen — springt der Code in den \`catch\`-Block. Das Ergebnis ist dasselbe wie mit \`.catch()\`, aber lesbarer bei mehreren aufeinanderfolgenden \`await\`-Aufrufen.
+
+**await statt .then():**
+\`await fetch(...)\` wartet bis die Antwort da ist, bevor die nächste Zeile ausgeführt wird. \`await result.json()\` wartet auf das Parsen der Antwort. Kein Verschachteln von Callbacks — jeder Schritt steht in einer eigenen Zeile.`,
+        keyPoints: [
+          'async function innerhalb von useEffect definieren und sofort aufrufen',
+          'await: wartet auf das Ergebnis ohne den Browser zu blockieren',
+          'try/catch: Fehlerbehandlung statt .catch()',
+          'Lesbarerer Code als .then()-Ketten bei mehreren aufeinanderfolgenden Schritten',
+        ],
+        learningGoals: [
+          'async/await innerhalb von useEffect korrekt einsetzen',
+          'Den Unterschied zwischen .then() und async/await erklären',
+          'Fehlerbehandlung mit try/catch umsetzen',
+        ],
+        files: [
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { useState, useEffect } from "react"
+import "./App.css"
+
+function App() {
+  const [witz, setWitz]       = useState("")
+  const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState<string | null>(null)
+
+  useEffect(() => {
+    // async direkt in useEffect ist nicht erlaubt —
+    // deshalb: async Funktion innen definieren und aufrufen
+    async function ladeWitz() {
+      try {
+        const result = await fetch("https://icanhazdadjoke.com/", {
+          headers: { Accept: "application/json" },
+        })
+
+        // fetch wirft keinen Fehler bei 404 etc. – manuell prüfen
+        if (!result.ok) throw new Error("Etwas ist schiefgelaufen")
+
+        const data = await result.json()  // auf das Parsen warten
+        setWitz(data.joke)
+        setLoading(false)
+
+      } catch (err: any) {
+        setError(err.message)
+        setLoading(false)
+      }
+    }
+
+    ladeWitz()  // ← Funktion aufrufen
+  }, [])
+
+  if (loading) return <div className="app"><p className="status">Lädt...</p></div>
+  if (error)   return <div className="app"><p className="status fehler">Fehler: {error}</p></div>
+
+  return (
+    <div className="app">
+      <h2>Dad Joke des Tages</h2>
+      <p className="witz">{witz}</p>
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.app {
+  font-family: sans-serif;
+  max-width: 420px;
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+h2 {
+  font-size: 16px;
+  color: #7c3aed;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.witz {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #2d1b4e;
+  margin: 0;
+  padding: 20px;
+  background: #f7f3fc;
+  border-left: 4px solid #7c3aed;
+  border-radius: 0 8px 8px 0;
+}
+
+.status { font-size: 15px; color: #6b7280; margin: 0; }
+.fehler  { color: #dc2626; }`,
+          },
+        ],
+      },
+      {
+        id: 32,
         title: 'TypeScript mit React — Typen & Generics',
         category: 'Fortgeschritten',
         explanation: `TypeScript macht React-Code deutlich robuster: Fehler werden direkt im Editor angezeigt, nicht erst wenn der User sie in der fertigen App auslöst. Für Props, State und Event-Handler gibt es jeweils passende TypeScript-Typen. Event-Typen wie \`React.ChangeEvent<HTMLInputElement>\` oder \`React.FormEvent\` sorgen dafür, dass du auf \`e.target.value\` zugreifen kannst ohne TypeScript-Fehler.
@@ -4521,7 +4751,7 @@ export default App`,
         ],
       },
       {
-        id: 31,
+        id: 33,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
         explanation: `**React.memo** ist eine Funktion die eine Komponente "einwickelt" und ihr ein Gedächtnis für ihre Props gibt. Ohne \`memo\` rendert React eine Kindkomponente jedes Mal neu, wenn der Parent rendert — auch wenn die Props der Kindkomponente sich gar nicht geändert haben. Mit \`memo\` merkt sich React die letzten Props und überspringt das Re-render wenn sie gleich geblieben sind.
@@ -4600,7 +4830,7 @@ export default App`,
         ],
       },
       {
-        id: 32,
+        id: 34,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
         explanation: `**Error Boundaries** sind Komponenten die JavaScript-Fehler in ihrem Kindbaum abfangen und statt einem abstürzenden UI eine benutzerfreundliche Fehlermeldung anzeigen. Ohne Error Boundary würde ein Laufzeitfehler in einer tief verschachtelten Komponente die gesamte App zum Absturz bringen — mit Error Boundary bleibt nur der betroffene Bereich kaputt, der Rest funktioniert weiter.
@@ -4699,7 +4929,7 @@ export default App`,
         ],
       },
       {
-        id: 33,
+        id: 35,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
         explanation: `Wenn eine React-App groß wird, lädt der Browser beim ersten Besuch das gesamte JavaScript herunter — auch Code für Seiten die der User vielleicht nie besucht. **Code-Splitting** löst dieses Problem: der Code wird in kleinere Chunks aufgeteilt, und jeder Chunk wird erst geladen wenn er gebraucht wird. Vite unterstützt Code-Splitting automatisch, du musst es nur aktivieren.
@@ -4752,7 +4982,7 @@ export default App`,
         ],
       },
       {
-        id: 34,
+        id: 36,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
         explanation: `Normalerweise rendert React jede Komponente innerhalb ihres Parents im DOM. **Portale** durchbrechen diese Regel: \`createPortal(jsx, domNode)\` rendert JSX direkt in einen anderen DOM-Knoten — typischerweise \`document.body\`. Im React-Komponentenbaum bleibt die Komponente trotzdem an ihrem Platz (Events bubblen wie erwartet durch den React-Baum), aber im echten DOM erscheint sie woanders.
@@ -4843,7 +5073,7 @@ export default Modal`,
     title: '4. Praxisprojekt: SportsDash',
     lessons: [
       {
-        id: 35,
+        id: 37,
         title: 'Projektübersicht & Architektur',
         category: 'Praxisprojekt',
         explanation: `**SportsDash** ist unser Praxisprojekt: eine App mit Login/Registrierung und Fußball-Ergebnissen aus einer echten API. Das Projekt verbindet alles aus dem Kurs — React Router für Navigation, Context für den Auth-State, und \`fetch()\` für API-Daten. Der Datenfluss ist: AuthContext stellt den eingeloggten User bereit → Router steuert welche Seite angezeigt wird → geschützte Seiten laden API-Daten.
@@ -4891,7 +5121,7 @@ Der Unterschied: **Pages** sind vollständige Seiten die einer Route zugeordnet 
         ],
       },
       {
-        id: 36,
+        id: 38,
         title: 'Projekt: Types & Interfaces',
         category: 'Praxisprojekt',
         explanation: `In einem Projekt mit mehreren Dateien lohnt es sich, alle gemeinsamen TypeScript-Typen **zentral** zu definieren — in \`src/types/index.ts\`. So müssen Typen nicht in jeder Datei neu definiert werden, und wenn sich ein Typ ändert (z.B. die API liefert ein neues Feld), musst du nur an einer Stelle editieren.
@@ -4988,7 +5218,7 @@ export interface ApiResponse<T> {
         ],
       },
       {
-        id: 37,
+        id: 39,
         title: 'Projekt: AuthContext',
         category: 'Praxisprojekt',
         explanation: `Der **AuthContext** ist das Herzstück der User-Verwaltung: Er hält den eingeloggten User als State und stellt Login-, Logout- und Register-Funktionen für die gesamte App bereit. Alle Komponenten die wissen müssen ob jemand eingeloggt ist, konsumieren diesen Context — ohne Props durch die Hierarchie reichen zu müssen.
@@ -5071,7 +5301,7 @@ export function useAuth(): AuthContextType {
         ],
       },
       {
-        id: 38,
+        id: 40,
         title: 'Projekt: PrivateRoute & Layout',
         category: 'Praxisprojekt',
         explanation: `Eine **PrivateRoute-Komponente** schützt Seiten die nur für eingeloggte User zugänglich sein sollen. Die Logik ist simpel: wenn kein User eingeloggt ist, wird mit \`<Navigate to="/login" replace />\` sofort zum Login weitergeleitet. Wenn ein User eingeloggt ist, rendert \`<Outlet />\` die eigentliche Kind-Route. Das \`replace\` sorgt dafür dass die geschützte URL nicht im Browser-Verlauf landet — der Zurück-Button führt nicht zurück zur geschützten Seite.
@@ -5214,7 +5444,7 @@ export default Layout`,
         ],
       },
       {
-        id: 39,
+        id: 41,
         title: 'Projekt: Login & Register Pages',
         category: 'Praxisprojekt',
         explanation: `Die Login- und Registrierungsseiten sind kontrollierte Formulare die auf den AuthContext zugreifen. Das Formular hält die Eingaben in einem State-Objekt (\`{ email: '', password: '' }\`) und nutzt einen generischen \`handleChange\`-Handler mit computed property syntax. Die Auth-Logik selbst (Login/Register) liegt komplett im Context — die Seite ruft nur \`login(form)\` oder \`register(form)\` auf.
@@ -5429,7 +5659,7 @@ export default RegisterPage`,
         ],
       },
       {
-        id: 40,
+        id: 42,
         title: 'Projekt: Dashboard & API',
         category: 'Praxisprojekt',
         explanation: `Das Dashboard ist das Herzstück der App: es lädt Spielergebnisse und zeigt sie als Karten-Grid an. Für die Entwicklung ohne API-Key gibt es Mock-Daten die dieselbe Struktur wie die echte API haben — so kannst du das UI entwickeln ohne sofort einen Account beim API-Anbieter zu brauchen. Ein Toggle-Button wechselt zwischen Mock und Live.
@@ -5767,7 +5997,7 @@ export default useFetch`,
         ],
       },
       {
-        id: 41,
+        id: 43,
         title: 'Projekt: App.tsx — Router zusammenbauen',
         category: 'Praxisprojekt',
         explanation: `In \`App.tsx\` fließen alle Teile der App zusammen: Router-Konfiguration, Layout-Wrapper, öffentliche Routen und geschützte Routen. Diese Datei ist der zentrale Ort wo du auf einen Blick siehst wie die gesamte Anwendung strukturiert ist. In \`main.tsx\` werden \`BrowserRouter\` und \`AuthProvider\` um die App gewickelt — so stehen Navigation und Auth-State überall zur Verfügung.
