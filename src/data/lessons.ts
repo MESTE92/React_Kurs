@@ -2708,17 +2708,21 @@ export default FocusInput`,
 **Einen Context anlegen mit createContext und useContext:**
 \`createContext()\` erstellt den zentralen Datenspeicher — du gibst dabei Standardwerte an, die als Typen-Vorlage dienen. Eine \`Provider\`-Komponente hält den State und stellt ihn per \`value={}\`-Prop bereit. Jede Komponente innerhalb des Providers kann dann mit \`useContext(DeinContext)\` direkt auf diese Daten zugreifen.
 
+**DataProvider in main.tsx:**
+Der \`DataProvider\` wird in \`main.tsx\` um \`<App />\` gelegt. Dadurch steht der Context ab dem ersten Render dem gesamten Komponentenbaum zur Verfügung. Die \`App\`-Komponente selbst ist nicht der richtige Ort für den Provider — sie ist Teil des Komponentenbaums und sollte Daten empfangen, nicht bereitstellen. Die Datenzuständigkeit liegt eine Ebene höher: in \`main.tsx\`, wo die Anwendung initialisiert wird.
+
 **Prop Drilling vermeiden:**
 Ohne Context müsstest du z.B. einen eingeloggten User als Prop durch App → Navbar → UserMenu → UserAvatar durchreichen — auch wenn nur UserAvatar ihn wirklich braucht. Mit Context importiert UserAvatar einfach den Context und holt sich den User direkt. Das ist besonders nützlich für Dinge die viele Komponenten brauchen: eingeloggter User, Theme (hell/dunkel), Sprache.`,
         keyPoints: [
           'createContext() erstellt den zentralen Datenspeicher',
-          'DataProvider hält den State und gibt ihn per value={} weiter',
+          'DataProvider in main.tsx: versorgt den gesamten Komponentenbaum von Anfang an',
           'useContext(DataContext) gibt jeder Komponente direkten Zugriff — ohne Props',
           'Jede Komponente nimmt sich nur was sie braucht — Inputfeld nur setInputText, Button nur inputText',
         ],
         learningGoals: [
           'Einen Context mit createContext und useContext anlegen',
           'Einen Provider bauen der State zentral bereitstellt',
+          'Den DataProvider korrekt in main.tsx platzieren',
           'Prop Drilling durch Context vermeiden',
         ],
         files: [
@@ -2738,8 +2742,8 @@ const person = {
 
 // createContext() legt den Store an — Defaultwerte für Struktur und Typsicherheit
 export const DataContext = createContext({
-  vorname: '',
-  mail: '',
+  vorname: person.vorname,
+  mail: person.mail,
   inputText: '',
   setInputText: (text: string) => {},
 })
@@ -2822,6 +2826,21 @@ function PersonAnzeige() {
 export default PersonAnzeige`,
           },
           {
+            name: 'main.tsx',
+            language: 'tsx',
+            code: `import ReactDOM from "react-dom/client"
+import { DataProvider } from "./DataContext"
+import App from "./App"
+
+// DataProvider umhüllt App — der gesamte Komponentenbaum
+// hat damit vom ersten Render an Zugriff auf den Context
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <DataProvider>
+    <App />
+  </DataProvider>
+)`,
+          },
+          {
             name: 'App.tsx',
             language: 'tsx',
             code: `import { DataProvider } from './DataContext'
@@ -2830,9 +2849,10 @@ import Button from './Button'
 import PersonAnzeige from './PersonAnzeige'
 import './App.css'
 
+// Hinweis: Im echten Projekt sitzt DataProvider in main.tsx (siehe Tab).
+// Hier steht er in App.tsx damit die Live-Vorschau funktioniert.
 function App() {
   return (
-    // DataProvider umhüllt alle Komponenten die Zugriff auf den Store brauchen
     <DataProvider>
       <div className="app">
         <h1>Context Demo</h1>

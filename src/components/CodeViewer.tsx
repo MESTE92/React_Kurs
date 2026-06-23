@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
 import * as Babel from '@babel/standalone'
 import MonacoEditor from '@monaco-editor/react'
+import { MemoryRouter, Routes, Route, Link, NavLink, useNavigate, useParams, Outlet, BrowserRouter } from 'react-router-dom'
 import type { CodeFile } from '../types'
 
 interface CodeViewerProps {
@@ -59,12 +60,14 @@ function LivePreview({ files }: { files: CodeFile[] }) {
         'React',
         'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo',
         'useContext', 'createContext', 'Fragment', 'useReducer', 'memo', 'forwardRef',
+        'Routes', 'Route', 'Link', 'NavLink', 'useNavigate', 'useParams', 'Outlet', 'BrowserRouter',
         parts.join('\n\n') + '\nreturn ' + rootName
       )
       const Component = fn(
         React,
         React.useState, React.useEffect, React.useRef, React.useCallback, React.useMemo,
         React.useContext, React.createContext, React.Fragment, React.useReducer, React.memo, React.forwardRef,
+        Routes, Route, Link, NavLink, useNavigate, useParams, Outlet, BrowserRouter,
       ) as React.ComponentType
       return { Component, error: null }
     } catch (e: unknown) {
@@ -98,7 +101,9 @@ function LivePreview({ files }: { files: CodeFile[] }) {
 
   useEffect(() => {
     if (!rootRef.current || !Component) return
-    rootRef.current.render(React.createElement(Component))
+    rootRef.current.render(
+      React.createElement(MemoryRouter, null, React.createElement(Component))
+    )
   }, [Component])
 
   return (
