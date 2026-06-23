@@ -3983,96 +3983,185 @@ input[type="number"]:focus {
         id: 27,
         title: 'React Router — Navigation',
         category: 'Fortgeschritten',
-        explanation: `**React Router** bringt Navigation in deine React-App — ohne dass der Browser die Seite neu lädt. Wenn der User auf einen Link klickt, ändert sich die URL im Browser, aber React tauscht nur die passende Komponente aus. Das ist das Prinzip der **Single Page Application**: eine einzige HTML-Seite, aber das Gefühl mehrerer Seiten. Installation: \`npm install react-router-dom\`.
+        explanation: `**React Router** bringt Navigation in deine React-App — ohne dass der Browser die Seite neu lädt. Wenn der User auf einen Link klickt, ändert sich nur die URL, aber React tauscht im Hintergrund nur die passende Komponente aus. Das nennt sich **Single Page Application (SPA)**: es gibt genau eine HTML-Datei, und React übernimmt das Anzeigen und Verstecken von Seiten vollständig selbst. Installation: \`npm install react-router-dom\`.
 
-**Routen definieren und navigieren:**
-Den \`BrowserRouter\` legst du in \`main.tsx\` um die gesamte App. In \`App.tsx\` definierst du mit \`<Routes>\` und \`<Route path="..." element={<Komponente />} />\` welche Komponente bei welcher URL angezeigt wird. Für Links in der Navigation verwendest du \`<Link to="/about">\` statt \`<a href>\` — damit bleibt es eine SPA ohne Seiten-Reload. Für programmatische Navigation (z.B. nach dem Login) nutzt du den \`useNavigate\`-Hook.
+**BrowserRouter in main.tsx:**
+Den \`BrowserRouter\` wickelst du einmalig in \`main.tsx\` um die gesamte App. Damit aktivierst du das Routing für alle Komponenten darunter — genau wie \`Context\` muss der Router ganz außen stehen damit alle Kindkomponenten darauf zugreifen können.
 
-**URL-Parameter mit useParams:**
-Mit dem Muster \`/user/:id\` in der Route-Definition kannst du dynamische URLs erstellen. Der \`:id\`-Teil ist ein Platzhalter für beliebige Werte. In der Zielkomponente liest du den Wert mit \`const { id } = useParams()\` aus. So kannst du z.B. eine User-Detailseite für jeden User unter \`/user/42\` oder \`/user/99\` erreichbar machen.`,
+**Routen in App.tsx definieren:**
+In \`App.tsx\` legst du mit \`<Routes>\` und \`<Route>\` fest welche Komponente bei welcher URL angezeigt wird. \`path="/"\` ist die Startseite, \`path="/kontakt"\` die Kontaktseite usw. React Router vergleicht die aktuelle URL mit den definierten Pfaden und rendert die passende Komponente.
+
+**Link statt \`<a href>\`:**
+Für Navigation innerhalb der App verwendest du \`<Link to="/kontakt">\` statt \`<a href="/kontakt">\`. Der Unterschied: \`<a href>\` löst einen vollständigen Seiten-Reload aus — der Browser lädt die ganze App neu. \`<Link>\` verhindert das und lässt React Router die URL tauschen ohne neu zu laden.
+
+**Navbar als eigene Komponente:**
+Die Navigation wird als eigene \`Navbar\`-Komponente ausgelagert und in \`App.tsx\` oberhalb der \`<Routes>\` eingebunden — so erscheint sie auf jeder Seite.`,
         keyPoints: [
-          'BrowserRouter: umhüllt die App, aktiviert Routing',
-          'Routes + Route: definiert URL → Komponente Zuordnungen',
-          'Link: Navigation ohne Seiten-Reload (kein <a href>)',
-          'useNavigate: programmatische Navigation per Code',
-          'useParams: URL-Parameter auslesen (z.B. /user/:id)',
+          'BrowserRouter in main.tsx: aktiviert Routing für die gesamte App',
+          'Routes + Route: URL → Komponente Zuordnung',
+          'Link statt <a href>: Navigation ohne Seiten-Reload',
+          'Navbar oberhalb von <Routes>: erscheint auf allen Seiten',
         ],
         learningGoals: [
-          'React Router einrichten und Routen definieren',
-          'Zwischen Seiten mit Link und useNavigate navigieren',
-          'URL-Parameter mit useParams auslesen',
+          'React Router installieren und BrowserRouter in main.tsx einrichten',
+          'Routen mit Routes und Route in App.tsx definieren',
+          'Mit Link zwischen Seiten navigieren ohne Seiten-Reload',
+          'Eine Navbar als eigene Komponente aufbauen',
         ],
         files: [
           {
             name: 'main.tsx',
             language: 'tsx',
-            code: `import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'  // NEU: Router aktivieren
-import App from './App.tsx'
+            code: `import ReactDOM from "react-dom/client"
+import { BrowserRouter } from "react-router-dom"  // Routing aktivieren
+import App from "./App"
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter>   {/* Umhüllt alles — aktiviert Routing */}
-      <App />
-    </BrowserRouter>
-  </StrictMode>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <BrowserRouter>   {/* umhüllt die gesamte App */}
+    <App />
+  </BrowserRouter>
 )`,
           },
           {
             name: 'App.tsx',
             language: 'tsx',
-            code: `import { Routes, Route, Link } from 'react-router-dom'
-import Home from './pages/Home'
-import About from './pages/About'
-import User from './pages/User'
-import NotFound from './pages/NotFound'
+            code: `import { Routes, Route } from "react-router-dom"
+import Navbar from "./Navbar"
+import Startseite from "./Startseite"
+import Kontakt from "./Kontakt"
+import UeberUns from "./UeberUns"
+import "./App.css"
 
 function App() {
   return (
-    <div>
-      {/* Navigation — kein <a> Reload */}
-      <nav>
-        <Link to="/">Home</Link> |{' '}
-        <Link to="/about">About</Link> |{' '}
-        <Link to="/user/42">User 42</Link>
-      </nav>
-
-      {/* Routen-Definitionen */}
-      <Routes>
-        <Route path="/"           element={<Home />} />
-        <Route path="/about"      element={<About />} />
-        <Route path="/user/:id"   element={<User />} />  {/* :id = Parameter */}
-        <Route path="*"           element={<NotFound />} />  {/* Fallback */}
-      </Routes>
-    </div>
+    <>
+      <Navbar />               {/* erscheint auf jeder Seite */}
+      <main>
+        <Routes>               {/* nur eine Route wird gleichzeitig gerendert */}
+          <Route path="/"          element={<Startseite />} />
+          <Route path="/kontakt"   element={<Kontakt />} />
+          <Route path="/ueber-uns" element={<UeberUns />} />
+        </Routes>
+      </main>
+    </>
   )
 }
 
 export default App`,
           },
           {
-            name: 'pages/User.tsx',
+            name: 'Navbar.tsx',
             language: 'tsx',
-            code: `import { useParams, useNavigate } from 'react-router-dom'
+            code: `import { Link } from "react-router-dom"
 
-function User() {
-  // useParams: URL-Parameter auslesen
-  const { id } = useParams<{ id: string }>()
-
-  // useNavigate: programmatisch navigieren
-  const navigate = useNavigate()
-
+function Navbar() {
   return (
-    <div>
-      <h1>User #{id}</h1>
-      <button onClick={() => navigate(-1)}>Zurück</button>
-      <button onClick={() => navigate('/')}>Home</button>
-    </div>
+    <nav>
+      {/* Link statt <a href> — kein Seiten-Reload */}
+      <Link to="/">Startseite</Link>
+      <Link to="/kontakt">Kontakt</Link>
+      <Link to="/ueber-uns">Über uns</Link>
+    </nav>
   )
 }
 
-export default User`,
+export default Navbar`,
+          },
+          {
+            name: 'Startseite.tsx',
+            language: 'tsx',
+            code: `import { Link } from "react-router-dom"
+
+function Startseite() {
+  return (
+    <>
+      <h1>Willkommen auf der Startseite</h1>
+      <Link to="/kontakt" className="link-btn">Kontaktiere uns</Link>
+    </>
+  )
+}
+
+export default Startseite`,
+          },
+          {
+            name: 'Kontakt.tsx',
+            language: 'tsx',
+            code: `function Kontakt() {
+  return <h1>Kontaktseite</h1>
+}
+
+export default Kontakt`,
+          },
+          {
+            name: 'UeberUns.tsx',
+            language: 'tsx',
+            code: `function UeberUns() {
+  return <h1>Über uns</h1>
+}
+
+export default UeberUns`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+  background: #faf8fc;
+  color: #2d1b4e;
+}
+
+nav {
+  display: flex;
+  gap: 4px;
+  padding: 14px 24px;
+  background: #7c3aed;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3);
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+nav a:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+main {
+  padding: 40px 28px;
+}
+
+h1 {
+  font-size: 26px;
+  margin-bottom: 20px;
+}
+
+.link-btn {
+  display: inline-block;
+  padding: 10px 22px;
+  background: #7c3aed;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.link-btn:hover {
+  background: #6d28d9;
+}`,
           },
         ],
       },
