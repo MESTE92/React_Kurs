@@ -3410,162 +3410,6 @@ export default App`,
       },
       {
         id: 23,
-        title: 'React.memo + useCallback — Renderkaskaden vermeiden',
-        category: 'Hooks',
-        explanation: `In der vorherigen Lektion haben wir gesehen dass \`useCallback\` stabile Funktionsreferenzen erzeugt. Aber wann macht das einen echten Unterschied? Erst wenn die Kindkomponente mit **\`React.memo\`** gewrappt ist. \`React.memo\` verhindert dass eine Komponente neu rendert wenn sich ihre Props nicht geändert haben. Ohne \`React.memo\` rendert die Kindkomponente bei jedem Render der Elternkomponente — egal ob useCallback verwendet wird oder nicht.
-
-**Wie die Kombination funktioniert:**
-\`React.memo\` vergleicht bei jedem Render ob sich die Props geändert haben. Bei normalen Werten (Zahlen, Strings) ist das einfach. Bei Funktionen vergleicht JavaScript die **Referenz** — zwei identische Funktionen sind trotzdem unterschiedliche Objekte. Ohne \`useCallback\` entsteht bei jedem Eltern-Render eine neue Funktion → \`React.memo\` sieht eine neue Prop → Kindkomponente rendert trotzdem neu. Mit \`useCallback\` bleibt die Referenz stabil → \`React.memo\` sieht keine Änderung → Kindkomponente bleibt ruhig.
-
-**Render-Counter mit useRef:**
-Um sichtbar zu machen wann die Kindkomponente rendert, nutzen wir \`useRef\` als Render-Zähler. \`useRef\` löst selbst kein Re-render aus — der Wert in \`.current\` wird einfach bei jedem Render hochgezählt. So siehst du direkt: Zähler erhöhen → Eltern rendert, Kind bleibt bei 1. Name ändern → beide rendern neu.`,
-        keyPoints: [
-          'React.memo: Kindkomponente rendert nur neu wenn Props sich ändern',
-          'useCallback allein reicht nicht — die Kindkomponente muss mit memo gewrappt sein',
-          'useRef als Render-Zähler: ändert sich ohne Re-render auszulösen',
-          'Zähler erhöhen → stabile Funktion → Kind rendert NICHT neu',
-        ],
-        learningGoals: [
-          'React.memo und useCallback gemeinsam einsetzen',
-          'Verstehen warum React.memo Voraussetzung für useCallback ist',
-          'Renderkaskaden mit memo + useCallback gezielt verhindern',
-        ],
-        files: [
-          {
-            name: 'App.tsx',
-            language: 'tsx',
-            code: `import { useState, useCallback } from "react"
-import Kind from "./Kind"
-import "./App.css"
-
-function App() {
-  const [count, setCount] = useState(0)
-  const [nachricht, setNachricht] = useState("")
-
-  // stabile Referenz — ändert sich nie (leeres Dependency Array)
-  // → Kind rendert nicht neu wenn count sich ändert
-  const handleKlick = useCallback(() => {
-    setNachricht("Nachricht vom Kind empfangen!")
-  }, [])
-
-  return (
-    <div className="app">
-      <div className="eltern">
-        <h2>Elternkomponente</h2>
-        <p>Zähler: <strong>{count}</strong></p>
-        <button onClick={() => setCount(vorheriger => vorheriger + 1)}>
-          Zähler erhöhen
-        </button>
-        {nachricht && <p className="msg">✓ {nachricht}</p>}
-      </div>
-      <Kind onKlick={handleKlick} />
-    </div>
-  )
-}
-
-export default App`,
-          },
-          {
-            name: 'Kind.tsx',
-            language: 'tsx',
-            code: `import { useRef, memo } from "react"
-
-// memo = React.memo: diese Komponente rendert nur neu
-// wenn sich ihre Props (onKlick) tatsächlich ändern
-const Kind = memo(({ onKlick }) => {
-  const renderZaehler = useRef(0)
-  renderZaehler.current++  // zählt Renders ohne selbst einen auszulösen
-
-  return (
-    <div className="kind">
-      <h2>Kindkomponente</h2>
-      <p>Renders: <strong>{renderZaehler.current}</strong></p>
-      <button onClick={onKlick}>Nachricht senden</button>
-    </div>
-  )
-})
-
-export default Kind`,
-          },
-          {
-            name: 'App.css',
-            language: 'css',
-            code: `.app {
-  display: flex;
-  gap: 20px;
-  padding: 36px;
-  justify-content: center;
-  font-family: sans-serif;
-  flex-wrap: wrap;
-}
-
-.eltern, .kind {
-  background: #f5f3ff;
-  border: 1px solid #ddd6fe;
-  border-radius: 16px;
-  padding: 24px;
-  min-width: 200px;
-  text-align: center;
-}
-
-.kind {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-}
-
-.eltern h2, .kind h2 {
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 12px;
-}
-
-.eltern h2 { color: #6d28d9; }
-.kind h2   { color: #16a34a; }
-
-.eltern p, .kind p {
-  font-size: 15px;
-  color: #4b5563;
-  margin-bottom: 12px;
-}
-
-.kind p strong {
-  font-size: 28px;
-  color: #16a34a;
-  display: block;
-}
-
-button {
-  padding: 9px 18px;
-  border-radius: 8px;
-  border: none;
-  background: #7c3aed;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-button:hover { background: #6d28d9; }
-
-.kind button {
-  background: #16a34a;
-}
-
-.kind button:hover { background: #15803d; }
-
-.msg {
-  margin-top: 10px;
-  font-size: 13px;
-  color: #16a34a;
-  font-weight: 600;
-}`,
-          },
-        ],
-      },
-      {
-        id: 24,
         title: 'useReducer — komplexer State',
         category: 'Hooks',
         explanation: `**useReducer** ist ein Hook der eine Alternative zu \`useState\` bietet — er ist besonders nützlich wenn mehrere verschiedene Aktionen denselben State verändern können. Statt einen Wert direkt zu setzen schickst du eine **Aktion** ab: \`dispatch({ type: "erhoehen" })\`. Eine zentrale Funktion — der **Reducer** — entscheidet dann anhand der Aktion wie der neue State aussieht.
@@ -3700,7 +3544,7 @@ export default App`,
         ],
       },
       {
-        id: 25,
+        id: 24,
         title: 'useReducer — mehrere Reducer in einer Komponente',
         category: 'Hooks',
         explanation: `Eine Komponente kann beliebig viele \`useReducer\`-Aufrufe haben — jeder davon ist völlig unabhängig. Das ist nützlich wenn eine Komponente mehrere klar voneinander getrennte Zustandsbereiche hat: zum Beispiel einen Zähler und ein Formular. Jeder Reducer hat seinen eigenen State und seine eigene \`dispatch\`-Funktion — sie beeinflussen sich gegenseitig nicht.
@@ -3882,7 +3726,7 @@ export default App`,
         ],
       },
       {
-        id: 26,
+        id: 25,
         title: 'Custom Hooks — wiederverwendbare Logik',
         category: 'Hooks',
         explanation: `**Custom Hooks** sind eigene Funktionen die mit dem Präfix \`use\` beginnen und intern andere Hooks verwenden — zum Beispiel \`useState\`, \`useEffect\` oder andere Custom Hooks. Du kannst sie genau wie eingebaute Hooks aufrufen. Das \`use\`-Präfix ist dabei Pflicht: React erkennt daran, dass es sich um einen Hook handelt, und kann die Regeln für Hooks (nur in Komponenten/Hooks aufrufen, nicht in Schleifen) entsprechend prüfen.
@@ -4000,7 +3844,7 @@ input[type="number"]:focus {
     title: '3. Fortgeschritten',
     lessons: [
       {
-        id: 27,
+        id: 26,
         title: 'React Router — Navigation',
         category: 'Fortgeschritten',
         explanation: `**React Router** bringt Navigation in deine React-App — ohne dass der Browser die Seite neu lädt. Wenn der User auf einen Link klickt, ändert sich nur die URL, aber React tauscht im Hintergrund nur die passende Komponente aus. Das nennt sich **Single Page Application (SPA)**: es gibt genau eine HTML-Datei, und React übernimmt das Anzeigen und Verstecken von Seiten vollständig selbst. Installation: \`npm install react-router-dom\`.
@@ -4186,7 +4030,7 @@ h1 {
         ],
       },
       {
-        id: 28,
+        id: 27,
         title: 'Formulare — kontrollierte Inputs',
         category: 'Fortgeschritten',
         explanation: `Bei **kontrollierten Inputs** übernimmt React die vollständige Kontrolle über den Wert eines Eingabefelds. Der aktuelle Wert wird in einem State gespeichert und über das \`value\`-Attribut an das Eingabefeld gebunden. Bei jeder Änderung des Felds wird über \`onChange\` der State aktualisiert — das Feld zeigt stets genau das was im State steht.
@@ -4307,7 +4151,7 @@ button:hover { background: #6d28d9; }
         ],
       },
       {
-        id: 29,
+        id: 28,
         title: 'Formulare — unkontrollierte Inputs',
         category: 'Fortgeschritten',
         explanation: `Bei **unkontrollierten Inputs** verwaltet der Browser den Wert des Eingabefelds selbst — React greift nicht bei jeder Eingabe ein. Statt \`value\` und \`onChange\` wird eine **Ref** an das Element gehängt. React liest den Wert erst dann aus wenn er tatsächlich gebraucht wird, typischerweise beim Absenden des Formulars.
@@ -4428,7 +4272,7 @@ button:hover { background: #6d28d9; }
         ],
       },
       {
-        id: 30,
+        id: 29,
         title: 'API-Fetch — Daten mit fetch() laden',
         category: 'Fortgeschritten',
         explanation: `Ein häufiger Anwendungsfall in React ist das Laden von Daten aus einer externen API. Dafür wird \`useEffect\` mit \`fetch()\` kombiniert. \`useEffect\` stellt sicher dass der API-Aufruf genau einmal ausgeführt wird — nämlich wenn die Komponente zum ersten Mal erscheint. Das leere Dependency Array \`[]\` ist dafür verantwortlich.
@@ -4547,7 +4391,7 @@ h2 {
         ],
       },
       {
-        id: 31,
+        id: 30,
         title: 'API-Fetch — async/await mit useEffect',
         category: 'Fortgeschritten',
         explanation: `In der vorherigen Lektion wurde \`fetch()\` mit einer \`.then()\`-Kette verwendet. **\`async/await\`** ist eine modernere Schreibweise für denselben asynchronen Ablauf — der Code liest sich dabei wie synchroner Code von oben nach unten, obwohl er tatsächlich asynchron läuft.
@@ -4654,6 +4498,162 @@ h2 {
 
 .status { font-size: 15px; color: #6b7280; margin: 0; }
 .fehler  { color: #dc2626; }`,
+          },
+        ],
+      },
+      {
+        id: 31,
+        title: 'React.memo + useCallback — Renderkaskaden vermeiden',
+        category: 'Fortgeschritten',
+        explanation: `In der vorherigen Lektion haben wir gesehen dass \`useCallback\` stabile Funktionsreferenzen erzeugt. Aber wann macht das einen echten Unterschied? Erst wenn die Kindkomponente mit **\`React.memo\`** gewrappt ist. \`React.memo\` verhindert dass eine Komponente neu rendert wenn sich ihre Props nicht geändert haben. Ohne \`React.memo\` rendert die Kindkomponente bei jedem Render der Elternkomponente — egal ob useCallback verwendet wird oder nicht.
+
+**Wie die Kombination funktioniert:**
+\`React.memo\` vergleicht bei jedem Render ob sich die Props geändert haben. Bei normalen Werten (Zahlen, Strings) ist das einfach. Bei Funktionen vergleicht JavaScript die **Referenz** — zwei identische Funktionen sind trotzdem unterschiedliche Objekte. Ohne \`useCallback\` entsteht bei jedem Eltern-Render eine neue Funktion → \`React.memo\` sieht eine neue Prop → Kindkomponente rendert trotzdem neu. Mit \`useCallback\` bleibt die Referenz stabil → \`React.memo\` sieht keine Änderung → Kindkomponente bleibt ruhig.
+
+**Render-Counter mit useRef:**
+Um sichtbar zu machen wann die Kindkomponente rendert, nutzen wir \`useRef\` als Render-Zähler. \`useRef\` löst selbst kein Re-render aus — der Wert in \`.current\` wird einfach bei jedem Render hochgezählt. So siehst du direkt: Zähler erhöhen → Eltern rendert, Kind bleibt bei 1. Name ändern → beide rendern neu.`,
+        keyPoints: [
+          'React.memo: Kindkomponente rendert nur neu wenn Props sich ändern',
+          'useCallback allein reicht nicht — die Kindkomponente muss mit memo gewrappt sein',
+          'useRef als Render-Zähler: ändert sich ohne Re-render auszulösen',
+          'Zähler erhöhen → stabile Funktion → Kind rendert NICHT neu',
+        ],
+        learningGoals: [
+          'React.memo und useCallback gemeinsam einsetzen',
+          'Verstehen warum React.memo Voraussetzung für useCallback ist',
+          'Renderkaskaden mit memo + useCallback gezielt verhindern',
+        ],
+        files: [
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { useState, useCallback } from "react"
+import Kind from "./Kind"
+import "./App.css"
+
+function App() {
+  const [count, setCount] = useState(0)
+  const [nachricht, setNachricht] = useState("")
+
+  // stabile Referenz — ändert sich nie (leeres Dependency Array)
+  // → Kind rendert nicht neu wenn count sich ändert
+  const handleKlick = useCallback(() => {
+    setNachricht("Nachricht vom Kind empfangen!")
+  }, [])
+
+  return (
+    <div className="app">
+      <div className="eltern">
+        <h2>Elternkomponente</h2>
+        <p>Zähler: <strong>{count}</strong></p>
+        <button onClick={() => setCount(vorheriger => vorheriger + 1)}>
+          Zähler erhöhen
+        </button>
+        {nachricht && <p className="msg">✓ {nachricht}</p>}
+      </div>
+      <Kind onKlick={handleKlick} />
+    </div>
+  )
+}
+
+export default App`,
+          },
+          {
+            name: 'Kind.tsx',
+            language: 'tsx',
+            code: `import { useRef, memo } from "react"
+
+// memo = React.memo: diese Komponente rendert nur neu
+// wenn sich ihre Props (onKlick) tatsächlich ändern
+const Kind = memo(({ onKlick }) => {
+  const renderZaehler = useRef(0)
+  renderZaehler.current++  // zählt Renders ohne selbst einen auszulösen
+
+  return (
+    <div className="kind">
+      <h2>Kindkomponente</h2>
+      <p>Renders: <strong>{renderZaehler.current}</strong></p>
+      <button onClick={onKlick}>Nachricht senden</button>
+    </div>
+  )
+})
+
+export default Kind`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `.app {
+  display: flex;
+  gap: 20px;
+  padding: 36px;
+  justify-content: center;
+  font-family: sans-serif;
+  flex-wrap: wrap;
+}
+
+.eltern, .kind {
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 16px;
+  padding: 24px;
+  min-width: 200px;
+  text-align: center;
+}
+
+.kind {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.eltern h2, .kind h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+.eltern h2 { color: #6d28d9; }
+.kind h2   { color: #16a34a; }
+
+.eltern p, .kind p {
+  font-size: 15px;
+  color: #4b5563;
+  margin-bottom: 12px;
+}
+
+.kind p strong {
+  font-size: 28px;
+  color: #16a34a;
+  display: block;
+}
+
+button {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button:hover { background: #6d28d9; }
+
+.kind button {
+  background: #16a34a;
+}
+
+.kind button:hover { background: #15803d; }
+
+.msg {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #16a34a;
+  font-weight: 600;
+}`,
           },
         ],
       },
