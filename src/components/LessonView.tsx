@@ -187,9 +187,9 @@ function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEd
           disabled={lesson.id === 0}
           style={{
             padding: '10px 20px', borderRadius: '6px', cursor: lesson.id === 0 ? 'not-allowed' : 'pointer',
-            background: lesson.id === 0 ? '#f3edfb' : '#ffffff',
-            color: lesson.id === 0 ? '#c9bce0' : '#2d1b4e',
-            border: '1px solid #e6ddf3', fontSize: '14px',
+            background: lesson.id === 0 ? '#f3edfb' : color,
+            color: lesson.id === 0 ? '#c9bce0' : '#fff',
+            border: 'none', fontSize: '14px', fontWeight: 600,
           }}
         >
           ← Vorherige
