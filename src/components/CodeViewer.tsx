@@ -5,6 +5,26 @@ import * as Babel from '@babel/standalone'
 import MonacoEditor from '@monaco-editor/react'
 import { MemoryRouter, Routes, Route, Link, NavLink, useNavigate, useParams, Outlet, BrowserRouter } from 'react-router-dom'
 import { Container, Row, Col, Button, Card, Badge, Alert, ListGroup, Nav, Navbar, Form, Table, Spinner, Modal } from 'react-bootstrap'
+function ReactPlayer({ url, controls = true, width = '640px', height = '360px', playing = false, muted = false }: {
+  url?: string; controls?: boolean; width?: string | number; height?: string | number; playing?: boolean; muted?: boolean
+}) {
+  const youtubeId = url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?\s]+)/)?.[1]
+  if (youtubeId) {
+    const params = `controls=${controls ? 1 : 0}&autoplay=${playing ? 1 : 0}&mute=${muted ? 1 : 0}`
+    return (
+      <iframe
+        src={`https://www.youtube.com/embed/${youtubeId}?${params}`}
+        width={width}
+        height={height}
+        frameBorder="0"
+        allowFullScreen
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        style={{ border: 'none', display: 'block' }}
+      />
+    )
+  }
+  return <div style={{ background: '#000', width, height, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px' }}>Video kann nicht geladen werden</div>
+}
 import type { CodeFile } from '../types'
 
 interface CodeViewerProps {
@@ -63,6 +83,7 @@ function LivePreview({ files }: { files: CodeFile[] }) {
         'useContext', 'createContext', 'Fragment', 'useReducer', 'memo', 'forwardRef',
         'Routes', 'Route', 'Link', 'NavLink', 'useNavigate', 'useParams', 'Outlet', 'BrowserRouter',
         'Container', 'Row', 'Col', 'Button', 'Card', 'Badge', 'Alert', 'ListGroup', 'Nav', 'Navbar', 'Form', 'Table', 'Spinner', 'Modal',
+        'ReactPlayer',
         parts.join('\n\n') + '\nreturn ' + rootName
       )
       const Component = fn(
@@ -71,6 +92,7 @@ function LivePreview({ files }: { files: CodeFile[] }) {
         React.useContext, React.createContext, React.Fragment, React.useReducer, React.memo, React.forwardRef,
         Routes, Route, Link, NavLink, useNavigate, useParams, Outlet, BrowserRouter,
         Container, Row, Col, Button, Card, Badge, Alert, ListGroup, Nav, Navbar, Form, Table, Spinner, Modal,
+        ReactPlayer,
       ) as React.ComponentType
       return { Component, error: null }
     } catch (e: unknown) {
@@ -105,7 +127,9 @@ function LivePreview({ files }: { files: CodeFile[] }) {
   useEffect(() => {
     if (!rootRef.current || !Component) return
     rootRef.current.render(
-      React.createElement(MemoryRouter, null, React.createElement(Component))
+      React.createElement(React.Suspense, { fallback: null },
+        React.createElement(MemoryRouter, null, React.createElement(Component))
+      )
     )
   }, [Component])
 

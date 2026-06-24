@@ -18,7 +18,9 @@
     "react": "^19.2.6",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.6",
-    "react-router-dom": "^7.17.0"
+    "react-player": "^2.16.1",
+    "react-router-dom": "^7.17.0",
+    "youtube-video-element": "^1.9.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

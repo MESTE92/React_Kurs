@@ -5185,94 +5185,60 @@ export default App`,
         id: 38,
         title: 'Beispielkomponente: Button',
         category: 'Komponenten',
-        explanation: `Ein wiederverwendbarer \`Button\` ist oft die erste eigene Komponente die man in einem Projekt baut. Statt überall \`<button className="...">\` zu schreiben, kapselt du das Aussehen und Verhalten in einer Komponente — und nutzt sie überall mit konsistentem Styling.
+        explanation: `Hier siehst du wie \`useState\` und eine React Bootstrap-Komponente zusammenspielen. Der \`<Button>\` aus React Bootstrap übernimmt das gesamte Styling — wir müssen kein einziges CSS schreiben. Unsere Komponente kümmert sich nur um die Logik: welcher Zustand ist aktiv?
 
-**Props für Flexibilität:**
-Der Button bekommt Props für alles was sich ändern kann: \`children\` für den Text, \`onClick\` für den Handler, \`variant\` für das Aussehen (z.B. \`"primary"\` oder \`"danger"\`), und \`disabled\` um ihn zu deaktivieren. Mit einem optionalen \`type\`-Prop kann er auch als Submit-Button in Formularen verwendet werden.
+**useState steuert das Aussehen:**
+Der State \`aktiv\` ist ein Boolean der beim Klick umgeschaltet wird. Er bestimmt zwei Dinge gleichzeitig: den \`variant\`-Prop des Buttons (\`"success"\` oder \`"primary"\`) und den angezeigten Text. Das ist das typische Muster — State als einzige Quelle der Wahrheit, JSX als Spiegel davon.
 
-**Varianten über CSS-Klassen:**
-Ein elegantes Muster: du mappst den \`variant\`-Prop auf eine CSS-Klasse. So bleibt die Komponente schlank — die Logik entscheidet nur welche Klasse gesetzt wird, das tatsächliche Aussehen liegt im CSS. In der Praxis könnte man auch ein Object verwenden: \`const variantClass = { primary: 'btn--primary', danger: 'btn--danger' }[variant]\`.`,
+**variant-Prop statt CSS:**
+Statt eigene Klassen zu schreiben, übergibst du React Bootstrap einfach einen \`variant\`-String. Die Bibliothek kümmert sich um Farbe, Hover-Effekt und alles weitere. Das spart Code und sorgt für konsistentes Aussehen ohne eigenes Stylesheet.`,
         keyPoints: [
-          'children-Prop: Inhalt des Buttons flexibel halten',
-          'variant-Prop mapped auf CSS-Klassen',
-          'disabled-Prop deaktiviert Button und verändert Cursor',
-          'type-Prop: "button" (Standard) oder "submit" für Formulare',
+          'useState(false): Boolean-State für Umschalten',
+          'variant={aktiv ? "success" : "primary"}: State steuert das Aussehen',
+          'onClick={() => setAktiv(!aktiv)}: State invertieren',
+          'React Bootstrap übernimmt das Styling — kein eigenes CSS nötig',
         ],
         learningGoals: [
-          'Einen wiederverwendbaren Button mit TypeScript-Props bauen',
-          'Varianten über Klassen-Mapping steuern',
-          'Den Button in verschiedenen Kontexten einsetzen',
+          'useState mit einem React Bootstrap Button kombinieren',
+          'Den variant-Prop dynamisch aus dem State ableiten',
+          'Das Zusammenspiel von State, Props und UI verstehen',
         ],
         files: [
           {
-            name: 'Button.tsx',
+            name: 'MeinButton.tsx',
             language: 'tsx',
-            code: `type ButtonVariant = 'primary' | 'secondary' | 'danger'
+            code: `import { useState } from "react";
+import { Button } from "react-bootstrap";
 
-interface ButtonProps {
-  children: React.ReactNode
-  onClick?: () => void
-  variant?: ButtonVariant
-  disabled?: boolean
-  type?: 'button' | 'submit' | 'reset'
-}
+function MeinButton() {
+  const [aktiv, setAktiv] = useState(false);
 
-function Button({
-  children,
-  onClick,
-  variant = 'primary',
-  disabled = false,
-  type = 'button',
-}: ButtonProps) {
   return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={\`btn btn--\${variant}\${disabled ? ' btn--disabled' : ''}\`}
+    <Button
+      variant={aktiv ? "success" : "primary"}
+      onClick={() => setAktiv(!aktiv)}
     >
-      {children}
-    </button>
-  )
+      {aktiv ? "Aktiv" : "Inaktiv"}
+    </Button>
+  );
 }
 
-export default Button`,
+export default MeinButton;`,
           },
           {
-            name: 'Button.css',
-            language: 'css',
-            code: `.btn {
-  padding: 8px 20px;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.btn--primary   { background: #4f46e5; color: #fff; }
-.btn--secondary { background: #e5e7eb; color: #111; }
-.btn--danger    { background: #dc2626; color: #fff; }
-
-.btn--disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}`,
-          },
-          {
-            name: 'Verwendung',
+            name: 'App.tsx',
             language: 'tsx',
-            code: `import Button from './Button'
+            code: `import MeinButton from './MeinButton'
 
-function Demo() {
+function App() {
   return (
-    <div style={{ display: 'flex', gap: '8px' }}>
-      <Button onClick={() => alert('Klick!')}>Speichern</Button>
-      <Button variant="secondary">Abbrechen</Button>
-      <Button variant="danger" disabled>Löschen</Button>
+    <div style={{ padding: '24px' }}>
+      <MeinButton />
     </div>
   )
-}`,
+}
+
+export default App`,
           },
         ],
       },
@@ -5280,105 +5246,88 @@ function Demo() {
         id: 39,
         title: 'Beispielkomponente: Formular',
         category: 'Komponenten',
-        explanation: `Ein Formular in React basiert auf **kontrolliertem State**: jedes Eingabefeld hat einen \`value\` aus dem State und ein \`onChange\` das den State aktualisiert. So ist React immer die einzige Quelle der Wahrheit — du kannst jederzeit auf die Eingaben zugreifen, validieren oder zurücksetzen.
+        explanation: `Ein Formular in React basiert auf **kontrolliertem State**: jedes Eingabefeld hat einen \`value\` aus dem State und ein \`onChange\` das den State aktualisiert. Wir nutzen React Bootstrap's \`Form\`-Komponenten — kein eigenes CSS nötig.
 
-**Generischer handleChange-Handler:**
-Statt für jedes Feld eine eigene Handler-Funktion zu schreiben, nutzt du einen einzigen Handler mit \`e.target.name\` und computed property syntax: \`{ ...prev, [e.target.name]: e.target.value }\`. Das funktioniert solange der \`name\`-Attribut des Inputs mit dem Key im State-Objekt übereinstimmt.
+**Pro Feld ein eigener State:**
+Hier bekommt jedes Feld seinen eigenen \`useState\`-Hook: \`name\` und \`mail\`. Das ist der einfachste Ansatz für kleine Formulare — übersichtlich und direkt. Jedes \`onChange\` aktualisiert nur seinen eigenen State: \`e => setName(e.target.value)\`.
 
-**Formular absenden:**
-Der \`onSubmit\`-Handler des \`<form>\`-Elements ruft zuerst \`e.preventDefault()\` auf — sonst würde die Seite neu laden. Danach kannst du mit den gesammelten Formulardaten arbeiten: validieren, an eine API senden oder den State zurücksetzen.`,
+**Form.Group, Form.Label, Form.Control:**
+React Bootstrap strukturiert Formulare mit drei Bausteinen: \`<Form.Group>\` gruppiert Label und Input zusammen, \`<Form.Label>\` ist das beschriftende Label, \`<Form.Control>\` ist das eigentliche Eingabefeld. Der \`type\`-Prop bestimmt ob es ein Text-, Email- oder anderes Feld ist. Bootstrap übernimmt das gesamte Styling automatisch.`,
         keyPoints: [
-          'Kontrolliertes Formular: value aus State, onChange aktualisiert State',
-          'e.preventDefault() verhindert Seiten-Reload beim Submit',
-          'Generischer handleChange mit computed property: [e.target.name]',
-          'Nach Submit: State mit useState-Setter zurücksetzen',
+          'Pro Feld ein useState: name, mail separat verwalten',
+          'Form.Group → Form.Label + Form.Control: Bootstrap-Struktur',
+          'onChange={e => setName(e.target.value)}: direktes State-Update',
+          'Button onClick statt onSubmit: einfache Variante ohne Event-Objekt',
         ],
         learningGoals: [
-          'Ein kontrolliertes Formular mit mehreren Feldern bauen',
-          'Einen generischen onChange-Handler schreiben',
-          'Formulardaten beim Submit verarbeiten und zurücksetzen',
+          'Ein Formular mit React Bootstrap aufbauen',
+          'Felder mit eigenem useState kontrollieren',
+          'Form.Group, Form.Label und Form.Control richtig einsetzen',
         ],
         files: [
           {
-            name: 'ContactForm.tsx',
+            name: 'Formular.tsx',
             language: 'tsx',
-            code: `import { useState } from 'react'
+            code: `import { useState } from "react";
+import { Form, Button } from "react-bootstrap";
 
-interface FormData {
-  name: string
-  email: string
-  message: string
-}
+function Formular() {
+  const [name, setName] = useState("");
+  const [mail, setMail] = useState("");
 
-const INITIAL: FormData = { name: '', email: '', message: '' }
-
-function ContactForm() {
-  const [form, setForm] = useState<FormData>(INITIAL)
-
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    console.log('Formulardaten:', form)
-    setForm(INITIAL) // Zurücksetzen
+  function abschicken() {
+    console.log(name, mail);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="contact-form">
-      <div className="field">
-        <label htmlFor="name">Name</label>
-        <input id="name" name="name" value={form.name}
-               onChange={handleChange} required />
-      </div>
-      <div className="field">
-        <label htmlFor="email">E-Mail</label>
-        <input id="email" name="email" type="email" value={form.email}
-               onChange={handleChange} required />
-      </div>
-      <div className="field">
-        <label htmlFor="message">Nachricht</label>
-        <textarea id="message" name="message" value={form.message}
-                  onChange={handleChange} rows={4} required />
-      </div>
-      <button type="submit">Absenden</button>
-    </form>
+    <Form>
+      <Form.Group className="mb-3">
+        <Form.Label>Name</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Name eingeben"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
+      </Form.Group>
+
+      <Form.Group className="mb-4">
+        <Form.Label>Mail</Form.Label>
+        <Form.Control
+          type="email"
+          placeholder="Mail eingeben"
+          value={mail}
+          onChange={e => setMail(e.target.value)}
+        />
+      </Form.Group>
+
+      <Button variant="primary" onClick={abschicken} className="w-100">
+        Abschicken
+      </Button>
+    </Form>
+  );
+}
+
+export default Formular;`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { Card } from "react-bootstrap";
+import Formular from './Formular'
+
+function App() {
+  return (
+    <div className="d-flex justify-content-center bg-light p-4">
+      <Card style={{ width: '420px' }} className="shadow-sm p-4">
+        <Card.Title className="mb-4">Kontakt</Card.Title>
+        <Formular />
+      </Card>
+    </div>
   )
 }
 
-export default ContactForm`,
-          },
-          {
-            name: 'ContactForm.css',
-            language: 'css',
-            code: `.contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-width: 480px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.field label { font-weight: 600; }
-
-.field input,
-.field textarea {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-family: inherit;
-}
-
-.field textarea { resize: vertical; }`,
+export default App`,
           },
         ],
       },
@@ -5386,85 +5335,51 @@ export default ContactForm`,
         id: 40,
         title: 'Beispielkomponente: Bild',
         category: 'Komponenten',
-        explanation: `Eine \`Image\`-Komponente kapselt das \`<img>\`-Element und fügt nützliche Features hinzu: einen Fallback wenn das Bild nicht lädt, ein Lade-Zustand und ein konsistentes Styling. Das \`alt\`-Attribut ist für Barrierefreiheit Pflicht — Screenreader lesen es vor, und Browser zeigen es wenn das Bild fehlt.
+        explanation: `Mit dem \`<img>\`-Element kannst du in React ganz einfach Bilder einbinden. Du übergibst die Bildquelle über das \`src\`-Attribut — das kann ein lokaler Pfad oder eine externe URL sein — und beschreibst das Bild mit \`alt\`.
 
-**onError-Fallback:**
-Das \`<img>\`-Element hat ein \`onError\`-Event das feuert wenn das Bild nicht geladen werden kann (falscher Pfad, kein Netz, etc.). Du kannst dann \`e.currentTarget.src\` auf ein Platzhalter-Bild setzen oder einen Fehler-State setzen der eine alternative Anzeige rendert.
+**src — die Bildquelle:**
+\`src\` erwartet eine URL oder einen Pfad zur Bilddatei. Du kannst externe Dienste wie \`https://picsum.photos\` nutzen, die zufällige Platzhalterbilder in beliebiger Größe liefern — sehr praktisch während der Entwicklung.
 
-**Lazy Loading:**
-Mit dem nativen \`loading="lazy"\` Attribut lädt der Browser das Bild erst wenn es in den sichtbaren Bereich scrollt. Das verbessert die initiale Ladezeit der Seite deutlich — besonders bei vielen Bildern. Das Attribut wird von allen modernen Browsern unterstützt und braucht keine JavaScript-Bibliothek.`,
+**alt — der Alternativtext:**
+Das \`alt\`-Attribut ist Pflicht. Es beschreibt das Bild für Screenreader (Barrierefreiheit) und wird angezeigt wenn das Bild nicht geladen werden kann. Ein leerer \`alt=""\` ist nur bei rein dekorativen Bildern erlaubt.`,
         keyPoints: [
-          'alt-Attribut: Pflicht für Barrierefreiheit und SEO',
-          'onError: Fallback-Bild bei Ladefehler setzen',
-          'loading="lazy": Bild erst beim Einscrollen laden',
-          'object-fit: cover/contain für konsistente Bildgrößen',
+          '`src`: URL oder Pfad zur Bilddatei',
+          '`alt`: Pflichtattribut für Barrierefreiheit und Fallback-Text',
+          'Externe URLs funktionieren direkt als `src`',
         ],
         learningGoals: [
-          'Eine Image-Komponente mit Fallback und Lazy Loading bauen',
-          'Das onError-Event für Fehlerbehandlung nutzen',
-          'Bilder mit CSS konsistent in ihrem Container darstellen',
+          'Ein Bild mit <img> in einer React-Komponente einbinden',
+          'src und alt korrekt setzen',
         ],
         files: [
           {
-            name: 'Image.tsx',
+            name: 'Bild.tsx',
             language: 'tsx',
-            code: `import { useState } from 'react'
-
-const FALLBACK = 'https://placehold.co/400x300?text=Kein+Bild'
-
-interface ImageProps {
-  src: string
-  alt: string
-  width?: number | string
-  height?: number | string
-  className?: string
-}
-
-function Image({ src, alt, width, height, className }: ImageProps) {
-  const [error, setError] = useState(false)
-
+            code: `function Bild() {
   return (
     <img
-      src={error ? FALLBACK : src}
-      alt={alt}
-      width={width}
-      height={height}
-      loading="lazy"
-      onError={() => setError(true)}
-      className={\`image\${className ? \` \${className}\` : ''}\`}
+      src="https://usagif.com/wp-content/uploads/cat-typing-12.gif"
+      alt="Katze tippt auf Tastatur"
     />
   )
 }
 
-export default Image`,
+export default Bild`,
           },
           {
-            name: 'Image.css',
-            language: 'css',
-            code: `.image {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 8px;
-}`,
-          },
-          {
-            name: 'Verwendung',
+            name: 'App.tsx',
             language: 'tsx',
-            code: `import Image from './Image'
+            code: `import Bild from './Bild'
 
-function Demo() {
+function App() {
   return (
-    <div>
-      {/* Normales Bild */}
-      <Image src="/foto.jpg" alt="Mein Foto" width={400} height={300} />
-
-      {/* Bild mit falschem Pfad → Fallback wird angezeigt */}
-      <Image src="/existiert-nicht.jpg" alt="Fehler-Demo" width={400} height={300} />
+    <div style={{ padding: '24px' }}>
+      <Bild />
     </div>
   )
-}`,
+}
+
+export default App`,
           },
         ],
       },
@@ -5472,107 +5387,53 @@ function Demo() {
         id: 41,
         title: 'Beispielkomponente: Audio',
         category: 'Komponenten',
-        explanation: `Mit dem HTML5-\`<audio>\`-Element kannst du Audiodateien direkt im Browser abspielen — ohne externe Bibliotheken. React kapselt das Element in einer Komponente und steuert es über eine **Ref**. Eine Ref (\`useRef\`) gibt dir direkten Zugriff auf das DOM-Element, was für Media-Elemente notwendig ist, weil \`.play()\` und \`.pause()\` direkte Methoden auf dem Element sind.
+        explanation: `Mit dem HTML5-\`<audio>\`-Element kannst du Audiodateien direkt im Browser abspielen — ohne externe Bibliotheken oder React-State. Das \`controls\`-Attribut zeigt den nativen Browser-Player mit Play/Pause, Lautstärke und Fortschrittsbalken an.
 
-**useRef für Media-Steuerung:**
-\`const audioRef = useRef<HTMLAudioElement>(null)\` erstellt eine Ref die du mit \`ref={audioRef}\` an das \`<audio>\`-Element hängst. Danach kannst du \`audioRef.current?.play()\` und \`audioRef.current?.pause()\` aufrufen. Das \`?\` ist wichtig weil \`current\` beim ersten Render noch \`null\` sein kann.
+**controls:**
+Ohne \`controls\` ist das \`<audio>\`-Element unsichtbar. Mit \`controls\` rendert der Browser automatisch einen Player — Design und Funktionsumfang variieren je nach Browser, aber es funktioniert überall sofort.
 
-**Eigene Controls:**
-Das Attribut \`controls\` zeigt den nativen Browser-Player an — praktisch, aber nicht immer schön. Alternativ baust du eigene Play/Pause-Buttons und steuerst das Element komplett über die Ref. So hast du volle Kontrolle über das Aussehen.`,
+**source-Tag:**
+Statt \`src\` direkt am \`<audio>\`-Element zu setzen, kannst du ein \`<source>\`-Tag verwenden. Das hat den Vorteil dass du mehrere Quellen in verschiedenen Formaten angeben kannst — der Browser nimmt das erste Format das er unterstützt. Das \`type\`-Attribut hilft dem Browser dabei schnell zu entscheiden.`,
         keyPoints: [
-          'useRef<HTMLAudioElement>: direkter Zugriff auf das audio-Element',
-          'audioRef.current?.play() / .pause() für Steuerung',
-          'controls-Attribut: nativer Browser-Player',
-          'onEnded-Event: feuert wenn Audio zu Ende ist',
+          '`controls`: zeigt den nativen Browser-Player an',
+          '`<source src="..." type="audio/mp3">`: Audioquelle mit MIME-Typ',
+          'Externe URLs funktionieren direkt als Quelle',
         ],
         learningGoals: [
-          'Das <audio>-Element mit useRef steuern',
-          'Eigene Play/Pause-Controls bauen',
-          'Den Abspielstatus im State tracken',
+          'Eine Audio-Komponente mit dem nativen Browser-Player bauen',
+          'Das <source>-Tag für Audioquellen nutzen',
         ],
         files: [
           {
-            name: 'AudioPlayer.tsx',
+            name: 'Audio.tsx',
             language: 'tsx',
-            code: `import { useRef, useState } from 'react'
-
-interface AudioPlayerProps {
-  src: string
-  title?: string
+            code: `function Audio() {
+  return (
+    <audio controls>
+      <source
+        src="https://upload.wikimedia.org/wikipedia/commons/0/04/Local_Forecast_-_Slower_%28ISRC_USUAN1300011%29.mp3"
+        type="audio/mp3"
+      />
+    </audio>
+  )
 }
 
-function AudioPlayer({ src, title }: AudioPlayerProps) {
-  const audioRef = useRef<HTMLAudioElement>(null)
-  const [playing, setPlaying] = useState(false)
+export default Audio`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import Audio from './Audio'
 
-  function togglePlay() {
-    if (!audioRef.current) return
-    if (playing) {
-      audioRef.current.pause()
-    } else {
-      audioRef.current.play()
-    }
-    setPlaying(!playing)
-  }
-
-  function handleEnded() {
-    setPlaying(false)
-  }
-
+function App() {
   return (
-    <div className="audio-player">
-      <audio ref={audioRef} src={src} onEnded={handleEnded} />
-      {title && <span className="audio-title">{title}</span>}
-      <button onClick={togglePlay} className="audio-btn">
-        {playing ? '⏸ Pause' : '▶ Play'}
-      </button>
+    <div style={{ padding: '24px' }}>
+      <Audio />
     </div>
   )
 }
 
-export default AudioPlayer`,
-          },
-          {
-            name: 'AudioPlayer.css',
-            language: 'css',
-            code: `.audio-player {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: #1e1e2e;
-  border-radius: 8px;
-  width: fit-content;
-}
-
-.audio-title {
-  color: #cdd6f4;
-  font-size: 0.9rem;
-}
-
-.audio-btn {
-  padding: 6px 16px;
-  background: #4f46e5;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}`,
-          },
-          {
-            name: 'Verwendung',
-            language: 'tsx',
-            code: `import AudioPlayer from './AudioPlayer'
-
-function Demo() {
-  return (
-    <AudioPlayer
-      src="/audio/beispiel.mp3"
-      title="Beispiel-Track"
-    />
-  )
-}`,
+export default App`,
           },
         ],
       },
@@ -5580,131 +5441,125 @@ function Demo() {
         id: 42,
         title: 'Beispielkomponente: Video',
         category: 'Komponenten',
-        explanation: `Das \`<video>\`-Element funktioniert sehr ähnlich wie \`<audio>\` — auch hier nutzt du \`useRef\` für die Steuerung. Video-Komponenten haben aber ein paar Besonderheiten: ein **Poster**-Bild das vor dem Abspielen angezeigt wird, Vollbild-Unterstützung, und häufig möchtest du die Lautstärke oder den Fortschritt steuern.
+        explanation: `YouTube-Videos lassen sich in React ganz einfach über einen \`<iframe>\` einbetten. Wenn du auf YouTube auf "Teilen → Einbetten" klickst, bekommst du direkt den fertigen Embed-Code — den wandelst du in JSX um und baust ihn in eine Komponente ein.
 
-**Poster-Attribut:**
-\`<video poster="/thumbnail.jpg">\` zeigt das Bild solange das Video nicht läuft. Das verbessert die User Experience weil der User sofort sieht worum es in dem Video geht — statt eines schwarzen Rechtecks.
+**src — die Embed-URL:**
+YouTube stellt für jedes Video eine spezielle Embed-URL bereit: \`https://www.youtube.com/embed/VIDEO_ID\`. Diese URL funktioniert nur im \`<iframe>\` — die normale Watch-URL funktioniert hier nicht.
 
-**Vollbild mit requestFullscreen:**
-\`videoRef.current?.requestFullscreen()\` aktiviert den Vollbildmodus des Browsers. Diese API ist direkt auf dem DOM-Element verfügbar — kein Plugin nötig. \`document.fullscreenElement\` gibt das aktuell im Vollbild angezeigte Element zurück, damit du den Button-Text anpassen kannst.
-
-**muted + autoPlay:**
-Die meisten Browser blockieren \`autoPlay\` für Videos mit Ton. Die Kombination \`autoPlay muted\` funktioniert überall und wird häufig für Hero-Videos im Hintergrund verwendet.`,
+**JSX-Unterschiede zum HTML:**
+In JSX heißen manche Attribute anders als in HTML: \`frameborder\` wird zu \`frameBorder\`, \`allowfullscreen\` zu \`allowFullScreen\`. React verwendet camelCase für alle HTML-Attribute.`,
         keyPoints: [
-          'useRef<HTMLVideoElement>: direkter Zugriff auf video-Element',
-          'poster-Attribut: Vorschaubild vor dem Abspielen',
-          'requestFullscreen(): nativer Vollbild-API',
-          'autoPlay funktioniert nur in Kombination mit muted',
+          '`src`: YouTube-Embed-URL im Format `/embed/VIDEO_ID`',
+          '`allowFullScreen`: Vollbild aktivieren (camelCase in JSX)',
+          '`width` / `height`: Größe des Players in Pixeln',
         ],
         learningGoals: [
-          'Das <video>-Element mit useRef steuern',
-          'Poster, Play/Pause und Vollbild implementieren',
-          'Den Unterschied zwischen Video- und Audio-Komponente verstehen',
+          'Ein YouTube-Video per <iframe> in React einbetten',
+          'Den Unterschied zwischen HTML- und JSX-Attributnamen kennen',
         ],
         files: [
           {
-            name: 'VideoPlayer.tsx',
+            name: 'Video.tsx',
             language: 'tsx',
-            code: `import { useRef, useState } from 'react'
-
-interface VideoPlayerProps {
-  src: string
-  poster?: string
+            code: `function Video() {
+  return (
+    <iframe
+      width="526"
+      height="935"
+      src="https://www.youtube.com/embed/6yEmKWZSG14"
+      title="Developer vs Tester Memes"
+      frameBorder="0"
+      allowFullScreen
+    />
+  )
 }
 
-function VideoPlayer({ src, poster }: VideoPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [playing, setPlaying] = useState(false)
+export default Video`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import Video from './Video'
 
-  function togglePlay() {
-    if (!videoRef.current) return
-    if (playing) {
-      videoRef.current.pause()
-    } else {
-      videoRef.current.play()
-    }
-    setPlaying(!playing)
-  }
-
-  function toggleFullscreen() {
-    if (!videoRef.current) return
-    if (document.fullscreenElement) {
-      document.exitFullscreen()
-    } else {
-      videoRef.current.requestFullscreen()
-    }
-  }
-
+function App() {
   return (
-    <div className="video-wrapper">
-      <video
-        ref={videoRef}
-        src={src}
-        poster={poster}
-        onEnded={() => setPlaying(false)}
-        className="video-element"
-      />
-      <div className="video-controls">
-        <button onClick={togglePlay}>
-          {playing ? '⏸ Pause' : '▶ Play'}
-        </button>
-        <button onClick={toggleFullscreen}>⛶ Vollbild</button>
-      </div>
+    <div style={{ padding: '24px' }}>
+      <Video />
     </div>
   )
 }
 
-export default VideoPlayer`,
-          },
-          {
-            name: 'VideoPlayer.css',
-            language: 'css',
-            code: `.video-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: fit-content;
-}
-
-.video-element {
-  max-width: 640px;
-  width: 100%;
-  border-radius: 8px;
-  background: #000;
-}
-
-.video-controls {
-  display: flex;
-  gap: 8px;
-}
-
-.video-controls button {
-  padding: 6px 14px;
-  background: #1e1e2e;
-  color: #cdd6f4;
-  border: 1px solid #45475a;
-  border-radius: 6px;
-  cursor: pointer;
-}`,
-          },
-          {
-            name: 'Verwendung',
-            language: 'tsx',
-            code: `import VideoPlayer from './VideoPlayer'
-
-function Demo() {
-  return (
-    <VideoPlayer
-      src="/videos/demo.mp4"
-      poster="/images/thumbnail.jpg"
-    />
-  )
-}`,
+export default App`,
           },
         ],
       },
       {
         id: 43,
+        title: 'Beispielkomponente: react-player',
+        category: 'Komponenten',
+        explanation: `\`react-player\` ist eine React-Komponente die Videos von YouTube, Vimeo, SoundCloud und vielen weiteren Plattformen abspielen kann — mit einem einzigen \`url\`-Prop. Kein manuelles Einbinden von iframes oder SDKs nötig.
+
+**Installation:**
+\`npm install react-player\`
+
+**url:**
+Du übergibst die YouTube-URL direkt — \`react-player\` erkennt automatisch die Plattform und wählt den passenden Player.
+
+**controls, width, height:**
+Mit \`controls={true}\` werden die nativen YouTube-Controls angezeigt. \`width\` und \`height\` steuern die Größe des Players — \`"100%"\` passt sich dem Container an.
+
+**playing und muted:**
+\`playing={false}\` verhindert Autoplay beim Laden. \`muted={false}\` bedeutet der Ton ist aktiv — viele Browser blockieren Autoplay mit Ton, deshalb wird \`playing={true}\` meist zusammen mit \`muted={true}\` gesetzt.`,
+        keyPoints: [
+          '`url`: YouTube, Vimeo, MP4 und mehr werden automatisch erkannt',
+          '`controls={true}`: native Player-Controls einblenden',
+          '`playing={false}`: kein Autoplay beim Laden',
+          '`muted={false}`: Ton aktiv — Autoplay mit Ton wird von Browsern blockiert',
+        ],
+        learningGoals: [
+          'react-player installieren und in einer Komponente nutzen',
+          'Ein YouTube-Video über react-player abspielen',
+        ],
+        files: [
+          {
+            name: 'Video.tsx',
+            language: 'tsx',
+            code: `import ReactPlayer from 'react-player'
+
+function Video() {
+  return (
+    <ReactPlayer
+      url="https://youtu.be/Tn6-PIqc4UM"
+      controls={true}
+      width="100%"
+      height="400px"
+      playing={false}
+      muted={false}
+    />
+  )
+}
+
+export default Video`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import Video from './Video'
+
+function App() {
+  return (
+    <div style={{ padding: '24px' }}>
+      <Video />
+    </div>
+  )
+}
+
+export default App`,
+          },
+        ],
+      },
+      {
+        id: 44,
         title: 'Beispielkomponente: Navbar',
         category: 'Komponenten',
         explanation: `Eine Navbar ist eine der häufigsten Komponenten in React-Apps. Sie zeigt Links zur Navigation, den Anwendungsnamen, und oft den Login-Status des Users. Mit React Router's \`<NavLink>\` bekommst du automatisch eine aktive CSS-Klasse für den aktuellen Link — ohne eigene Logik.
@@ -5776,6 +5631,24 @@ function Navbar() {
 }
 
 export default Navbar`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import Navbar from './Navbar'
+
+function App() {
+  return (
+    <div>
+      <Navbar />
+      <div style={{ padding: '24px' }}>
+        <p>Seiteninhalt</p>
+      </div>
+    </div>
+  )
+}
+
+export default App`,
           },
           {
             name: 'Navbar.css',
