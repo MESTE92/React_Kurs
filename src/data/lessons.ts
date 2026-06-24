@@ -5067,594 +5067,837 @@ export default Modal`,
   },
 
   // ─────────────────────────────────────────────
-  // KAPITEL 4: PRAXISPROJEKT
+  // KAPITEL 4: LAYOUTING, STYLING & BEISPIELKOMPONENTEN
   // ─────────────────────────────────────────────
   {
-    title: '4. Praxisprojekt: SportsDash',
+    title: '4. Layouting, Styling & Beispielkomponenten',
     lessons: [
       {
         id: 37,
-        title: 'Projektübersicht & Architektur',
-        category: 'Praxisprojekt',
-        explanation: `**SportsDash** ist unser Praxisprojekt: eine App mit Login/Registrierung und Fußball-Ergebnissen aus einer echten API. Das Projekt verbindet alles aus dem Kurs — React Router für Navigation, Context für den Auth-State, und \`fetch()\` für API-Daten. Der Datenfluss ist: AuthContext stellt den eingeloggten User bereit → Router steuert welche Seite angezeigt wird → geschützte Seiten laden API-Daten.
+        title: 'Layouting mit Flexbox & CSS Grid',
+        category: 'Styling',
+        explanation: `Bevor wir eigene Komponenten bauen, schauen wir uns an wie man sie **optisch anordnet**. Die zwei wichtigsten CSS-Werkzeuge dafür sind **Flexbox** und **CSS Grid**. Beide lösen das gleiche Problem — Elemente im Layout platzieren — aber auf unterschiedliche Weise.
 
-**Die Ordnerstruktur verstehen:**
-Das Projekt ist in klare Bereiche unterteilt: \`src/pages/\` enthält die vollständigen Seiten (Login, Dashboard), \`src/components/\` enthält wiederverwendbare Bausteine (MatchCard, Layout, PrivateRoute), \`src/context/\` enthält den AuthContext, \`src/hooks/\` enthält Custom Hooks, und \`src/types/\` enthält alle TypeScript-Typen. Diese Struktur ist ein verbreitetes Muster in React-Projekten.
+**Flexbox — eindimensional:**
+Flexbox ordnet Elemente entlang einer Achse an: entweder als Zeile (\`flex-direction: row\`) oder als Spalte (\`flex-direction: column\`). Mit \`justify-content\` steuerst du die Verteilung entlang der Hauptachse (z.B. \`space-between\`, \`center\`), mit \`align-items\` die Ausrichtung auf der Querachse. Flexbox ist ideal für Navigationsleisten, Button-Gruppen oder überall wo Elemente in einer Linie nebeneinander stehen sollen.
 
-**Pages vs. Components:**
-Der Unterschied: **Pages** sind vollständige Seiten die einer Route zugeordnet sind — sie kombinieren mehrere Komponenten zu einer kompletten Ansicht. **Components** sind wiederverwendbare Bausteine die auf verschiedenen Seiten eingesetzt werden können. Eine \`MatchCard\` ist eine Komponente (zeigt ein Spiel an), das \`DashboardPage\` ist eine Seite (zeigt alle Spiele und den Header zusammen).`,
+**CSS Grid — zweidimensional:**
+Grid arbeitet mit Zeilen **und** Spalten gleichzeitig. Mit \`grid-template-areas\` kannst du das Layout mit Namen beschreiben — das macht den Code sehr lesbar. Du definierst benannte Bereiche wie \`header\`, \`sidebar\`, \`main\` und \`footer\` und weist Elemente diesen Bereichen per \`grid-area\` zu. Grid eignet sich perfekt für Seiten-Layouts mit mehreren Bereichen.
+
+**Wann Flexbox, wann Grid?**
+Faustregel: **Flexbox für Komponenten** (Elemente in einer Reihe oder Spalte), **Grid für Seiten-Layouts** (mehrere Bereiche mit festen Positionen). In der Praxis kombinierst du beides: Grid für das Gesamtlayout der Seite, Flexbox innerhalb einzelner Komponenten.`,
         keyPoints: [
-          'Ordnerstruktur: src/components, src/pages, src/context, src/hooks, src/types',
-          'AuthContext: verwaltet eingeloggten User global',
-          'PrivateRoute: leitet nicht-eingeloggte User zum Login um',
-          'API: api-football.com (kostenloser Tier verfügbar)',
+          'Flexbox: eindimensional — Zeile oder Spalte',
+          'justify-content & align-items: Ausrichtung auf Haupt- und Querachse',
+          'CSS Grid: zweidimensional — Zeilen und Spalten gleichzeitig',
+          'grid-template-areas: Layout mit Namen beschreiben',
+          'Faustregel: Flexbox für Komponenten, Grid für Seiten-Layouts',
         ],
         learningGoals: [
-          'Die Ordnerstruktur des SportsDash-Projekts verstehen',
-          'Erklären wie die Komponenten und Seiten zusammenhängen',
-          'Den Unterschied zwischen Pages und Components in diesem Projekt beschreiben',
+          'Flexbox-Layouts mit justify-content und align-items aufbauen',
+          'Ein Seiten-Layout mit grid-template-areas definieren',
+          'Entscheiden wann Flexbox und wann Grid sinnvoller ist',
         ],
         files: [
           {
-            name: 'Ordnerstruktur',
-            language: 'bash',
-            code: `src/
-├── components/
-│   ├── Layout.tsx          # Nav + Wrapper
-│   ├── PrivateRoute.tsx    # Routen-Schutz
-│   ├── MatchCard.tsx       # Spielergebnis-Karte
-│   └── LoadingSpinner.tsx  # Ladeindikator
-├── context/
-│   └── AuthContext.tsx     # Globaler Auth-State
-├── hooks/
-│   ├── useAuth.ts          # Auth Custom Hook
-│   └── useFetch.ts         # Generic Fetch Hook
-├── pages/
-│   ├── LoginPage.tsx       # Login-Formular
-│   ├── RegisterPage.tsx    # Registrierung
-│   └── DashboardPage.tsx   # Fußball-Ergebnisse
-├── types/
-│   └── index.ts            # Alle TypeScript-Interfaces
-├── App.tsx                 # Router-Setup
-└── main.tsx                # Einstiegspunkt`,
+            name: 'FlexboxBeispiel.css',
+            language: 'css',
+            code: `.navbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; /* Links & rechts verteilen */
+  align-items: center;            /* Vertikal zentrieren */
+  padding: 0 16px;
+  height: 60px;
+  background: #1e1e2e;
+}
+
+.card-list {
+  display: flex;
+  flex-wrap: wrap;        /* Umbruch bei zu wenig Platz */
+  gap: 16px;              /* Abstand zwischen Karten */
+  justify-content: center;
+}
+
+.card {
+  flex: 1 1 250px;        /* Wächst, schrumpft, Mindestbreite 250px */
+}`,
+          },
+          {
+            name: 'GridBeispiel.css',
+            language: 'css',
+            code: `.page-layout {
+  display: grid;
+  grid-template-areas:
+    "header  header"
+    "sidebar main  "
+    "footer  footer";
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 60px 1fr 40px;
+  min-height: 100vh;
+  gap: 8px;
+}
+
+/* Elemente den Bereichen zuweisen */
+.header  { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.main    { grid-area: main; }
+.footer  { grid-area: footer; }`,
+          },
+          {
+            name: 'PageLayout.tsx',
+            language: 'tsx',
+            code: `import './GridBeispiel.css'
+
+function PageLayout() {
+  return (
+    <div className="page-layout">
+      <header className="header">Header</header>
+      <aside className="sidebar">Sidebar</aside>
+      <main className="main">Hauptinhalt</main>
+      <footer className="footer">Footer</footer>
+    </div>
+  )
+}
+
+export default PageLayout`,
           },
         ],
       },
       {
         id: 38,
-        title: 'Projekt: Types & Interfaces',
-        category: 'Praxisprojekt',
-        explanation: `In einem Projekt mit mehreren Dateien lohnt es sich, alle gemeinsamen TypeScript-Typen **zentral** zu definieren — in \`src/types/index.ts\`. So müssen Typen nicht in jeder Datei neu definiert werden, und wenn sich ein Typ ändert (z.B. die API liefert ein neues Feld), musst du nur an einer Stelle editieren.
+        title: 'Layouting & Styling mit Bootstrap',
+        category: 'Styling',
+        explanation: `Bootstrap ist ein CSS-Framework das fertige Klassen für Layout, Abstände, Farben und Komponenten mitbringt. Statt eigenes CSS zu schreiben nutzt du direkt Klassen wie \`d-flex\`, \`gap-3\` oder \`col-md-6\`. In React integrierst du Bootstrap einfach über npm.
 
-**Interfaces für API-Responses und State-Objekte:**
-Für API-Responses schaust du in die API-Dokumentation und baust die Typen nach — nur die Felder die du wirklich brauchst. \`interface Match\` beschreibt ein Spielobjekt mit Teams, Toren und Status. \`interface ApiResponse<T>\` ist ein generisches Interface für die Wrapper-Struktur der API. Für Auth-Daten definierst du \`interface User\`, \`interface LoginData\` und \`interface AuthContextType\`.
+**Installation:**
+\`\`\`
+npm install bootstrap
+\`\`\`
+Danach importierst du das CSS einmalig in \`main.tsx\`:
+\`\`\`tsx
+import 'bootstrap/dist/css/bootstrap.min.css'
+\`\`\`
+Ab sofort stehen alle Bootstrap-Klassen in deiner gesamten App zur Verfügung.
 
-**Typen projektübergreifend importieren:**
-Alle Typen werden mit \`export interface\` exportiert. In anderen Dateien importierst du sie gezielt: \`import type { User, Match } from '../types'\`. Das \`import type\` (statt \`import\`) ist eine TypeScript-Optimierung — es signalisiert dass nur der Typ gebraucht wird, kein Laufzeit-Code. Wenn TypeScript-Fehler auftauchen weil ein Feld fehlt oder den falschen Typ hat, findest du die Definition immer an einer Stelle.`,
+**Das Grid-System:**
+Bootstrap hat ein eigenes 12-Spalten-Grid-System. Mit \`container\`, \`row\` und \`col\` baust du responsive Layouts. \`col-md-6\` bedeutet: ab mittlerer Bildschirmbreite nimmt das Element 6 von 12 Spalten ein (also die Hälfte). Auf kleinen Bildschirmen wird aus zwei nebeneinander stehenden Spalten automatisch ein gestapeltes Layout.
+
+**Utility-Klassen:**
+Bootstrap hat hunderte Utility-Klassen für häufige CSS-Eigenschaften: \`mt-3\` (margin-top), \`p-2\` (padding), \`text-center\`, \`fw-bold\`, \`bg-primary\`, \`d-flex\`, \`align-items-center\`, \`justify-content-between\`. Diese Klassen ersetzen in vielen Fällen eigenes CSS komplett.`,
         keyPoints: [
-          'Zentrale types/index.ts verhindert doppelte Definitionen',
-          'API-Typen exakt nach API-Dokumentation benennen',
-          'Optional fields (?) für Felder die manchmal fehlen',
+          'npm install bootstrap + Import in main.tsx',
+          '12-Spalten-Grid: container → row → col-md-6',
+          'Utility-Klassen: mt-3, p-2, d-flex, text-center, fw-bold',
+          'Responsive: col-md-6 = halbe Breite ab mittlerem Viewport',
         ],
         learningGoals: [
-          'Zentrale TypeScript-Typen für das Projekt anlegen',
-          'Interfaces für API-Responses und State-Objekte definieren',
-          'Typen projektübergreifend importieren und wiederverwenden',
+          'Bootstrap in ein Vite/React-Projekt einbinden',
+          'Das Bootstrap-Grid für ein responsives Layout nutzen',
+          'Utility-Klassen für Abstände, Farben und Flexbox einsetzen',
         ],
         files: [
           {
-            name: 'src/types/index.ts',
+            name: 'main.tsx',
             language: 'tsx',
-            code: `// ── Auth ──────────────────────────────────────
-export interface User {
-  id: string
-  username: string
-  email: string
+            code: `import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import 'bootstrap/dist/css/bootstrap.min.css' // Bootstrap einbinden
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+)`,
+          },
+          {
+            name: 'BootstrapLayout.tsx',
+            language: 'tsx',
+            code: `function BootstrapLayout() {
+  return (
+    <div className="container mt-4">
+      <h1 className="fw-bold text-primary mb-3">Meine App</h1>
+
+      {/* Zwei gleichbreite Spalten nebeneinander */}
+      <div className="row g-3">
+        <div className="col-md-6">
+          <div className="p-3 bg-light rounded">Linke Spalte</div>
+        </div>
+        <div className="col-md-6">
+          <div className="p-3 bg-light rounded">Rechte Spalte</div>
+        </div>
+      </div>
+
+      {/* Flexbox mit Bootstrap-Utilities */}
+      <div className="d-flex justify-content-between align-items-center mt-4">
+        <span className="text-muted">Links</span>
+        <button className="btn btn-primary">Rechts</button>
+      </div>
+    </div>
+  )
 }
 
-export interface RegisterData {
-  username: string
-  email: string
-  password: string
-}
-
-export interface LoginData {
-  email: string
-  password: string
-}
-
-// ── Auth Context ───────────────────────────────
-export interface AuthContextType {
-  user: User | null               // null = nicht eingeloggt
-  login: (data: LoginData) => Promise<void>
-  register: (data: RegisterData) => Promise<void>
-  logout: () => void
-  isLoading: boolean
-}
-
-// ── Fußball API (api-football.com) ─────────────
-export interface Team {
-  id: number
-  name: string
-  logo: string
-}
-
-export interface Goals {
-  home: number | null
-  away: number | null
-}
-
-export interface MatchStatus {
-  short: string   // "FT" = Abgepfiffen, "NS" = Nicht gestartet
-  long: string
-  elapsed: number | null
-}
-
-export interface Fixture {
-  id: number
-  date: string
-  status: MatchStatus
-}
-
-export interface Match {
-  fixture: Fixture
-  teams: {
-    home: Team
-    away: Team
-  }
-  goals: Goals
-  league: {
-    name: string
-    country: string
-    logo: string
-  }
-}
-
-export interface ApiResponse<T> {
-  response: T[]
-  errors: Record<string, string>
-}`,
+export default BootstrapLayout`,
           },
         ],
       },
       {
         id: 39,
-        title: 'Projekt: AuthContext',
-        category: 'Praxisprojekt',
-        explanation: `Der **AuthContext** ist das Herzstück der User-Verwaltung: Er hält den eingeloggten User als State und stellt Login-, Logout- und Register-Funktionen für die gesamte App bereit. Alle Komponenten die wissen müssen ob jemand eingeloggt ist, konsumieren diesen Context — ohne Props durch die Hierarchie reichen zu müssen.
+        title: 'Beispielkomponente: Button',
+        category: 'Komponenten',
+        explanation: `Ein wiederverwendbarer \`Button\` ist oft die erste eigene Komponente die man in einem Projekt baut. Statt überall \`<button className="...">\` zu schreiben, kapselt du das Aussehen und Verhalten in einer Komponente — und nutzt sie überall mit konsistentem Styling.
 
-**Login- und Logout-Logik zentral verwalten:**
-Im AuthProvider leben alle Auth-Funktionen: \`register()\` erstellt einen neuen User und speichert ihn im \`localStorage\`, \`login()\` prüft die Eingabe gegen den gespeicherten User und setzt den State, \`logout()\` löscht den User aus dem State und aus dem \`localStorage\`. Der \`useEffect\` beim Start liest den gespeicherten User aus dem \`localStorage\` — so bleibt die Session auch nach einem Seiten-Reload erhalten.
+**Props für Flexibilität:**
+Der Button bekommt Props für alles was sich ändern kann: \`children\` für den Text, \`onClick\` für den Handler, \`variant\` für das Aussehen (z.B. \`"primary"\` oder \`"danger"\`), und \`disabled\` um ihn zu deaktivieren. Mit einem optionalen \`type\`-Prop kann er auch als Submit-Button in Formularen verwendet werden.
 
-**Den AuthContext konsumieren:**
-Der Custom Hook \`useAuth()\` macht den Zugriff komfortabel: \`const { user, login, logout } = useAuth()\` — fertig. Der Hook wirft einen Fehler wenn er außerhalb des Providers verwendet wird, was Bugs durch falsche Verwendung früh aufdeckt. In einer echten App würden \`login()\` und \`register()\` echte API-Calls machen (\`fetch('/api/login', ...)\`) statt lokal zu simulieren.`,
+**Varianten über CSS-Klassen:**
+Ein elegantes Muster: du mappst den \`variant\`-Prop auf eine CSS-Klasse. So bleibt die Komponente schlank — die Logik entscheidet nur welche Klasse gesetzt wird, das tatsächliche Aussehen liegt im CSS. In der Praxis könnte man auch ein Object verwenden: \`const variantClass = { primary: 'btn--primary', danger: 'btn--danger' }[variant]\`.`,
         keyPoints: [
-          'localStorage: User-Session persistieren',
-          'JSON.parse/stringify: Objekte in localStorage konvertieren',
-          'Provider wraps die ganze App in main.tsx',
-          'Custom Hook useAuth() für bequemen Zugriff',
+          'children-Prop: Inhalt des Buttons flexibel halten',
+          'variant-Prop mapped auf CSS-Klassen',
+          'disabled-Prop deaktiviert Button und verändert Cursor',
+          'type-Prop: "button" (Standard) oder "submit" für Formulare',
         ],
         learningGoals: [
-          'Einen AuthContext für Login-State anlegen',
-          'Login- und Logout-Logik zentral im Context verwalten',
-          'Den AuthContext in beliebigen Komponenten konsumieren',
+          'Einen wiederverwendbaren Button mit TypeScript-Props bauen',
+          'Varianten über Klassen-Mapping steuern',
+          'Den Button in verschiedenen Kontexten einsetzen',
         ],
         files: [
           {
-            name: 'src/context/AuthContext.tsx',
+            name: 'Button.tsx',
             language: 'tsx',
-            code: `import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import type { User, LoginData, RegisterData, AuthContextType } from '../types'
+            code: `type ButtonVariant = 'primary' | 'secondary' | 'danger'
 
-const AuthContext = createContext<AuthContextType | null>(null)
+interface ButtonProps {
+  children: React.ReactNode
+  onClick?: () => void
+  variant?: ButtonVariant
+  disabled?: boolean
+  type?: 'button' | 'submit' | 'reset'
+}
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser]         = useState<User | null>(null)
-  const [isLoading, setLoading] = useState(true)
-
-  // Beim Start: gespeicherten User aus localStorage laden
-  useEffect(() => {
-    const stored = localStorage.getItem('auth_user')
-    if (stored) setUser(JSON.parse(stored))
-    setLoading(false)
-  }, [])
-
-  async function register(data: RegisterData): Promise<void> {
-    // Demo: simuliert API-Call — in Produktion: fetch('/api/register', ...)
-    const newUser: User = {
-      id: crypto.randomUUID(),
-      username: data.username,
-      email: data.email,
-    }
-    localStorage.setItem('auth_user', JSON.stringify(newUser))
-    setUser(newUser)
-  }
-
-  async function login(data: LoginData): Promise<void> {
-    // Demo: akzeptiert jeden User der registriert wurde
-    const stored = localStorage.getItem('auth_user')
-    if (!stored) throw new Error('Kein Account gefunden — bitte registrieren')
-    const savedUser: User = JSON.parse(stored)
-    if (savedUser.email !== data.email) throw new Error('E-Mail stimmt nicht überein')
-    setUser(savedUser)
-  }
-
-  function logout() {
-    localStorage.removeItem('auth_user')
-    setUser(null)
-  }
-
+function Button({
+  children,
+  onClick,
+  variant = 'primary',
+  disabled = false,
+  type = 'button',
+}: ButtonProps) {
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={\`btn btn--\${variant}\${disabled ? ' btn--disabled' : ''}\`}
+    >
       {children}
-    </AuthContext.Provider>
+    </button>
   )
 }
 
-// Custom Hook — prüft ob Context vorhanden (Safety)
-export function useAuth(): AuthContextType {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth muss innerhalb von AuthProvider genutzt werden')
-  return ctx
+export default Button`,
+          },
+          {
+            name: 'Button.css',
+            language: 'css',
+            code: `.btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn--primary   { background: #4f46e5; color: #fff; }
+.btn--secondary { background: #e5e7eb; color: #111; }
+.btn--danger    { background: #dc2626; color: #fff; }
+
+.btn--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}`,
+          },
+          {
+            name: 'Verwendung',
+            language: 'tsx',
+            code: `import Button from './Button'
+
+function Demo() {
+  return (
+    <div style={{ display: 'flex', gap: '8px' }}>
+      <Button onClick={() => alert('Klick!')}>Speichern</Button>
+      <Button variant="secondary">Abbrechen</Button>
+      <Button variant="danger" disabled>Löschen</Button>
+    </div>
+  )
 }`,
           },
         ],
       },
       {
         id: 40,
-        title: 'Projekt: PrivateRoute & Layout',
-        category: 'Praxisprojekt',
-        explanation: `Eine **PrivateRoute-Komponente** schützt Seiten die nur für eingeloggte User zugänglich sein sollen. Die Logik ist simpel: wenn kein User eingeloggt ist, wird mit \`<Navigate to="/login" replace />\` sofort zum Login weitergeleitet. Wenn ein User eingeloggt ist, rendert \`<Outlet />\` die eigentliche Kind-Route. Das \`replace\` sorgt dafür dass die geschützte URL nicht im Browser-Verlauf landet — der Zurück-Button führt nicht zurück zur geschützten Seite.
+        title: 'Beispielkomponente: Formular',
+        category: 'Komponenten',
+        explanation: `Ein Formular in React basiert auf **kontrolliertem State**: jedes Eingabefeld hat einen \`value\` aus dem State und ein \`onChange\` das den State aktualisiert. So ist React immer die einzige Quelle der Wahrheit — du kannst jederzeit auf die Eingaben zugreifen, validieren oder zurücksetzen.
 
-**Nicht eingeloggte User weiterleiten:**
-Der Auth-State kommt aus dem \`useAuth()\`-Hook. Während der State noch aus dem \`localStorage\` geladen wird (\`isLoading\`), zeigt die PrivateRoute einen Ladehinweis — sonst würde kurz die Login-Seite aufblitzen bevor die Session erkannt wird. Erst wenn klar ist dass kein User eingeloggt ist, wird weitergeleitet.
+**Generischer handleChange-Handler:**
+Statt für jedes Feld eine eigene Handler-Funktion zu schreiben, nutzt du einen einzigen Handler mit \`e.target.name\` und computed property syntax: \`{ ...prev, [e.target.name]: e.target.value }\`. Das funktioniert solange der \`name\`-Attribut des Inputs mit dem Key im State-Objekt übereinstimmt.
 
-**Ein gemeinsames Layout für alle Seiten:**
-Die \`Layout\`-Komponente liefert den gemeinsamen Header mit Navigation und Logout-Button. Sie verwendet \`<Outlet />\` als Platzhalter für den eigentlichen Seiteninhalt — React Router tauscht dort die aktuelle Seite ein. Indem du Layout als Wrapper-Route in deiner Routen-Konfiguration verwendest, bekommen alle Kind-Routen automatisch den Header, ohne dass jede Seite ihn selbst importieren muss.`,
+**Formular absenden:**
+Der \`onSubmit\`-Handler des \`<form>\`-Elements ruft zuerst \`e.preventDefault()\` auf — sonst würde die Seite neu laden. Danach kannst du mit den gesammelten Formulardaten arbeiten: validieren, an eine API senden oder den State zurücksetzen.`,
         keyPoints: [
-          'Navigate component: programmatische Umleitung in Router',
-          'replace: ersetzt History-Eintrag (kein Zurück-Button zur geschützten Seite)',
-          'Outlet: rendert die aktuelle Kind-Route',
+          'Kontrolliertes Formular: value aus State, onChange aktualisiert State',
+          'e.preventDefault() verhindert Seiten-Reload beim Submit',
+          'Generischer handleChange mit computed property: [e.target.name]',
+          'Nach Submit: State mit useState-Setter zurücksetzen',
         ],
         learningGoals: [
-          'Eine PrivateRoute-Komponente zum Schützen von Routen bauen',
-          'Nicht eingeloggte Nutzer auf die Login-Seite weiterleiten',
-          'Ein gemeinsames Layout für geschützte Seiten definieren',
+          'Ein kontrolliertes Formular mit mehreren Feldern bauen',
+          'Einen generischen onChange-Handler schreiben',
+          'Formulardaten beim Submit verarbeiten und zurücksetzen',
         ],
         files: [
           {
-            name: 'src/components/PrivateRoute.tsx',
+            name: 'ContactForm.tsx',
             language: 'tsx',
-            code: `import { Navigate, Outlet } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+            code: `import { useState } from 'react'
 
-function PrivateRoute() {
-  const { user, isLoading } = useAuth()
-
-  // Während Auth-State geladen wird: nichts zeigen
-  if (isLoading) return <div>Laden...</div>
-
-  // Nicht eingeloggt: zum Login umleiten
-  if (!user) return <Navigate to="/login" replace />
-
-  // Eingeloggt: die geschützte Kind-Route rendern
-  return <Outlet />
+interface FormData {
+  name: string
+  email: string
+  message: string
 }
 
-export default PrivateRoute`,
-          },
-          {
-            name: 'src/components/Layout.tsx',
-            language: 'tsx',
-            code: `import { Link, useNavigate, Outlet } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import './Layout.css'
+const INITIAL: FormData = { name: '', email: '', message: '' }
 
-function Layout() {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
+function ContactForm() {
+  const [form, setForm] = useState<FormData>(INITIAL)
 
-  function handleLogout() {
-    logout()
-    navigate('/login')
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    console.log('Formulardaten:', form)
+    setForm(INITIAL) // Zurücksetzen
   }
 
   return (
-    <div className="layout-wrapper">
-      <header className="layout-header">
-        <Link to="/dashboard" className="layout-logo">
-          ⚽ SportsDash
-        </Link>
-
-        {user && (
-          <div className="layout-nav">
-            <span className="layout-greeting">Hallo, {user.username}</span>
-            <button
-              onClick={handleLogout}
-              className="logout-button"
-            >
-              Abmelden
-            </button>
-          </div>
-        )}
-      </header>
-
-      <main className="layout-main">
-        <Outlet />   {/* Hier wird die aktuelle Seite gerendert */}
-      </main>
-    </div>
+    <form onSubmit={handleSubmit} className="contact-form">
+      <div className="field">
+        <label htmlFor="name">Name</label>
+        <input id="name" name="name" value={form.name}
+               onChange={handleChange} required />
+      </div>
+      <div className="field">
+        <label htmlFor="email">E-Mail</label>
+        <input id="email" name="email" type="email" value={form.email}
+               onChange={handleChange} required />
+      </div>
+      <div className="field">
+        <label htmlFor="message">Nachricht</label>
+        <textarea id="message" name="message" value={form.message}
+                  onChange={handleChange} rows={4} required />
+      </div>
+      <button type="submit">Absenden</button>
+    </form>
   )
 }
 
-export default Layout`,
+export default ContactForm`,
           },
           {
-            name: 'Layout.css',
+            name: 'ContactForm.css',
             language: 'css',
-            code: `
-.layout-wrapper {
-  min-height: 100vh;
+            code: `.contact-form {
   display: flex;
   flex-direction: column;
-}
-
-.layout-header {
-  background: #1a1a2e;
-  color: #fff;
-  padding: 0 24px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.layout-logo {
-  color: #e94560;
-  font-weight: bold;
-  text-decoration: none;
-}
-
-.layout-nav {
-  display: flex;
   gap: 16px;
-  align-items: center;
+  max-width: 480px;
 }
 
-.layout-greeting {
-  color: #aaa;
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.logout-button {
-  background: #e94560;
-  color: #fff;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 4px;
-  cursor: pointer;
+.field label { font-weight: 600; }
+
+.field input,
+.field textarea {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
 }
 
-.layout-main {
-  flex: 1;
-  padding: 24px;
-  background: #0f3460;
-  color: #fff;
-}
-`,
+.field textarea { resize: vertical; }`,
           },
         ],
       },
       {
         id: 41,
-        title: 'Projekt: Login & Register Pages',
-        category: 'Praxisprojekt',
-        explanation: `Die Login- und Registrierungsseiten sind kontrollierte Formulare die auf den AuthContext zugreifen. Das Formular hält die Eingaben in einem State-Objekt (\`{ email: '', password: '' }\`) und nutzt einen generischen \`handleChange\`-Handler mit computed property syntax. Die Auth-Logik selbst (Login/Register) liegt komplett im Context — die Seite ruft nur \`login(form)\` oder \`register(form)\` auf.
+        title: 'Beispielkomponente: Bild',
+        category: 'Komponenten',
+        explanation: `Eine \`Image\`-Komponente kapselt das \`<img>\`-Element und fügt nützliche Features hinzu: einen Fallback wenn das Bild nicht lädt, ein Lade-Zustand und ein konsistentes Styling. Das \`alt\`-Attribut ist für Barrierefreiheit Pflicht — Screenreader lesen es vor, und Browser zeigen es wenn das Bild fehlt.
 
-**Formulardaten validieren und Fehler anzeigen:**
-Fehler können auf zwei Arten entstehen: durch Client-seitige Validierung (z.B. "Passwort min. 6 Zeichen" vor dem Submit) oder durch Fehler aus dem Context (z.B. "E-Mail stimmt nicht überein"). Beide landen in einem lokalen \`error\`-State. Das \`try/catch\` um den \`await login()\`-Aufruf fängt Fehler ab die der Context mit \`throw new Error(...)\` wirft. Der Fehler wird dann einfach als String in einer \`<p>\`-Zeile angezeigt.
+**onError-Fallback:**
+Das \`<img>\`-Element hat ein \`onError\`-Event das feuert wenn das Bild nicht geladen werden kann (falscher Pfad, kein Netz, etc.). Du kannst dann \`e.currentTarget.src\` auf ein Platzhalter-Bild setzen oder einen Fehler-State setzen der eine alternative Anzeige rendert.
 
-**Nach erfolgreichem Login navigieren:**
-Nach einem erfolgreichen Login oder einer Registrierung rufst du \`navigate('/dashboard')\` auf. Das ist programmatische Navigation mit dem \`useNavigate\`-Hook — der User landet sofort auf dem Dashboard ohne dass er auf einen Link klicken muss. Ein \`loading\`-State während des async-Aufrufs verhindert dass der User mehrfach absendet.`,
+**Lazy Loading:**
+Mit dem nativen \`loading="lazy"\` Attribut lädt der Browser das Bild erst wenn es in den sichtbaren Bereich scrollt. Das verbessert die initiale Ladezeit der Seite deutlich — besonders bei vielen Bildern. Das Attribut wird von allen modernen Browsern unterstützt und braucht keine JavaScript-Bibliothek.`,
         keyPoints: [
-          'try/catch um login()/register() — fängt Fehler aus AuthContext',
-          'navigate("/dashboard") nach erfolgreichem Login',
-          'Link zu /register für User ohne Account',
+          'alt-Attribut: Pflicht für Barrierefreiheit und SEO',
+          'onError: Fallback-Bild bei Ladefehler setzen',
+          'loading="lazy": Bild erst beim Einscrollen laden',
+          'object-fit: cover/contain für konsistente Bildgrößen',
         ],
         learningGoals: [
-          'Login- und Registrierungsformulare mit React bauen',
-          'Formulardaten validieren und Fehler anzeigen',
-          'Nach erfolgreichem Login zum Dashboard navigieren',
+          'Eine Image-Komponente mit Fallback und Lazy Loading bauen',
+          'Das onError-Event für Fehlerbehandlung nutzen',
+          'Bilder mit CSS konsistent in ihrem Container darstellen',
         ],
         files: [
           {
-            name: 'src/pages/LoginPage.tsx',
+            name: 'Image.tsx',
             language: 'tsx',
             code: `import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import type { LoginData } from '../types'
-import './AuthPages.css'
 
-function LoginPage() {
-  const [form, setForm]   = useState<LoginData>({ email: '', password: '' })
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
-  const navigate  = useNavigate()
+const FALLBACK = 'https://placehold.co/400x300?text=Kein+Bild'
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
+interface ImageProps {
+  src: string
+  alt: string
+  width?: number | string
+  height?: number | string
+  className?: string
+}
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-    try {
-      await login(form)
-      navigate('/dashboard')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login fehlgeschlagen')
-    } finally {
-      setLoading(false)
-    }
-  }
+function Image({ src, alt, width, height, className }: ImageProps) {
+  const [error, setError] = useState(false)
 
   return (
-    <div className="auth-container">
-      <h2 className="auth-title">⚽ SportsDash Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="auth-field">
-          <label>E-Mail</label>
-          <input name="email" type="email" value={form.email}
-                 onChange={handleChange} className="auth-input" required />
-        </div>
-        <div className="auth-field">
-          <label>Passwort</label>
-          <input name="password" type="password" value={form.password}
-                 onChange={handleChange} className="auth-input" required />
-        </div>
-        {error && <p className="auth-error">{error}</p>}
-        <button type="submit" disabled={loading}
-          className={\`auth-submit\${loading ? ' auth-submit--loading' : ''}\`}>
-          {loading ? 'Anmelden...' : 'Anmelden'}
-        </button>
-      </form>
-      <p className="auth-footer">
-        Noch kein Account? <Link to="/register" className="auth-link">Registrieren</Link>
-      </p>
-    </div>
+    <img
+      src={error ? FALLBACK : src}
+      alt={alt}
+      width={width}
+      height={height}
+      loading="lazy"
+      onError={() => setError(true)}
+      className={\`image\${className ? \` \${className}\` : ''}\`}
+    />
   )
 }
 
-export default LoginPage`,
+export default Image`,
           },
           {
-            name: 'src/pages/RegisterPage.tsx',
-            language: 'tsx',
-            code: `import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import type { RegisterData } from '../types'
-import './AuthPages.css'
-
-function RegisterPage() {
-  const [form, setForm]   = useState<RegisterData>({ username: '', email: '', password: '' })
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const { register } = useAuth()
-  const navigate = useNavigate()
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (form.password.length < 6) { setError('Passwort min. 6 Zeichen'); return }
-    setError(null)
-    setLoading(true)
-    try {
-      await register(form)
-      navigate('/dashboard')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registrierung fehlgeschlagen')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="auth-container">
-      <h2 className="auth-title">⚽ Registrieren</h2>
-      <form onSubmit={handleSubmit}>
-        {(['username', 'email', 'password'] as const).map(field => (
-          <div key={field} className="auth-field">
-            <label className="auth-label-capitalize">{field}</label>
-            <input
-              name={field}
-              type={field === 'password' ? 'password' : field === 'email' ? 'email' : 'text'}
-              value={form[field]}
-              onChange={handleChange}
-              className="auth-input"
-              required
-            />
-          </div>
-        ))}
-        {error && <p className="auth-error">{error}</p>}
-        <button type="submit" disabled={loading}
-          className="auth-submit">
-          {loading ? 'Registrieren...' : 'Registrieren'}
-        </button>
-      </form>
-      <p className="auth-footer">
-        Schon registriert? <Link to="/login" className="auth-link">Anmelden</Link>
-      </p>
-    </div>
-  )
-}
-
-export default RegisterPage`,
-          },
-          {
-            name: 'AuthPages.css',
+            name: 'Image.css',
             language: 'css',
-            code: `
-.auth-container {
-  max-width: 400px;
-  margin: 60px auto;
+            code: `.image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+}`,
+          },
+          {
+            name: 'Verwendung',
+            language: 'tsx',
+            code: `import Image from './Image'
+
+function Demo() {
+  return (
+    <div>
+      {/* Normales Bild */}
+      <Image src="/foto.jpg" alt="Mein Foto" width={400} height={300} />
+
+      {/* Bild mit falschem Pfad → Fallback wird angezeigt */}
+      <Image src="/existiert-nicht.jpg" alt="Fehler-Demo" width={400} height={300} />
+    </div>
+  )
+}`,
+          },
+        ],
+      },
+      {
+        id: 42,
+        title: 'Beispielkomponente: Audio',
+        category: 'Komponenten',
+        explanation: `Mit dem HTML5-\`<audio>\`-Element kannst du Audiodateien direkt im Browser abspielen — ohne externe Bibliotheken. React kapselt das Element in einer Komponente und steuert es über eine **Ref**. Eine Ref (\`useRef\`) gibt dir direkten Zugriff auf das DOM-Element, was für Media-Elemente notwendig ist, weil \`.play()\` und \`.pause()\` direkte Methoden auf dem Element sind.
+
+**useRef für Media-Steuerung:**
+\`const audioRef = useRef<HTMLAudioElement>(null)\` erstellt eine Ref die du mit \`ref={audioRef}\` an das \`<audio>\`-Element hängst. Danach kannst du \`audioRef.current?.play()\` und \`audioRef.current?.pause()\` aufrufen. Das \`?\` ist wichtig weil \`current\` beim ersten Render noch \`null\` sein kann.
+
+**Eigene Controls:**
+Das Attribut \`controls\` zeigt den nativen Browser-Player an — praktisch, aber nicht immer schön. Alternativ baust du eigene Play/Pause-Buttons und steuerst das Element komplett über die Ref. So hast du volle Kontrolle über das Aussehen.`,
+        keyPoints: [
+          'useRef<HTMLAudioElement>: direkter Zugriff auf das audio-Element',
+          'audioRef.current?.play() / .pause() für Steuerung',
+          'controls-Attribut: nativer Browser-Player',
+          'onEnded-Event: feuert wenn Audio zu Ende ist',
+        ],
+        learningGoals: [
+          'Das <audio>-Element mit useRef steuern',
+          'Eigene Play/Pause-Controls bauen',
+          'Den Abspielstatus im State tracken',
+        ],
+        files: [
+          {
+            name: 'AudioPlayer.tsx',
+            language: 'tsx',
+            code: `import { useRef, useState } from 'react'
+
+interface AudioPlayerProps {
+  src: string
+  title?: string
 }
 
-.auth-title {
-  color: #e94560;
-  margin-bottom: 24px;
+function AudioPlayer({ src, title }: AudioPlayerProps) {
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const [playing, setPlaying] = useState(false)
+
+  function togglePlay() {
+    if (!audioRef.current) return
+    if (playing) {
+      audioRef.current.pause()
+    } else {
+      audioRef.current.play()
+    }
+    setPlaying(!playing)
+  }
+
+  function handleEnded() {
+    setPlaying(false)
+  }
+
+  return (
+    <div className="audio-player">
+      <audio ref={audioRef} src={src} onEnded={handleEnded} />
+      {title && <span className="audio-title">{title}</span>}
+      <button onClick={togglePlay} className="audio-btn">
+        {playing ? '⏸ Pause' : '▶ Play'}
+      </button>
+    </div>
+  )
 }
 
-.auth-field {
-  margin-bottom: 16px;
+export default AudioPlayer`,
+          },
+          {
+            name: 'AudioPlayer.css',
+            language: 'css',
+            code: `.audio-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #1e1e2e;
+  border-radius: 8px;
+  width: fit-content;
 }
 
-.auth-input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 6px;
-  background: #16213e;
-  border: 1px solid #e94560;
-  border-radius: 4px;
-  color: #fff;
-  box-sizing: border-box;
+.audio-title {
+  color: #cdd6f4;
+  font-size: 0.9rem;
 }
 
-.auth-error {
-  color: #e94560;
-}
-
-.auth-submit {
-  width: 100%;
-  padding: 10px;
-  background: #e94560;
+.audio-btn {
+  padding: 6px 16px;
+  background: #4f46e5;
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}`,
+          },
+          {
+            name: 'Verwendung',
+            language: 'tsx',
+            code: `import AudioPlayer from './AudioPlayer'
+
+function Demo() {
+  return (
+    <AudioPlayer
+      src="/audio/beispiel.mp3"
+      title="Beispiel-Track"
+    />
+  )
+}`,
+          },
+        ],
+      },
+      {
+        id: 43,
+        title: 'Beispielkomponente: Video',
+        category: 'Komponenten',
+        explanation: `Das \`<video>\`-Element funktioniert sehr ähnlich wie \`<audio>\` — auch hier nutzt du \`useRef\` für die Steuerung. Video-Komponenten haben aber ein paar Besonderheiten: ein **Poster**-Bild das vor dem Abspielen angezeigt wird, Vollbild-Unterstützung, und häufig möchtest du die Lautstärke oder den Fortschritt steuern.
+
+**Poster-Attribut:**
+\`<video poster="/thumbnail.jpg">\` zeigt das Bild solange das Video nicht läuft. Das verbessert die User Experience weil der User sofort sieht worum es in dem Video geht — statt eines schwarzen Rechtecks.
+
+**Vollbild mit requestFullscreen:**
+\`videoRef.current?.requestFullscreen()\` aktiviert den Vollbildmodus des Browsers. Diese API ist direkt auf dem DOM-Element verfügbar — kein Plugin nötig. \`document.fullscreenElement\` gibt das aktuell im Vollbild angezeigte Element zurück, damit du den Button-Text anpassen kannst.
+
+**muted + autoPlay:**
+Die meisten Browser blockieren \`autoPlay\` für Videos mit Ton. Die Kombination \`autoPlay muted\` funktioniert überall und wird häufig für Hero-Videos im Hintergrund verwendet.`,
+        keyPoints: [
+          'useRef<HTMLVideoElement>: direkter Zugriff auf video-Element',
+          'poster-Attribut: Vorschaubild vor dem Abspielen',
+          'requestFullscreen(): nativer Vollbild-API',
+          'autoPlay funktioniert nur in Kombination mit muted',
+        ],
+        learningGoals: [
+          'Das <video>-Element mit useRef steuern',
+          'Poster, Play/Pause und Vollbild implementieren',
+          'Den Unterschied zwischen Video- und Audio-Komponente verstehen',
+        ],
+        files: [
+          {
+            name: 'VideoPlayer.tsx',
+            language: 'tsx',
+            code: `import { useRef, useState } from 'react'
+
+interface VideoPlayerProps {
+  src: string
+  poster?: string
+}
+
+function VideoPlayer({ src, poster }: VideoPlayerProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [playing, setPlaying] = useState(false)
+
+  function togglePlay() {
+    if (!videoRef.current) return
+    if (playing) {
+      videoRef.current.pause()
+    } else {
+      videoRef.current.play()
+    }
+    setPlaying(!playing)
+  }
+
+  function toggleFullscreen() {
+    if (!videoRef.current) return
+    if (document.fullscreenElement) {
+      document.exitFullscreen()
+    } else {
+      videoRef.current.requestFullscreen()
+    }
+  }
+
+  return (
+    <div className="video-wrapper">
+      <video
+        ref={videoRef}
+        src={src}
+        poster={poster}
+        onEnded={() => setPlaying(false)}
+        className="video-element"
+      />
+      <div className="video-controls">
+        <button onClick={togglePlay}>
+          {playing ? '⏸ Pause' : '▶ Play'}
+        </button>
+        <button onClick={toggleFullscreen}>⛶ Vollbild</button>
+      </div>
+    </div>
+  )
+}
+
+export default VideoPlayer`,
+          },
+          {
+            name: 'VideoPlayer.css',
+            language: 'css',
+            code: `.video-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: fit-content;
+}
+
+.video-element {
+  max-width: 640px;
+  width: 100%;
+  border-radius: 8px;
+  background: #000;
+}
+
+.video-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.video-controls button {
+  padding: 6px 14px;
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border: 1px solid #45475a;
+  border-radius: 6px;
+  cursor: pointer;
+}`,
+          },
+          {
+            name: 'Verwendung',
+            language: 'tsx',
+            code: `import VideoPlayer from './VideoPlayer'
+
+function Demo() {
+  return (
+    <VideoPlayer
+      src="/videos/demo.mp4"
+      poster="/images/thumbnail.jpg"
+    />
+  )
+}`,
+          },
+        ],
+      },
+      {
+        id: 44,
+        title: 'Beispielkomponente: Navbar',
+        category: 'Komponenten',
+        explanation: `Eine Navbar ist eine der häufigsten Komponenten in React-Apps. Sie zeigt Links zur Navigation, den Anwendungsnamen, und oft den Login-Status des Users. Mit React Router's \`<NavLink>\` bekommst du automatisch eine aktive CSS-Klasse für den aktuellen Link — ohne eigene Logik.
+
+**NavLink vs. Link:**
+\`<NavLink>\` ist eine erweiterte Version von \`<Link>\`. Es fügt automatisch die CSS-Klasse \`active\` hinzu wenn die aktuelle Route mit dem \`to\`-Prop übereinstimmt. So kannst du den aktiven Menüpunkt optisch hervorheben. Alternativ kannst du eine Funktion übergeben: \`className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}\`.
+
+**Responsive Navbar mit Hamburger-Menü:**
+Auf kleinen Bildschirmen soll die Navbar einklappen. Du hältst einen \`open\`-State der beim Klick auf den Hamburger-Button umschaltet. Das Menü wird dann per CSS ein- oder ausgeblendet. Mit dem \`useEffect\` und einem Window-Resize-Listener kannst du das Menü automatisch schließen wenn der Viewport breiter wird.`,
+        keyPoints: [
+          'NavLink statt Link: aktive CSS-Klasse automatisch',
+          'className={({ isActive }) => ...}: aktiven Link stylen',
+          'Hamburger-Menü: open-State + CSS für Mobile',
+          'useEffect: Menü bei Viewport-Verbreiterung schließen',
+        ],
+        learningGoals: [
+          'Eine Navbar mit NavLink und aktivem Link-Styling bauen',
+          'Ein responsives Hamburger-Menü implementieren',
+          'Die Navbar in das App-Layout einbinden',
+        ],
+        files: [
+          {
+            name: 'Navbar.tsx',
+            language: 'tsx',
+            code: `import { useState } from 'react'
+import { NavLink } from 'react-router-dom'
+import './Navbar.css'
+
+const links = [
+  { to: '/',        label: 'Home' },
+  { to: '/about',   label: 'Über uns' },
+  { to: '/contact', label: 'Kontakt' },
+]
+
+function Navbar() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <nav className="navbar">
+      <span className="navbar-brand">MeineApp</span>
+
+      {/* Hamburger-Button (nur mobil sichtbar) */}
+      <button
+        className="navbar-toggle"
+        onClick={() => setOpen(o => !o)}
+        aria-label="Menü öffnen"
+      >
+        {open ? '✕' : '☰'}
+      </button>
+
+      {/* Navigations-Links */}
+      <ul className={\`navbar-links\${open ? ' navbar-links--open' : ''}\`}>
+        {links.map(link => (
+          <li key={link.to}>
+            <NavLink
+              to={link.to}
+              className={({ isActive }) =>
+                isActive ? 'nav-link nav-link--active' : 'nav-link'
+              }
+              onClick={() => setOpen(false)}
+            >
+              {link.label}
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+export default Navbar`,
+          },
+          {
+            name: 'Navbar.css',
+            language: 'css',
+            code: `.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 20px;
+  height: 60px;
+  background: #1e1e2e;
+  color: #cdd6f4;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #cdd6f4;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.nav-link:hover           { background: #313244; }
+.nav-link--active         { background: #4f46e5; color: #fff; }
+
+/* Mobile */
+.navbar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #cdd6f4;
+  font-size: 1.4rem;
   cursor: pointer;
 }
 
-.auth-submit--loading {
-  cursor: not-allowed;
-}
+@media (max-width: 600px) {
+  .navbar-toggle { display: block; }
 
-.auth-footer {
-  margin-top: 16px;
-  color: #aaa;
-}
+  .navbar-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    padding: 8px 0 12px;
+  }
 
-.auth-link {
-  color: #e94560;
-}
-
-.auth-label-capitalize {
-  text-transform: capitalize;
-}
-`,
+  .navbar-links--open { display: flex; }
+}`,
           },
         ],
       },
