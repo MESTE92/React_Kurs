@@ -5562,154 +5562,142 @@ export default App`,
         id: 44,
         title: 'Beispielkomponente: Navbar',
         category: 'Komponenten',
-        explanation: `Eine Navbar ist eine der häufigsten Komponenten in React-Apps. Sie zeigt Links zur Navigation, den Anwendungsnamen, und oft den Login-Status des Users. Mit React Router's \`<NavLink>\` bekommst du automatisch eine aktive CSS-Klasse für den aktuellen Link — ohne eigene Logik.
+        explanation: `React Bootstrap bietet eine fertige \`<Navbar>\`-Komponente die bereits responsives Verhalten mitbringt — inklusive Hamburger-Menü für kleine Bildschirme, ohne eine Zeile eigenes CSS.
 
-**NavLink vs. Link:**
-\`<NavLink>\` ist eine erweiterte Version von \`<Link>\`. Es fügt automatisch die CSS-Klasse \`active\` hinzu wenn die aktuelle Route mit dem \`to\`-Prop übereinstimmt. So kannst du den aktiven Menüpunkt optisch hervorheben. Alternativ kannst du eine Funktion übergeben: \`className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}\`.
+**bg, variant und expand:**
+\`bg="dark"\` setzt den dunklen Hintergrund, \`variant="dark"\` stellt sicher dass Text und Icons hell dargestellt werden. \`expand="md"\` bedeutet: ab dem \`md\`-Breakpoint (768px) werden die Links angezeigt — darunter erscheint automatisch ein Hamburger-Button.
 
-**Responsive Navbar mit Hamburger-Menü:**
-Auf kleinen Bildschirmen soll die Navbar einklappen. Du hältst einen \`open\`-State der beim Klick auf den Hamburger-Button umschaltet. Das Menü wird dann per CSS ein- oder ausgeblendet. Mit dem \`useEffect\` und einem Window-Resize-Listener kannst du das Menü automatisch schließen wenn der Viewport breiter wird.`,
+**as={Link}:**
+Mit \`as={Link}\` ersetzt du das Standard-\`<a>\`-Element durch React Router's \`<Link>\`. So navigiert die Navbar innerhalb der React-App ohne einen echten Seitenneuladen — die URL ändert sich aber die Seite lädt nicht komplett neu.
+
+**ms-auto:**
+Die Bootstrap-Klasse \`ms-auto\` (margin-start: auto) schiebt die Nav-Links automatisch auf die rechte Seite der Navbar.`,
         keyPoints: [
-          'NavLink statt Link: aktive CSS-Klasse automatisch',
-          'className={({ isActive }) => ...}: aktiven Link stylen',
-          'Hamburger-Menü: open-State + CSS für Mobile',
-          'useEffect: Menü bei Viewport-Verbreiterung schließen',
+          '`expand="md"`: Hamburger-Menü unter dem md-Breakpoint (768px)',
+          '`as={Link}`: React Router-Link statt HTML-Anker',
+          '`ms-auto`: Bootstrap-Klasse für rechtsbündige Links',
+          '`variant="dark"`: helle Schrift auf dunklem Hintergrund',
         ],
         learningGoals: [
-          'Eine Navbar mit NavLink und aktivem Link-Styling bauen',
-          'Ein responsives Hamburger-Menü implementieren',
-          'Die Navbar in das App-Layout einbinden',
+          'Eine responsive Navbar mit React Bootstrap bauen',
+          'React Router\'s Link in Bootstrap-Komponenten einbinden',
         ],
         files: [
           {
-            name: 'Navbar.tsx',
+            name: 'MeineNavbar.tsx',
             language: 'tsx',
-            code: `import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
-import './Navbar.css'
+            code: `import { Navbar, Nav, Container } from 'react-bootstrap'
+import { Link } from 'react-router-dom'
 
-const links = [
-  { to: '/',        label: 'Home' },
-  { to: '/about',   label: 'Über uns' },
-  { to: '/contact', label: 'Kontakt' },
-]
-
-function Navbar() {
-  const [open, setOpen] = useState(false)
-
+function MeineNavbar() {
   return (
-    <nav className="navbar">
-      <span className="navbar-brand">MeineApp</span>
-
-      {/* Hamburger-Button (nur mobil sichtbar) */}
-      <button
-        className="navbar-toggle"
-        onClick={() => setOpen(o => !o)}
-        aria-label="Menü öffnen"
-      >
-        {open ? '✕' : '☰'}
-      </button>
-
-      {/* Navigations-Links */}
-      <ul className={\`navbar-links\${open ? ' navbar-links--open' : ''}\`}>
-        {links.map(link => (
-          <li key={link.to}>
-            <NavLink
-              to={link.to}
-              className={({ isActive }) =>
-                isActive ? 'nav-link nav-link--active' : 'nav-link'
-              }
-              onClick={() => setOpen(false)}
-            >
-              {link.label}
-            </NavLink>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <Navbar bg="dark" variant="dark" expand="md">
+      <Container>
+        <Navbar.Brand as={Link} to="/">MeineApp</Navbar.Brand>
+        <Navbar.Toggle aria-controls="navbar-nav" />
+        <Navbar.Collapse id="navbar-nav">
+          <Nav className="ms-auto">
+            <Nav.Link as={Link} to="/">Startseite</Nav.Link>
+            <Nav.Link as={Link} to="/kontakt">Kontakt</Nav.Link>
+            <Nav.Link as={Link} to="/ueber-uns">Über uns</Nav.Link>
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
   )
 }
 
-export default Navbar`,
+export default MeineNavbar`,
           },
           {
             name: 'App.tsx',
             language: 'tsx',
-            code: `import Navbar from './Navbar'
+            code: `import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import MeineNavbar from './MeineNavbar'
 
 function App() {
   return (
-    <div>
-      <Navbar />
+    <BrowserRouter>
+      <MeineNavbar />
       <div style={{ padding: '24px' }}>
-        <p>Seiteninhalt</p>
+        <Routes>
+          <Route path="/" element={<p>Willkommen auf der Startseite</p>} />
+          <Route path="/kontakt" element={<p>Kontaktseite</p>} />
+          <Route path="/ueber-uns" element={<p>Über uns</p>} />
+        </Routes>
       </div>
-    </div>
+    </BrowserRouter>
   )
 }
 
 export default App`,
           },
+        ],
+      },
+      {
+        id: 45,
+        title: 'Beispielkomponente: Card',
+        category: 'Komponenten',
+        explanation: `Die \`<Card>\`-Komponente von React Bootstrap ist eine vielseitige Box für Inhalte — Bilder, Text und Buttons lassen sich strukturiert darin anordnen. Cards werden häufig für Produkte, Blogbeiträge, Nutzerprofile oder Teaser eingesetzt.
+
+**Card.Img:**
+\`<Card.Img variant="top">\` platziert ein Bild oben in der Card. Das \`variant\`-Prop steuert die Position — \`"top"\` rundet die oberen Ecken passend ab. \`src\` akzeptiert jede Bild-URL.
+
+**Card.Body, Card.Title, Card.Text:**
+\`<Card.Body>\` ist der Inhaltsbereich der Card mit Padding. Darin kommen \`<Card.Title>\` für die Überschrift und \`<Card.Text>\` für den Beschreibungstext. Buttons werden direkt in den Body gesetzt.
+
+**width über style:**
+Die Breite der Card steuerst du über \`style={{ width: "18rem" }}\`. Bootstrap-Cards nehmen standardmäßig die volle Breite ihres Containers ein — mit \`width\` begrenzt du sie auf einen festen Wert.`,
+        keyPoints: [
+          '`Card.Img variant="top"`: Bild oben mit abgerundeten Ecken',
+          '`Card.Body`: Inhaltsbereich mit automatischem Padding',
+          '`Card.Title` / `Card.Text`: Überschrift und Beschreibungstext',
+          '`style={{ width: "18rem" }}`: Kartenbreite begrenzen',
+        ],
+        learningGoals: [
+          'Eine Card mit Bild, Text und Button mit React Bootstrap bauen',
+          'Die Unterkomponenten von Card kennen und einsetzen',
+        ],
+        files: [
           {
-            name: 'Navbar.css',
-            language: 'css',
-            code: `.navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 20px;
-  height: 60px;
-  background: #1e1e2e;
-  color: #cdd6f4;
+            name: 'MeineCard.tsx',
+            language: 'tsx',
+            code: `import { Card, Button } from 'react-bootstrap'
+
+function MeineCard() {
+  return (
+    <Card style={{ width: '18rem' }}>
+      <Card.Img
+        variant="top"
+        src="https://picsum.photos/200/100"
+      />
+      <Card.Body>
+        <Card.Title>Titel</Card.Title>
+        <Card.Text>
+          Hier steht ein kurzer Beschreibungstext.
+        </Card.Text>
+        <Button variant="primary">Mehr erfahren</Button>
+      </Card.Body>
+    </Card>
+  )
 }
 
-.navbar-brand {
-  font-weight: 700;
-  font-size: 1.2rem;
+export default MeineCard`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import MeineCard from './MeineCard'
+
+function App() {
+  return (
+    <div style={{ padding: '24px' }}>
+      <MeineCard />
+    </div>
+  )
 }
 
-.navbar-links {
-  display: flex;
-  gap: 8px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  padding: 6px 12px;
-  border-radius: 6px;
-  color: #cdd6f4;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.nav-link:hover           { background: #313244; }
-.nav-link--active         { background: #4f46e5; color: #fff; }
-
-/* Mobile */
-.navbar-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: #cdd6f4;
-  font-size: 1.4rem;
-  cursor: pointer;
-}
-
-@media (max-width: 600px) {
-  .navbar-toggle { display: block; }
-
-  .navbar-links {
-    display: none;
-    width: 100%;
-    flex-direction: column;
-    padding: 8px 0 12px;
-  }
-
-  .navbar-links--open { display: flex; }
-}`,
+export default App`,
           },
         ],
       },

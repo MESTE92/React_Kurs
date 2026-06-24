@@ -126,9 +126,15 @@ function LivePreview({ files }: { files: CodeFile[] }) {
 
   useEffect(() => {
     if (!rootRef.current || !Component) return
+    const hasRouter = files
+      .filter(f => ['tsx', 'ts', 'jsx', 'js'].includes(f.language))
+      .filter(f => !/^(main|index)\.[jt]sx?$/.test(f.name))
+      .some(f => /\b(BrowserRouter|MemoryRouter|HashRouter)\b/.test(f.code))
     rootRef.current.render(
       React.createElement(React.Suspense, { fallback: null },
-        React.createElement(MemoryRouter, null, React.createElement(Component))
+        hasRouter
+          ? React.createElement(Component)
+          : React.createElement(MemoryRouter, null, React.createElement(Component))
       )
     )
   }, [Component])

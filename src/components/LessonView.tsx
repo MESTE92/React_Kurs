@@ -74,7 +74,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Fortgeschritten': '#a855f7',
   'Praxisprojekt':   '#6d28d9',
   'Styling':         '#0ea5e9',
-  'Komponenten':     '#10b981',
+  'Komponenten':     '#0ea5e9',
 }
 
 function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEdit, editedCodes, onEditChange, onResetEdit, isCompleted, onToggleComplete }: LessonViewProps) {
