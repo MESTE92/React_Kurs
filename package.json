@@ -14,7 +14,9 @@
     "@codesandbox/sandpack-react": "^2.20.0",
     "@monaco-editor/react": "^4.7.0",
     "@types/babel__standalone": "^7.1.9",
+    "bootstrap": "^5.3.8",
     "react": "^19.2.6",
+    "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.17.0"
   },

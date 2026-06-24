@@ -5074,127 +5074,29 @@ export default Modal`,
     lessons: [
       {
         id: 37,
-        title: 'Layouting mit Flexbox & CSS Grid',
+        title: 'Layouting mit React Bootstrap',
         category: 'Styling',
-        explanation: `Bevor wir eigene Komponenten bauen, schauen wir uns an wie man sie **optisch anordnet**. Die zwei wichtigsten CSS-Werkzeuge dafür sind **Flexbox** und **CSS Grid**. Beide lösen das gleiche Problem — Elemente im Layout platzieren — aber auf unterschiedliche Weise.
+        explanation: `**React Bootstrap** bringt das bekannte Bootstrap-Grid-System als fertige React-Komponenten mit. Statt CSS-Klassen wie \`class="col-md-3"\` in HTML zu schreiben, verwendest du direkt \`<Col md={3}>\` in JSX — typsicher und ohne className-Strings.
 
-**Flexbox — eindimensional:**
-Flexbox ordnet Elemente entlang einer Achse an: entweder als Zeile (\`flex-direction: row\`) oder als Spalte (\`flex-direction: column\`). Mit \`justify-content\` steuerst du die Verteilung entlang der Hauptachse (z.B. \`space-between\`, \`center\`), mit \`align-items\` die Ausrichtung auf der Querachse. Flexbox ist ideal für Navigationsleisten, Button-Gruppen oder überall wo Elemente in einer Linie nebeneinander stehen sollen.
+**Container → Row → Col:**
+Das Grid basiert auf drei Bausteinen: \`<Container>\` begrenzt die maximale Breite und zentriert den Inhalt. \`<Row>\` erstellt eine Zeile. \`<Col>\` definiert eine Spalte — Bootstrap teilt jede Zeile in **12 gleiche Einheiten** auf. \`<Col md={3}>\` nimmt also 3 von 12 Einheiten = 25% der Breite. Props wie \`xs\`, \`md\`, \`lg\` steuern das Verhalten je nach Bildschirmbreite.
 
-**CSS Grid — zweidimensional:**
-Grid arbeitet mit Zeilen **und** Spalten gleichzeitig. Mit \`grid-template-areas\` kannst du das Layout mit Namen beschreiben — das macht den Code sehr lesbar. Du definierst benannte Bereiche wie \`header\`, \`sidebar\`, \`main\` und \`footer\` und weist Elemente diesen Bereichen per \`grid-area\` zu. Grid eignet sich perfekt für Seiten-Layouts mit mehreren Bereichen.
+**App.tsx nur als Gerüst:**
+\`App.tsx\` baut nur das Grid-Skelett auf und lädt eigene Komponenten in die Spalten. Die eigentliche Logik — zum Beispiel welcher Menüpunkt aktiv ist — gehört in die jeweilige Komponente. Nur dort kannst du Hooks wie \`useState\` verwenden.
 
-**Wann Flexbox, wann Grid?**
-Faustregel: **Flexbox für Komponenten** (Elemente in einer Reihe oder Spalte), **Grid für Seiten-Layouts** (mehrere Bereiche mit festen Positionen). In der Praxis kombinierst du beides: Grid für das Gesamtlayout der Seite, Flexbox innerhalb einzelner Komponenten.`,
+**Sidebar mit useState:**
+\`Sidebar.tsx\` ist eine eigenständige Komponente die ihren eigenen State verwaltet: welcher Link gerade aktiv ist. Das ist der typische React-Ansatz — jede Komponente ist verantwortlich für ihren eigenen Zustand, \`App\` orchestriert nur das Layout.`,
         keyPoints: [
-          'Flexbox: eindimensional — Zeile oder Spalte',
-          'justify-content & align-items: Ausrichtung auf Haupt- und Querachse',
-          'CSS Grid: zweidimensional — Zeilen und Spalten gleichzeitig',
-          'grid-template-areas: Layout mit Namen beschreiben',
-          'Faustregel: Flexbox für Komponenten, Grid für Seiten-Layouts',
+          'Container → Row → Col: die drei Bausteine des Grids',
+          'Bootstrap teilt jede Row in 12 Einheiten auf',
+          'xs / md / lg: Spaltenbreite je nach Bildschirmgröße',
+          'App.tsx = Gerüst, eigene Komponenten = Logik & State',
+          'useState nur in Komponenten nutzbar, nicht direkt in JSX-Strukturen',
         ],
         learningGoals: [
-          'Flexbox-Layouts mit justify-content und align-items aufbauen',
-          'Ein Seiten-Layout mit grid-template-areas definieren',
-          'Entscheiden wann Flexbox und wann Grid sinnvoller ist',
-        ],
-        files: [
-          {
-            name: 'FlexboxBeispiel.css',
-            language: 'css',
-            code: `.navbar {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between; /* Links & rechts verteilen */
-  align-items: center;            /* Vertikal zentrieren */
-  padding: 0 16px;
-  height: 60px;
-  background: #1e1e2e;
-}
-
-.card-list {
-  display: flex;
-  flex-wrap: wrap;        /* Umbruch bei zu wenig Platz */
-  gap: 16px;              /* Abstand zwischen Karten */
-  justify-content: center;
-}
-
-.card {
-  flex: 1 1 250px;        /* Wächst, schrumpft, Mindestbreite 250px */
-}`,
-          },
-          {
-            name: 'GridBeispiel.css',
-            language: 'css',
-            code: `.page-layout {
-  display: grid;
-  grid-template-areas:
-    "header  header"
-    "sidebar main  "
-    "footer  footer";
-  grid-template-columns: 240px 1fr;
-  grid-template-rows: 60px 1fr 40px;
-  min-height: 100vh;
-  gap: 8px;
-}
-
-/* Elemente den Bereichen zuweisen */
-.header  { grid-area: header; }
-.sidebar { grid-area: sidebar; }
-.main    { grid-area: main; }
-.footer  { grid-area: footer; }`,
-          },
-          {
-            name: 'PageLayout.tsx',
-            language: 'tsx',
-            code: `import './GridBeispiel.css'
-
-function PageLayout() {
-  return (
-    <div className="page-layout">
-      <header className="header">Header</header>
-      <aside className="sidebar">Sidebar</aside>
-      <main className="main">Hauptinhalt</main>
-      <footer className="footer">Footer</footer>
-    </div>
-  )
-}
-
-export default PageLayout`,
-          },
-        ],
-      },
-      {
-        id: 38,
-        title: 'Layouting & Styling mit Bootstrap',
-        category: 'Styling',
-        explanation: `Bootstrap ist ein CSS-Framework das fertige Klassen für Layout, Abstände, Farben und Komponenten mitbringt. Statt eigenes CSS zu schreiben nutzt du direkt Klassen wie \`d-flex\`, \`gap-3\` oder \`col-md-6\`. In React integrierst du Bootstrap einfach über npm.
-
-**Installation:**
-\`\`\`
-npm install bootstrap
-\`\`\`
-Danach importierst du das CSS einmalig in \`main.tsx\`:
-\`\`\`tsx
-import 'bootstrap/dist/css/bootstrap.min.css'
-\`\`\`
-Ab sofort stehen alle Bootstrap-Klassen in deiner gesamten App zur Verfügung.
-
-**Das Grid-System:**
-Bootstrap hat ein eigenes 12-Spalten-Grid-System. Mit \`container\`, \`row\` und \`col\` baust du responsive Layouts. \`col-md-6\` bedeutet: ab mittlerer Bildschirmbreite nimmt das Element 6 von 12 Spalten ein (also die Hälfte). Auf kleinen Bildschirmen wird aus zwei nebeneinander stehenden Spalten automatisch ein gestapeltes Layout.
-
-**Utility-Klassen:**
-Bootstrap hat hunderte Utility-Klassen für häufige CSS-Eigenschaften: \`mt-3\` (margin-top), \`p-2\` (padding), \`text-center\`, \`fw-bold\`, \`bg-primary\`, \`d-flex\`, \`align-items-center\`, \`justify-content-between\`. Diese Klassen ersetzen in vielen Fällen eigenes CSS komplett.`,
-        keyPoints: [
-          'npm install bootstrap + Import in main.tsx',
-          '12-Spalten-Grid: container → row → col-md-6',
-          'Utility-Klassen: mt-3, p-2, d-flex, text-center, fw-bold',
-          'Responsive: col-md-6 = halbe Breite ab mittlerem Viewport',
-        ],
-        learningGoals: [
-          'Bootstrap in ein Vite/React-Projekt einbinden',
-          'Das Bootstrap-Grid für ein responsives Layout nutzen',
-          'Utility-Klassen für Abstände, Farben und Flexbox einsetzen',
+          'Ein Sidebar-Layout mit Container, Row und Col aufbauen',
+          'Responsive Breakpoints (xs, md, lg) richtig einsetzen',
+          'Verstehen warum Logik in eigene Komponenten gehört',
         ],
         files: [
           {
@@ -5202,7 +5104,7 @@ Bootstrap hat hunderte Utility-Klassen für häufige CSS-Eigenschaften: \`mt-3\`
             language: 'tsx',
             code: `import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import 'bootstrap/dist/css/bootstrap.min.css' // Bootstrap einbinden
+import 'bootstrap/dist/css/bootstrap.min.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
@@ -5212,38 +5114,75 @@ createRoot(document.getElementById('root')!).render(
 )`,
           },
           {
-            name: 'BootstrapLayout.tsx',
+            name: 'Sidebar.tsx',
             language: 'tsx',
-            code: `function BootstrapLayout() {
+            code: `import { useState } from 'react'
+
+const links = ['Dashboard', 'Profil', 'Einstellungen', 'Hilfe']
+
+function Sidebar() {
+  const [active, setActive] = useState('Dashboard')
+
   return (
-    <div className="container mt-4">
-      <h1 className="fw-bold text-primary mb-3">Meine App</h1>
-
-      {/* Zwei gleichbreite Spalten nebeneinander */}
-      <div className="row g-3">
-        <div className="col-md-6">
-          <div className="p-3 bg-light rounded">Linke Spalte</div>
-        </div>
-        <div className="col-md-6">
-          <div className="p-3 bg-light rounded">Rechte Spalte</div>
-        </div>
-      </div>
-
-      {/* Flexbox mit Bootstrap-Utilities */}
-      <div className="d-flex justify-content-between align-items-center mt-4">
-        <span className="text-muted">Links</span>
-        <button className="btn btn-primary">Rechts</button>
-      </div>
+    <div style={{ background: '#1e3a5f', minHeight: '300px', padding: '1.5rem 1rem' }}>
+      <h5 style={{ color: '#fff', marginBottom: '1.5rem', fontWeight: 700 }}>
+        MeineApp
+      </h5>
+      {links.map(link => (
+        <p
+          key={link}
+          onClick={() => setActive(link)}
+          style={{
+            color: active === link ? '#fff' : '#9db8d2',
+            background: active === link ? 'rgba(255,255,255,0.12)' : 'transparent',
+            padding: '8px 12px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            margin: '4px 0',
+          }}
+        >
+          {link}
+        </p>
+      ))}
     </div>
   )
 }
 
-export default BootstrapLayout`,
+export default Sidebar`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { Container, Row, Col } from 'react-bootstrap'
+import Sidebar from './Sidebar'
+
+function App() {
+  return (
+    <Container fluid style={{ padding: 0 }}>
+      <Row style={{ margin: 0 }}>
+
+        {/* xs={12} → Handy: untereinander | md={3} → Tablet: 25% | lg={2} → Desktop: 16% */}
+        <Col xs={12} md={3} lg={2} style={{ padding: 0 }}>
+          <Sidebar />
+        </Col>
+
+        {/* xs={12} → Handy: untereinander | md={9} → Tablet: 75% | lg={10} → Desktop: 83% */}
+        <Col xs={12} md={9} lg={10} style={{ padding: '1.5rem' }}>
+          <h2>Dashboard</h2>
+          <p style={{ color: '#6c757d' }}>Willkommen zurück! Hier steht der Hauptinhalt.</p>
+        </Col>
+
+      </Row>
+    </Container>
+  )
+}
+
+export default App`,
           },
         ],
       },
       {
-        id: 39,
+        id: 38,
         title: 'Beispielkomponente: Button',
         category: 'Komponenten',
         explanation: `Ein wiederverwendbarer \`Button\` ist oft die erste eigene Komponente die man in einem Projekt baut. Statt überall \`<button className="...">\` zu schreiben, kapselt du das Aussehen und Verhalten in einer Komponente — und nutzt sie überall mit konsistentem Styling.
@@ -5338,7 +5277,7 @@ function Demo() {
         ],
       },
       {
-        id: 40,
+        id: 39,
         title: 'Beispielkomponente: Formular',
         category: 'Komponenten',
         explanation: `Ein Formular in React basiert auf **kontrolliertem State**: jedes Eingabefeld hat einen \`value\` aus dem State und ein \`onChange\` das den State aktualisiert. So ist React immer die einzige Quelle der Wahrheit — du kannst jederzeit auf die Eingaben zugreifen, validieren oder zurücksetzen.
@@ -5444,7 +5383,7 @@ export default ContactForm`,
         ],
       },
       {
-        id: 41,
+        id: 40,
         title: 'Beispielkomponente: Bild',
         category: 'Komponenten',
         explanation: `Eine \`Image\`-Komponente kapselt das \`<img>\`-Element und fügt nützliche Features hinzu: einen Fallback wenn das Bild nicht lädt, ein Lade-Zustand und ein konsistentes Styling. Das \`alt\`-Attribut ist für Barrierefreiheit Pflicht — Screenreader lesen es vor, und Browser zeigen es wenn das Bild fehlt.
@@ -5530,7 +5469,7 @@ function Demo() {
         ],
       },
       {
-        id: 42,
+        id: 41,
         title: 'Beispielkomponente: Audio',
         category: 'Komponenten',
         explanation: `Mit dem HTML5-\`<audio>\`-Element kannst du Audiodateien direkt im Browser abspielen — ohne externe Bibliotheken. React kapselt das Element in einer Komponente und steuert es über eine **Ref**. Eine Ref (\`useRef\`) gibt dir direkten Zugriff auf das DOM-Element, was für Media-Elemente notwendig ist, weil \`.play()\` und \`.pause()\` direkte Methoden auf dem Element sind.
@@ -5638,7 +5577,7 @@ function Demo() {
         ],
       },
       {
-        id: 43,
+        id: 42,
         title: 'Beispielkomponente: Video',
         category: 'Komponenten',
         explanation: `Das \`<video>\`-Element funktioniert sehr ähnlich wie \`<audio>\` — auch hier nutzt du \`useRef\` für die Steuerung. Video-Komponenten haben aber ein paar Besonderheiten: ein **Poster**-Bild das vor dem Abspielen angezeigt wird, Vollbild-Unterstützung, und häufig möchtest du die Lautstärke oder den Fortschritt steuern.
@@ -5765,7 +5704,7 @@ function Demo() {
         ],
       },
       {
-        id: 44,
+        id: 43,
         title: 'Beispielkomponente: Navbar',
         category: 'Komponenten',
         explanation: `Eine Navbar ist eine der häufigsten Komponenten in React-Apps. Sie zeigt Links zur Navigation, den Anwendungsnamen, und oft den Login-Status des Users. Mit React Router's \`<NavLink>\` bekommst du automatisch eine aktive CSS-Klasse für den aktuellen Link — ohne eigene Logik.

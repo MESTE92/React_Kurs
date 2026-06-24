@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 import * as Babel from '@babel/standalone'
 import MonacoEditor from '@monaco-editor/react'
 import { MemoryRouter, Routes, Route, Link, NavLink, useNavigate, useParams, Outlet, BrowserRouter } from 'react-router-dom'
+import { Container, Row, Col, Button, Card, Badge, Alert, ListGroup, Nav, Navbar, Form, Table, Spinner, Modal } from 'react-bootstrap'
 import type { CodeFile } from '../types'
 
 interface CodeViewerProps {
@@ -61,6 +62,7 @@ function LivePreview({ files }: { files: CodeFile[] }) {
         'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo',
         'useContext', 'createContext', 'Fragment', 'useReducer', 'memo', 'forwardRef',
         'Routes', 'Route', 'Link', 'NavLink', 'useNavigate', 'useParams', 'Outlet', 'BrowserRouter',
+        'Container', 'Row', 'Col', 'Button', 'Card', 'Badge', 'Alert', 'ListGroup', 'Nav', 'Navbar', 'Form', 'Table', 'Spinner', 'Modal',
         parts.join('\n\n') + '\nreturn ' + rootName
       )
       const Component = fn(
@@ -68,6 +70,7 @@ function LivePreview({ files }: { files: CodeFile[] }) {
         React.useState, React.useEffect, React.useRef, React.useCallback, React.useMemo,
         React.useContext, React.createContext, React.Fragment, React.useReducer, React.memo, React.forwardRef,
         Routes, Route, Link, NavLink, useNavigate, useParams, Outlet, BrowserRouter,
+        Container, Row, Col, Button, Card, Badge, Alert, ListGroup, Nav, Navbar, Form, Table, Spinner, Modal,
       ) as React.ComponentType
       return { Component, error: null }
     } catch (e: unknown) {

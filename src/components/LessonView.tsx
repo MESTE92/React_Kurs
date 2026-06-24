@@ -37,6 +37,25 @@ function injectAnimationStyle() {
 function renderExplanation(text: string) {
   const parts = text.split('\n')
   return parts.map((line, i) => {
+    const trimmed = line.trim()
+
+    // Leerzeile → Abstand
+    if (!trimmed) return <div key={i} style={{ height: '6px' }} />
+
+    // Zeile die komplett fett ist → Abschnittsüberschrift
+    if (/^\*\*[^*]+\*\*$/.test(trimmed)) {
+      const headingText = trimmed.replace(/\*\*/g, '')
+      return (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '20px', marginBottom: '6px' }}>
+          <div style={{ width: '3px', height: '18px', background: '#7c3aed', borderRadius: '2px', flexShrink: 0 }} />
+          <h4 style={{ margin: 0, fontSize: '14.5px', fontWeight: 700, color: '#4c1d95', letterSpacing: '0.01em' }}>
+            {headingText}
+          </h4>
+        </div>
+      )
+    }
+
+    // Normaler Absatz mit Inline-Bold und Inline-Code
     const formatted = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     const withCode = formatted.replace(/`([^`]+)`/g, (_, m) => {
       const escaped = m.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -54,6 +73,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Hooks':           '#9333ea',
   'Fortgeschritten': '#a855f7',
   'Praxisprojekt':   '#6d28d9',
+  'Styling':         '#0ea5e9',
+  'Komponenten':     '#10b981',
 }
 
 function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEdit, editedCodes, onEditChange, onResetEdit, isCompleted, onToggleComplete }: LessonViewProps) {
