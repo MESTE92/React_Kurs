@@ -4503,6 +4503,85 @@ h2 {
       },
       {
         id: 31,
+        title: 'React.memo — Rendering optimieren',
+        category: 'Fortgeschritten',
+        explanation: `**React.memo** ist eine Funktion die eine Komponente "einwickelt" und ihr ein Gedächtnis für ihre Props gibt. Ohne \`memo\` rendert React eine Kindkomponente jedes Mal neu, wenn der Parent rendert — auch wenn die Props der Kindkomponente sich gar nicht geändert haben. Mit \`memo\` merkt sich React die letzten Props und überspringt das Re-render wenn sie gleich geblieben sind.
+
+**Wann React.memo sinnvoll ist:**
+\`React.memo\` lohnt sich nur für Komponenten die **teuer zu rendern** sind und deren **Parent häufig neu rendert**. Ein gutes Beispiel: eine große Listenkomponente die viel berechnet, während der Parent seinen eigenen State laufend ändert. Für einfache Komponenten mit wenigen Elementen bringt \`memo\` keinen messbaren Vorteil — es fügt sogar einen kleinen Overhead durch den Props-Vergleich hinzu.
+
+**Das Zusammenspiel mit useCallback:**
+\`React.memo\` vergleicht Props mit **Shallow Comparison** — es prüft ob zwei Werte dieselbe Referenz haben. Für Zahlen und Strings funktioniert das prima. Für Funktionen aber nicht: bei jedem Render des Parents entsteht eine neue Funktion — eine neue Referenz — und \`memo\` denkt die Prop hat sich geändert. Deshalb musst du Handler-Props mit \`useCallback\` stabilisieren, damit \`memo\` seinen Zweck erfüllt.`,
+        keyPoints: [
+          'React.memo(Component) — Komponente merkt sich Props',
+          'Shallow Comparison — Objekte/Arrays brauchen stabile Referenzen',
+          'useCallback für Handler-Props — sonst neue Referenz bei jedem Render',
+          'Nur einsetzen wenn Profiler Performance-Probleme zeigt',
+        ],
+        learningGoals: [
+          'Komponenten mit React.memo vor unnötigen Re-renders schützen',
+          'Erklären wann React.memo sinnvoll ist',
+          'Das Zusammenspiel mit useCallback verstehen',
+        ],
+        files: [
+          {
+            name: 'Child.tsx',
+            language: 'tsx',
+            code: `import { memo } from 'react'
+
+interface ChildProps {
+  name: string
+  onClick: () => void
+}
+
+// memo: rendert nur wenn name oder onClick sich ändern
+const Child = memo(function Child({ name, onClick }: ChildProps) {
+  console.log('Child rendert:', name)  // Zeigt wann wirklich gerendert wird
+  return (
+    <div>
+      <p>Kind: {name}</p>
+      <button onClick={onClick}>Klick</button>
+    </div>
+  )
+})
+
+export default Child`,
+          },
+          {
+            name: 'App.tsx',
+            language: 'tsx',
+            code: `import { useState, useCallback } from 'react'
+import Child from './Child'
+
+function App() {
+  const [count, setCount]   = useState(0)
+  const [text, setText]     = useState('')
+
+  // useCallback: handleClick ist immer dieselbe Referenz
+  // Ohne useCallback: neue Funktion bei jedem Render → Child rendert immer
+  const handleClick = useCallback(() => {
+    console.log('Geklickt!')
+  }, [])  // Leeres Array: wird einmal erstellt
+
+  return (
+    <div>
+      <input value={text} onChange={e => setText(e.target.value)} />
+      <button onClick={() => setCount(c => c + 1)}>
+        Count: {count}
+      </button>
+
+      {/* Child rendert NUR wenn sich seine Props ändern */}
+      <Child name="Festes Kind" onClick={handleClick} />
+    </div>
+  )
+}
+
+export default App`,
+          },
+        ],
+      },
+      {
+        id: 32,
         title: 'React.memo + useCallback — Renderkaskaden vermeiden',
         category: 'Fortgeschritten',
         explanation: `In der vorherigen Lektion haben wir gesehen dass \`useCallback\` stabile Funktionsreferenzen erzeugt. Aber wann macht das einen echten Unterschied? Erst wenn die Kindkomponente mit **\`React.memo\`** gewrappt ist. \`React.memo\` verhindert dass eine Komponente neu rendert wenn sich ihre Props nicht geändert haben. Ohne \`React.memo\` rendert die Kindkomponente bei jedem Render der Elternkomponente — egal ob useCallback verwendet wird oder nicht.
@@ -4654,85 +4733,6 @@ button:hover { background: #6d28d9; }
   color: #16a34a;
   font-weight: 600;
 }`,
-          },
-        ],
-      },
-      {
-        id: 32,
-        title: 'React.memo — Rendering optimieren',
-        category: 'Fortgeschritten',
-        explanation: `**React.memo** ist eine Funktion die eine Komponente "einwickelt" und ihr ein Gedächtnis für ihre Props gibt. Ohne \`memo\` rendert React eine Kindkomponente jedes Mal neu, wenn der Parent rendert — auch wenn die Props der Kindkomponente sich gar nicht geändert haben. Mit \`memo\` merkt sich React die letzten Props und überspringt das Re-render wenn sie gleich geblieben sind.
-
-**Wann React.memo sinnvoll ist:**
-\`React.memo\` lohnt sich nur für Komponenten die **teuer zu rendern** sind und deren **Parent häufig neu rendert**. Ein gutes Beispiel: eine große Listenkomponente die viel berechnet, während der Parent seinen eigenen State laufend ändert. Für einfache Komponenten mit wenigen Elementen bringt \`memo\` keinen messbaren Vorteil — es fügt sogar einen kleinen Overhead durch den Props-Vergleich hinzu.
-
-**Das Zusammenspiel mit useCallback:**
-\`React.memo\` vergleicht Props mit **Shallow Comparison** — es prüft ob zwei Werte dieselbe Referenz haben. Für Zahlen und Strings funktioniert das prima. Für Funktionen aber nicht: bei jedem Render des Parents entsteht eine neue Funktion — eine neue Referenz — und \`memo\` denkt die Prop hat sich geändert. Deshalb musst du Handler-Props mit \`useCallback\` stabilisieren, damit \`memo\` seinen Zweck erfüllt.`,
-        keyPoints: [
-          'React.memo(Component) — Komponente merkt sich Props',
-          'Shallow Comparison — Objekte/Arrays brauchen stabile Referenzen',
-          'useCallback für Handler-Props — sonst neue Referenz bei jedem Render',
-          'Nur einsetzen wenn Profiler Performance-Probleme zeigt',
-        ],
-        learningGoals: [
-          'Komponenten mit React.memo vor unnötigen Re-renders schützen',
-          'Erklären wann React.memo sinnvoll ist',
-          'Das Zusammenspiel mit useCallback verstehen',
-        ],
-        files: [
-          {
-            name: 'Child.tsx',
-            language: 'tsx',
-            code: `import { memo } from 'react'
-
-interface ChildProps {
-  name: string
-  onClick: () => void
-}
-
-// memo: rendert nur wenn name oder onClick sich ändern
-const Child = memo(function Child({ name, onClick }: ChildProps) {
-  console.log('Child rendert:', name)  // Zeigt wann wirklich gerendert wird
-  return (
-    <div>
-      <p>Kind: {name}</p>
-      <button onClick={onClick}>Klick</button>
-    </div>
-  )
-})
-
-export default Child`,
-          },
-          {
-            name: 'App.tsx',
-            language: 'tsx',
-            code: `import { useState, useCallback } from 'react'
-import Child from './Child'
-
-function App() {
-  const [count, setCount]   = useState(0)
-  const [text, setText]     = useState('')
-
-  // useCallback: handleClick ist immer dieselbe Referenz
-  // Ohne useCallback: neue Funktion bei jedem Render → Child rendert immer
-  const handleClick = useCallback(() => {
-    console.log('Geklickt!')
-  }, [])  // Leeres Array: wird einmal erstellt
-
-  return (
-    <div>
-      <input value={text} onChange={e => setText(e.target.value)} />
-      <button onClick={() => setCount(c => c + 1)}>
-        Count: {count}
-      </button>
-
-      {/* Child rendert NUR wenn sich seine Props ändern */}
-      <Child name="Festes Kind" onClick={handleClick} />
-    </div>
-  )
-}
-
-export default App`,
           },
         ],
       },
