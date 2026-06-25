@@ -8,6 +8,7 @@ interface SidebarProps {
   isOpen: boolean
   onToggle: () => void
   completedIds: Set<number>
+  onReset: () => void
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -17,7 +18,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Praxisprojekt':  '#6d28d9',
 }
 
-function Sidebar({ chapters, currentLessonId, onSelect, isOpen, onToggle, completedIds }: SidebarProps) {
+function Sidebar({ chapters, currentLessonId, onSelect, isOpen, onToggle, completedIds, onReset }: SidebarProps) {
   const totalLessons = chapters.reduce((sum, ch) => sum + ch.lessons.length, 0)
   const completedCount = completedIds.size
 
@@ -74,6 +75,21 @@ function Sidebar({ chapters, currentLessonId, onSelect, isOpen, onToggle, comple
               }} />
             </div>
           </div>
+
+          {/* Kurs zurücksetzen */}
+          <button
+            onClick={onReset}
+            style={{
+              marginTop: '10px', width: '100%', padding: '6px 0',
+              background: 'transparent', border: '1px solid #e6ddf3',
+              borderRadius: '6px', color: '#9d8bc0', fontSize: '11.5px',
+              cursor: 'pointer', transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#7c3aed'; (e.currentTarget as HTMLButtonElement).style.color = '#7c3aed' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#e6ddf3'; (e.currentTarget as HTMLButtonElement).style.color = '#9d8bc0' }}
+          >
+            ↺ Kurs zurücksetzen
+          </button>
         </div>
 
         {/* Kapitel und Lektionen */}
@@ -111,13 +127,13 @@ function Sidebar({ chapters, currentLessonId, onSelect, isOpen, onToggle, comple
                       minWidth: '22px', height: '22px', borderRadius: '50%',
                       background: isDone ? '#16a34a' : isActive ? color : '#e6ddf3',
                       color: isDone || isActive ? '#fff' : '#9d8bc0',
-                      fontSize: isDone ? '13px' : '11px',
+                      fontSize: '11px',
                       display: 'flex', alignItems: 'center',
                       justifyContent: 'center', fontWeight: 600,
                       transition: 'background 0.3s',
                       flexShrink: 0,
                     }}>
-                      {isDone ? '✓' : lesson.id}
+                      {lesson.id}
                     </span>
                     {lesson.title}
                   </button>

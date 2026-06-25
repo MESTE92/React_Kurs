@@ -4659,99 +4659,6 @@ button:hover { background: #6d28d9; }
       },
       {
         id: 32,
-        title: 'TypeScript mit React — Typen & Generics',
-        category: 'Fortgeschritten',
-        explanation: `TypeScript macht React-Code deutlich robuster: Fehler werden direkt im Editor angezeigt, nicht erst wenn der User sie in der fertigen App auslöst. Für Props, State und Event-Handler gibt es jeweils passende TypeScript-Typen. Event-Typen wie \`React.ChangeEvent<HTMLInputElement>\` oder \`React.FormEvent\` sorgen dafür, dass du auf \`e.target.value\` zugreifen kannst ohne TypeScript-Fehler.
-
-**Generics in React-Hooks korrekt einsetzen:**
-Viele eingebaute Hooks akzeptieren **Generics**: \`useState<User | null>(null)\` sagt TypeScript dass dieser State entweder ein \`User\`-Objekt oder \`null\` ist. \`useRef<HTMLInputElement>(null)\` stellt sicher dass \`ref.current\` als \`HTMLInputElement\` behandelt wird. Bei eigenen generischen Komponenten schreibst du \`<T,>\` (mit Komma, damit TypeScript es nicht als JSX-Tag missversteht).
-
-**Interface vs. Type für Komponenten-Props:**
-Beide funktionieren für Komponenten-Props — es gibt keinen technischen Unterschied für einfache Fälle. Convention: \`interface\` für Objekte die erweitert werden könnten (Props, API-Responses), \`type\` für alles andere (Unions, Aliases, Primitive). In React ist die Wahl meistens \`interface CardProps { ... }\` für Props — aber wenn das Projekt schon eine Konvention hat, bleib dabei. Konsistenz ist wichtiger als die Wahl selbst.`,
-        keyPoints: [
-          'Interface für Props — immer, auch bei wenigen Props',
-          'Generics: <T> in Komponenten für flexible Typen',
-          'React.ComponentProps<"button"> — HTMLButton-Attribute vererben',
-          'Discriminated Unions für komplexe Props-Varianten',
-        ],
-        learningGoals: [
-          'Props, State und Events mit TypeScript typisieren',
-          'Generics in React-Hooks korrekt einsetzen',
-          'Interface vs. Type für Komponenten-Props verwenden',
-        ],
-        files: [
-          {
-            name: 'Select.tsx',
-            language: 'tsx',
-            code: `// Generische Select-Komponente — funktioniert für beliebige Option-Typen
-interface SelectProps<T> {
-  options: T[]                    // Array von beliebigem Typ T
-  getValue: (option: T) => string // Wie den String-Wert aus T extrahieren
-  getLabel: (option: T) => string // Wie das Label aus T extrahieren
-  selected: T | null
-  onChange: (value: T) => void
-}
-
-// <T,> mit Komma nötig in TSX damit TypeScript nicht denkt es ist JSX
-function Select<T,>({ options, getValue, getLabel, selected, onChange }: SelectProps<T>) {
-  return (
-    <select
-      value={selected ? getValue(selected) : ''}
-      onChange={e => {
-        const found = options.find(o => getValue(o) === e.target.value)
-        if (found) onChange(found)
-      }}
-    >
-      <option value="">— Auswählen —</option>
-      {options.map(option => (
-        <option key={getValue(option)} value={getValue(option)}>
-          {getLabel(option)}
-        </option>
-      ))}
-    </select>
-  )
-}
-
-export default Select`,
-          },
-          {
-            name: 'App.tsx',
-            language: 'tsx',
-            code: `import { useState } from 'react'
-import Select from './Select'
-
-interface Country { code: string; name: string }
-
-const countries: Country[] = [
-  { code: 'de', name: 'Deutschland' },
-  { code: 'at', name: 'Österreich' },
-  { code: 'ch', name: 'Schweiz' },
-]
-
-function App() {
-  const [selected, setSelected] = useState<Country | null>(null)
-
-  return (
-    <div>
-      {/* TypeScript prüft: getValue/getLabel müssen Country zurückgeben */}
-      <Select<Country>
-        options={countries}
-        getValue={c => c.code}
-        getLabel={c => c.name}
-        selected={selected}
-        onChange={setSelected}
-      />
-      {selected && <p>Gewählt: {selected.name}</p>}
-    </div>
-  )
-}
-
-export default App`,
-          },
-        ],
-      },
-      {
-        id: 33,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
         explanation: `**React.memo** ist eine Funktion die eine Komponente "einwickelt" und ihr ein Gedächtnis für ihre Props gibt. Ohne \`memo\` rendert React eine Kindkomponente jedes Mal neu, wenn der Parent rendert — auch wenn die Props der Kindkomponente sich gar nicht geändert haben. Mit \`memo\` merkt sich React die letzten Props und überspringt das Re-render wenn sie gleich geblieben sind.
@@ -4830,7 +4737,7 @@ export default App`,
         ],
       },
       {
-        id: 34,
+        id: 33,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
         explanation: `**Error Boundaries** sind Komponenten die JavaScript-Fehler in ihrem Kindbaum abfangen und statt einem abstürzenden UI eine benutzerfreundliche Fehlermeldung anzeigen. Ohne Error Boundary würde ein Laufzeitfehler in einer tief verschachtelten Komponente die gesamte App zum Absturz bringen — mit Error Boundary bleibt nur der betroffene Bereich kaputt, der Rest funktioniert weiter.
@@ -4929,7 +4836,7 @@ export default App`,
         ],
       },
       {
-        id: 35,
+        id: 34,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
         explanation: `Wenn eine React-App groß wird, lädt der Browser beim ersten Besuch das gesamte JavaScript herunter — auch Code für Seiten die der User vielleicht nie besucht. **Code-Splitting** löst dieses Problem: der Code wird in kleinere Chunks aufgeteilt, und jeder Chunk wird erst geladen wenn er gebraucht wird. Vite unterstützt Code-Splitting automatisch, du musst es nur aktivieren.
@@ -4982,7 +4889,7 @@ export default App`,
         ],
       },
       {
-        id: 36,
+        id: 35,
         title: 'Portale — Rendering außerhalb des Root',
         category: 'Fortgeschritten',
         explanation: `Normalerweise rendert React jede Komponente innerhalb ihres Parents im DOM. **Portale** durchbrechen diese Regel: \`createPortal(jsx, domNode)\` rendert JSX direkt in einen anderen DOM-Knoten — typischerweise \`document.body\`. Im React-Komponentenbaum bleibt die Komponente trotzdem an ihrem Platz (Events bubblen wie erwartet durch den React-Baum), aber im echten DOM erscheint sie woanders.
@@ -5073,7 +4980,7 @@ export default Modal`,
     title: '4. Layouting, Styling & Beispielkomponenten',
     lessons: [
       {
-        id: 37,
+        id: 36,
         title: 'Layouting mit React Bootstrap',
         category: 'Styling',
         explanation: `**React Bootstrap** bringt das bekannte Bootstrap-Grid-System als fertige React-Komponenten mit. Statt CSS-Klassen wie \`class="col-md-3"\` in HTML zu schreiben, verwendest du direkt \`<Col md={3}>\` in JSX — typsicher und ohne className-Strings.
@@ -5182,7 +5089,7 @@ export default App`,
         ],
       },
       {
-        id: 38,
+        id: 37,
         title: 'Beispielkomponente: Button',
         category: 'Komponenten',
         explanation: `Hier siehst du wie \`useState\` und eine React Bootstrap-Komponente zusammenspielen. Der \`<Button>\` aus React Bootstrap übernimmt das gesamte Styling — wir müssen kein einziges CSS schreiben. Unsere Komponente kümmert sich nur um die Logik: welcher Zustand ist aktiv?
@@ -5243,7 +5150,7 @@ export default App`,
         ],
       },
       {
-        id: 39,
+        id: 38,
         title: 'Beispielkomponente: Formular',
         category: 'Komponenten',
         explanation: `Ein Formular in React basiert auf **kontrolliertem State**: jedes Eingabefeld hat einen \`value\` aus dem State und ein \`onChange\` das den State aktualisiert. Wir nutzen React Bootstrap's \`Form\`-Komponenten — kein eigenes CSS nötig.
@@ -5332,7 +5239,7 @@ export default App`,
         ],
       },
       {
-        id: 40,
+        id: 39,
         title: 'Beispielkomponente: Bild',
         category: 'Komponenten',
         explanation: `Mit dem \`<img>\`-Element kannst du in React ganz einfach Bilder einbinden. Du übergibst die Bildquelle über das \`src\`-Attribut — das kann ein lokaler Pfad oder eine externe URL sein — und beschreibst das Bild mit \`alt\`.
@@ -5384,7 +5291,7 @@ export default App`,
         ],
       },
       {
-        id: 41,
+        id: 40,
         title: 'Beispielkomponente: Audio',
         category: 'Komponenten',
         explanation: `Mit dem HTML5-\`<audio>\`-Element kannst du Audiodateien direkt im Browser abspielen — ohne externe Bibliotheken oder React-State. Das \`controls\`-Attribut zeigt den nativen Browser-Player mit Play/Pause, Lautstärke und Fortschrittsbalken an.
@@ -5438,7 +5345,7 @@ export default App`,
         ],
       },
       {
-        id: 42,
+        id: 41,
         title: 'Beispielkomponente: Video',
         category: 'Komponenten',
         explanation: `YouTube-Videos lassen sich in React ganz einfach über einen \`<iframe>\` einbetten. Wenn du auf YouTube auf "Teilen → Einbetten" klickst, bekommst du direkt den fertigen Embed-Code — den wandelst du in JSX um und baust ihn in eine Komponente ein.
@@ -5494,7 +5401,7 @@ export default App`,
         ],
       },
       {
-        id: 43,
+        id: 42,
         title: 'Beispielkomponente: react-player',
         category: 'Komponenten',
         explanation: `\`react-player\` ist eine React-Komponente die Videos von YouTube, Vimeo, SoundCloud und vielen weiteren Plattformen abspielen kann — mit einem einzigen \`url\`-Prop. Kein manuelles Einbinden von iframes oder SDKs nötig.
@@ -5559,7 +5466,7 @@ export default App`,
         ],
       },
       {
-        id: 44,
+        id: 43,
         title: 'Beispielkomponente: Navbar',
         category: 'Komponenten',
         explanation: `React Bootstrap bietet eine fertige \`<Navbar>\`-Komponente die bereits responsives Verhalten mitbringt — inklusive Hamburger-Menü für kleine Bildschirme, ohne eine Zeile eigenes CSS.
@@ -5635,7 +5542,7 @@ export default App`,
         ],
       },
       {
-        id: 45,
+        id: 44,
         title: 'Beispielkomponente: Card',
         category: 'Komponenten',
         explanation: `Die \`<Card>\`-Komponente von React Bootstrap ist eine vielseitige Box für Inhalte — Bilder, Text und Buttons lassen sich strukturiert darin anordnen. Cards werden häufig für Produkte, Blogbeiträge, Nutzerprofile oder Teaser eingesetzt.

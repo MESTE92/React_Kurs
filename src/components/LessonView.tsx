@@ -242,12 +242,12 @@ function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEd
 
         <button
           onClick={onNext}
-          disabled={lesson.id === totalLessons}
+          disabled={lesson.id === totalLessons - 1}
           style={{
             padding: '10px 20px', borderRadius: '6px',
-            cursor: lesson.id === totalLessons ? 'not-allowed' : 'pointer',
-            background: lesson.id === totalLessons ? '#f3edfb' : color,
-            color: lesson.id === totalLessons ? '#c9bce0' : '#fff',
+            cursor: lesson.id === totalLessons - 1 ? 'not-allowed' : 'pointer',
+            background: lesson.id === totalLessons - 1 ? '#f3edfb' : color,
+            color: lesson.id === totalLessons - 1 ? '#c9bce0' : '#fff',
             border: 'none', fontSize: '14px', fontWeight: 600,
           }}
         >

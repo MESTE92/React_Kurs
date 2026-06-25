@@ -86,10 +86,10 @@ function App() {
   useEffect(() => { localStorage.setItem(`rk_last_lesson_${userId}`, String(currentId)) }, [currentId, userId])
 
   function goNext() {
-    if (currentId < totalLessons) setCurrentId(id => id + 1)
+    if (currentId < totalLessons - 1) setCurrentId(id => id + 1)
   }
   function goPrev() {
-    if (currentId > 1) setCurrentId(id => id - 1)
+    if (currentId > 0) setCurrentId(id => id - 1)
   }
 
   const currentEditedCodes = editedCodes[currentId] ?? lesson.files.map(f => f.code)
@@ -116,6 +116,12 @@ function App() {
     })
   }
 
+  function handleReset() {
+    setCompleted(new Set())
+    setEditedCodes({})
+    setCurrentId(1)
+  }
+
   return (
     <div style={{
       display: 'flex', height: '100vh', overflow: 'hidden',
@@ -129,6 +135,7 @@ function App() {
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(o => !o)}
         completedIds={completed}
+        onReset={handleReset}
       />
 
       <NotesPanel
