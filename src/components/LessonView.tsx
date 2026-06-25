@@ -6,6 +6,7 @@ import CodeViewer from './CodeViewer'
 interface LessonViewProps {
   lesson: Lesson
   totalLessons: number
+  completedCount: number
   onPrev: () => void
   onNext: () => void
   editMode: boolean
@@ -77,9 +78,9 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Komponenten':     '#0ea5e9',
 }
 
-function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEdit, editedCodes, onEditChange, onResetEdit, isCompleted, onToggleComplete }: LessonViewProps) {
+function LessonView({ lesson, totalLessons, completedCount, onPrev, onNext, editMode, onToggleEdit, editedCodes, onEditChange, onResetEdit, isCompleted, onToggleComplete }: LessonViewProps) {
   const color = CATEGORY_COLORS[lesson.category] ?? '#7c3aed'
-  const progress = Math.round((lesson.id / totalLessons) * 100)
+  const progress = Math.round((completedCount / totalLessons) * 100)
   const [popAnim, setPopAnim] = useState(false)
 
   useEffect(() => { injectAnimationStyle() }, [])
@@ -104,7 +105,7 @@ function LessonView({ lesson, totalLessons, onPrev, onNext, editMode, onToggleEd
       <div style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
           <span style={{ fontSize: '12px', color: '#9d8bc0' }}>Fortschritt</span>
-          <span style={{ fontSize: '12px', color: '#9d8bc0' }}>Lektion {lesson.id} / {totalLessons}</span>
+          <span style={{ fontSize: '12px', color: '#9d8bc0' }}>{completedCount} / {totalLessons} abgeschlossen</span>
         </div>
         <div style={{ height: '4px', background: '#e6ddf3', borderRadius: '2px' }}>
           <div style={{

@@ -148,6 +148,7 @@ function App() {
         <LessonView
           lesson={lesson}
           totalLessons={totalLessons}
+          completedCount={completed.size}
           onPrev={goPrev}
           onNext={goNext}
           editMode={editMode}
