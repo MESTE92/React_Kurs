@@ -64,6 +64,9 @@ function LivePreview({ files }: { files: CodeFile[] }) {
         let js = result.code ?? ''
         js = js.replace(/^import\b[\s\S]*?from\s+['"][^'"]*['"];?\s*\n?/gm, '')
         js = js.replace(/^import\s+['"][^'"]*['"];?\s*\n?/gm, '')
+        // Strip lazy() assignments — dynamic imports can't resolve in sandbox;
+        // the components are already defined from the joined files
+        js = js.replace(/^(?:var|const|let)\s+\w+\s*=\s*.*\blazy\s*\(.*$/mg, '')
         js = js.replace(/\bexport\s+default\s+/g, '')
         js = js.replace(/\bexport\s+(const|let|var|function|class)\b/g, '$1')
         parts.push(js)
@@ -81,6 +84,7 @@ function LivePreview({ files }: { files: CodeFile[] }) {
         'React',
         'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo',
         'useContext', 'createContext', 'Fragment', 'useReducer', 'memo', 'forwardRef',
+        'Component', 'Suspense', 'lazy',
         'Routes', 'Route', 'Link', 'NavLink', 'useNavigate', 'useParams', 'Outlet', 'BrowserRouter',
         'Container', 'Row', 'Col', 'Button', 'Card', 'Badge', 'Alert', 'ListGroup', 'Nav', 'Navbar', 'Form', 'Table', 'Spinner', 'Modal',
         'ReactPlayer',
@@ -90,6 +94,7 @@ function LivePreview({ files }: { files: CodeFile[] }) {
         React,
         React.useState, React.useEffect, React.useRef, React.useCallback, React.useMemo,
         React.useContext, React.createContext, React.Fragment, React.useReducer, React.memo, React.forwardRef,
+        React.Component, React.Suspense, React.lazy,
         Routes, Route, Link, NavLink, useNavigate, useParams, Outlet, BrowserRouter,
         Container, Row, Col, Button, Card, Badge, Alert, ListGroup, Nav, Navbar, Form, Table, Spinner, Modal,
         ReactPlayer,

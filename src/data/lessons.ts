@@ -4505,78 +4505,155 @@ h2 {
         id: 31,
         title: 'React.memo — Rendering optimieren',
         category: 'Fortgeschritten',
-        explanation: `**React.memo** ist eine Funktion die eine Komponente "einwickelt" und ihr ein Gedächtnis für ihre Props gibt. Ohne \`memo\` rendert React eine Kindkomponente jedes Mal neu, wenn der Parent rendert — auch wenn die Props der Kindkomponente sich gar nicht geändert haben. Mit \`memo\` merkt sich React die letzten Props und überspringt das Re-render wenn sie gleich geblieben sind.
+        explanation: `**React.memo** wickelt eine Komponente ein und verhindert unnötige Re-renders: Wenn der Parent neu rendert, vergleicht React die alten mit den neuen Props. Sind sie identisch, überspringt React das Re-render der Kindkomponente komplett. Ohne \`memo\` rendert die Kindkomponente bei jedem Parent-Render neu — egal ob sich die Props geändert haben oder nicht.
 
-**Wann React.memo sinnvoll ist:**
-\`React.memo\` lohnt sich nur für Komponenten die **teuer zu rendern** sind und deren **Parent häufig neu rendert**. Ein gutes Beispiel: eine große Listenkomponente die viel berechnet, während der Parent seinen eigenen State laufend ändert. Für einfache Komponenten mit wenigen Elementen bringt \`memo\` keinen messbaren Vorteil — es fügt sogar einen kleinen Overhead durch den Props-Vergleich hinzu.
+**Das Beispiel:**
+Im Code gibt es zwei Komponenten die dasselbe darstellen: \`Text\` ohne memo und \`TextMemo\` mit memo. Beide loggen beim Rendern in die Konsole (F12 öffnen). Wenn du auf **"Klick"** drückst, ändert sich nur \`count\` — \`name\` bleibt "Max". \`Text\` rendert trotzdem neu weil App neu rendert. \`TextMemo\` bleibt ruhig weil ihre Props unverändert sind. Wenn du **"Name ändern"** drückst, ändert sich \`name\` — jetzt rendern **beide** korrekt neu.
 
-**Das Zusammenspiel mit useCallback:**
-\`React.memo\` vergleicht Props mit **Shallow Comparison** — es prüft ob zwei Werte dieselbe Referenz haben. Für Zahlen und Strings funktioniert das prima. Für Funktionen aber nicht: bei jedem Render des Parents entsteht eine neue Funktion — eine neue Referenz — und \`memo\` denkt die Prop hat sich geändert. Deshalb musst du Handler-Props mit \`useCallback\` stabilisieren, damit \`memo\` seinen Zweck erfüllt.`,
+**Wann memo sinnvoll ist:**
+\`memo\` lohnt sich für Komponenten die rechenintensiv sind und deren Props sich seltener ändern als der Parent-State. Für einfache Komponenten bringt es keinen Vorteil — der Props-Vergleich kostet selbst minimale Zeit. Sobald du in der nächsten Lektion Funktionen als Props übergibst, brauchst du zusätzlich \`useCallback\` — sonst entsteht bei jedem Render eine neue Funktionsreferenz und \`memo\` greift nicht.`,
         keyPoints: [
-          'React.memo(Component) — Komponente merkt sich Props',
-          'Shallow Comparison — Objekte/Arrays brauchen stabile Referenzen',
-          'useCallback für Handler-Props — sonst neue Referenz bei jedem Render',
-          'Nur einsetzen wenn Profiler Performance-Probleme zeigt',
+          'memo(Component) — rendert nur neu wenn Props sich geändert haben',
+          'Ohne memo: Kindkomponente rendert bei jedem Parent-Render neu',
+          'Shallow Comparison: funktioniert für Zahlen/Strings, nicht für Objekte/Funktionen',
+          'Nur sinnvoll bei rechenintensiven Komponenten mit stabilen Props',
         ],
         learningGoals: [
-          'Komponenten mit React.memo vor unnötigen Re-renders schützen',
-          'Erklären wann React.memo sinnvoll ist',
-          'Das Zusammenspiel mit useCallback verstehen',
+          'Den Unterschied zwischen gememoter und nicht-gememoter Komponente erklären',
+          'React.memo korrekt um eine Komponente wickeln',
+          'Verstehen wann memo hilft und wann nicht',
         ],
         files: [
           {
-            name: 'Child.tsx',
-            language: 'tsx',
-            code: `import { memo } from 'react'
-
-interface ChildProps {
-  name: string
-  onClick: () => void
-}
-
-// memo: rendert nur wenn name oder onClick sich ändern
-const Child = memo(function Child({ name, onClick }: ChildProps) {
-  console.log('Child rendert:', name)  // Zeigt wann wirklich gerendert wird
-  return (
-    <div>
-      <p>Kind: {name}</p>
-      <button onClick={onClick}>Klick</button>
-    </div>
-  )
-})
-
-export default Child`,
-          },
-          {
             name: 'App.tsx',
             language: 'tsx',
-            code: `import { useState, useCallback } from 'react'
-import Child from './Child'
+            code: `import { useState, memo } from "react";
+import "./App.css";
 
-function App() {
-  const [count, setCount]   = useState(0)
-  const [text, setText]     = useState('')
-
-  // useCallback: handleClick ist immer dieselbe Referenz
-  // Ohne useCallback: neue Funktion bei jedem Render → Child rendert immer
-  const handleClick = useCallback(() => {
-    console.log('Geklickt!')
-  }, [])  // Leeres Array: wird einmal erstellt
-
+// rendert nur neu wenn name sich ändert
+const TextMemo = memo(function TextMemo({ name }: { name: string }) {
+  console.log("TextMemo rendert");
   return (
-    <div>
-      <input value={text} onChange={e => setText(e.target.value)} />
-      <button onClick={() => setCount(c => c + 1)}>
-        Count: {count}
-      </button>
-
-      {/* Child rendert NUR wenn sich seine Props ändern */}
-      <Child name="Festes Kind" onClick={handleClick} />
+    <div className="box with-memo">
+      <span className="badge">mit memo</span>
+      <p>Hallo {name}</p>
     </div>
-  )
+  );
+});
+
+// rendert bei jedem Re-render neu
+function Text({ name }: { name: string }) {
+  console.log("Text rendert");
+  return (
+    <div className="box without-memo">
+      <span className="badge">ohne memo</span>
+      <p>Hallo {name}</p>
+    </div>
+  );
 }
 
-export default App`,
+function App() {
+  const [count, setCount] = useState(0);
+  const [name, setName] = useState("Max");
+
+  return (
+    <div className="container">
+      <div className="buttons">
+        {/* ändert count – beide sollten nicht neu rendern */}
+        <button onClick={() => setCount(count + 1)}>Klick: {count}</button>
+
+        {/* ändert name – beide sollten neu rendern */}
+        <button onClick={() => setName("Lisa")}>Name ändern</button>
+      </div>
+
+      <Text name={name} />
+      <TextMemo name={name} />
+    </div>
+  );
+}
+
+export default App;`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `body {
+  font-family: sans-serif;
+  padding: 32px;
+  background: #f8f7ff;
+}
+
+.container {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+button {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button:hover {
+  background: #6d28d9;
+}
+
+.box {
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  border: 1px solid;
+}
+
+.with-memo {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.without-memo {
+  background: #fffbeb;
+  border-color: #fcd34d;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+
+.with-memo .badge {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.without-memo .badge {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.box p {
+  margin: 0;
+  font-size: 18px;
+  color: #2d1b4e;
+  font-weight: 500;
+}`,
           },
         ],
       },
@@ -4740,98 +4817,125 @@ button:hover { background: #6d28d9; }
         id: 33,
         title: 'Error Boundaries',
         category: 'Fortgeschritten',
-        explanation: `**Error Boundaries** sind Komponenten die JavaScript-Fehler in ihrem Kindbaum abfangen und statt einem abstürzenden UI eine benutzerfreundliche Fehlermeldung anzeigen. Ohne Error Boundary würde ein Laufzeitfehler in einer tief verschachtelten Komponente die gesamte App zum Absturz bringen — mit Error Boundary bleibt nur der betroffene Bereich kaputt, der Rest funktioniert weiter.
+        explanation: `**Error Boundaries** fangen JavaScript-Fehler in ihrem Kindbaum ab und zeigen statt einem abstürzenden UI einen benutzerfreundlichen Fallback an. Ohne Error Boundary würde ein Laufzeitfehler in einer tief verschachtelten Komponente die gesamte App zum Absturz bringen — mit Error Boundary bleibt nur der betroffene Bereich kaputt.
 
-**Eine Error Boundary implementieren:**
-Error Boundaries müssen als **Klassen-Komponenten** geschrieben werden — das ist der einzige Bereich in React wo Klassen nach wie vor notwendig sind, weil Hooks diese Lifecycle-Methoden nicht abbilden können. Du implementierst zwei Methoden: \`getDerivedStateFromError()\` setzt einen Fehler-State (damit der Fallback angezeigt wird), und \`componentDidCatch()\` kann den Fehler loggen (z.B. an einen Monitoring-Dienst wie Sentry schicken).
+**Warum Klassen-Komponenten:**
+Error Boundaries müssen als **Klassen-Komponenten** geschrieben werden — das ist der einzige Bereich in React wo Klassen nach wie vor Pflicht sind. Hooks können die benötigte Lifecycle-Methode \`getDerivedStateFromError\` nicht ersetzen. Diese statische Methode wird aufgerufen sobald ein Kind einen Fehler wirft, und gibt den neuen State zurück der die Fallback-UI aktiviert.
 
-**Laufzeitfehler abfangen und Fallback anzeigen:**
-Sobald eine Kindkomponente einen Fehler wirft, wechselt die Error Boundary in den Fehler-Zustand und rendert stattdessen die Fallback-UI. Du kannst eine eigene \`fallback\`-Prop anbieten (\`<ErrorBoundary fallback={<p>Fehler!</p>}>\`) oder eine Standard-Fehlermeldung definieren. Wichtig: Async-Fehler (z.B. in \`fetch()\`) werden von Error Boundaries **nicht** gefangen — dafür brauchst du \`try/catch\` im \`useEffect\`.`,
+**Aufbau im Beispiel:**
+\`ErrorBoundary.tsx\` enthält die Klassen-Komponente die Fehler abfängt. \`KaputteKomponente.tsx\` wirft sofort einen Fehler — das simuliert einen Laufzeitfehler in einer echten Komponente. \`App.tsx\` wickelt die kaputte Komponente in die Error Boundary ein. Das Ergebnis: statt eines komplett weißen Bildschirms siehst du eine saubere Fehlermeldung.
+
+**Wichtig:** Async-Fehler (z.B. in \`fetch()\`) werden von Error Boundaries **nicht** gefangen — dafür brauchst du \`try/catch\` im \`useEffect\`.`,
         keyPoints: [
           'Nur Klassen-Komponenten können Error Boundaries sein',
-          'getDerivedStateFromError → Fallback-State setzen',
-          'componentDidCatch → Fehler loggen (z.B. Sentry)',
-          'Async-Fehler (fetch) werden NICHT gefangen — useEffect try/catch nutzen',
+          'getDerivedStateFromError() → wird bei Fehler aufgerufen, gibt neuen State zurück',
+          'Fallback-UI wird gerendert sobald hatFehler === true',
+          'Async-Fehler (fetch) werden NICHT gefangen',
         ],
         learningGoals: [
-          'Eine Error Boundary Komponente implementieren',
-          'Laufzeitfehler in Kindkomponenten abfangen',
-          'Einen benutzerfreundlichen Fehler-Fallback anzeigen',
+          'Eine Error Boundary als Klassen-Komponente implementieren',
+          'Laufzeitfehler in Kindkomponenten abfangen und eine Fallback-UI anzeigen',
+          'Verstehen warum Error Boundaries Klassen-Komponenten sein müssen',
         ],
         files: [
           {
-            name: 'ErrorBoundary.tsx',
+            name: 'App.tsx',
             language: 'tsx',
-            code: `import { Component, ReactNode, ErrorInfo } from 'react'
-import './ErrorBoundary.css'
+            code: `import { Component, ReactNode } from "react";
+import "./App.css";
 
-interface Props {
-  children: ReactNode
-  fallback?: ReactNode  // Optionale custom Fallback-UI
-}
+// Error Boundary – muss eine Class Component sein
+// kein Hook verfügbar dafür
+class ErrorBoundary extends Component<{ children: ReactNode }, { hatFehler: boolean }> {
 
-interface State {
-  hasError: boolean
-  error?: Error
-}
+  // Startwert – kein Fehler
+  state = { hatFehler: false };
 
-// Klassen-Komponente — für Error Boundaries Pflicht
-class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props)
-    this.state = { hasError: false }
-  }
-
-  // Wird bei Fehler im Kindbaum aufgerufen — State für Fallback setzen
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error }
-  }
-
-  // Für Logging (Sentry, etc.)
-  componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('ErrorBoundary:', error, info.componentStack)
+  // React ruft diese Methode automatisch auf wenn ein Fehler auftritt
+  // gibt den neuen State zurück
+  static getDerivedStateFromError() {
+    return { hatFehler: true };
   }
 
   render() {
-    if (this.state.hasError) {
-      return this.props.fallback ?? (
-        <div className="error-boundary">
+    // wenn ein Fehler aufgetreten ist → Fallback UI anzeigen
+    if (this.state.hatFehler) {
+      return (
+        <div className="error-card">
+          <div className="error-icon">⚠️</div>
           <h2>Etwas ist schiefgelaufen.</h2>
-          <p>{this.state.error?.message}</p>
+          <p>Diese Komponente konnte nicht geladen werden.</p>
         </div>
-      )
+      );
     }
-    return this.props.children
+
+    // kein Fehler → Kindkomponenten normal rendern
+    return this.props.children;
   }
 }
 
-export default ErrorBoundary`,
-          },
-          {
-            name: 'App.tsx',
-            language: 'tsx',
-            code: `import ErrorBoundary from './ErrorBoundary'
-import BrokenComponent from './BrokenComponent'
+// Komponente die einen Fehler wirft
+function KaputteKomponente() {
+  throw new Error("Ich bin kaputt!");
+}
 
+// App
 function App() {
   return (
-    <ErrorBoundary fallback={<p>Diese Sektion ist nicht verfügbar.</p>}>
-      <BrokenComponent />
-    </ErrorBoundary>
-  )
+    <div className="app">
+      {/* ErrorBoundary als Wrapper – fängt Fehler der Kindkomponenten ab */}
+      <ErrorBoundary>
+        <KaputteKomponente />
+      </ErrorBoundary>
+    </div>
+  );
 }
 
-export default App`,
+export default App;`,
           },
           {
-            name: 'ErrorBoundary.css',
+            name: 'App.css',
             language: 'css',
-            code: `
-.error-boundary {
-  color: red;
-  padding: 16px;
+            code: `body {
+  font-family: sans-serif;
+  padding: 48px 24px;
+  background: #fef2f2;
+  display: flex;
+  justify-content: center;
 }
-`,
+
+.app {
+  max-width: 420px;
+  width: 100%;
+}
+
+.error-card {
+  background: #fff;
+  border: 1px solid #fca5a5;
+  border-left: 4px solid #ef4444;
+  border-radius: 12px;
+  padding: 28px 32px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.1);
+}
+
+.error-icon {
+  font-size: 40px;
+  margin-bottom: 14px;
+}
+
+.error-card h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #991b1b;
+  margin: 0 0 8px;
+}
+
+.error-card p {
+  font-size: 14px;
+  color: #b91c1c;
+  margin: 0;
+}`,
           },
         ],
       },
@@ -4839,52 +4943,183 @@ export default App`,
         id: 34,
         title: 'Lazy Loading & Suspense',
         category: 'Fortgeschritten',
-        explanation: `Wenn eine React-App groß wird, lädt der Browser beim ersten Besuch das gesamte JavaScript herunter — auch Code für Seiten die der User vielleicht nie besucht. **Code-Splitting** löst dieses Problem: der Code wird in kleinere Chunks aufgeteilt, und jeder Chunk wird erst geladen wenn er gebraucht wird. Vite unterstützt Code-Splitting automatisch, du musst es nur aktivieren.
+        explanation: `Wenn eine React-App groß wird, lädt der Browser beim ersten Besuch das gesamte JavaScript herunter — auch Code für Seiten die der User vielleicht nie besucht. **Code-Splitting** löst dieses Problem: der Code wird in kleinere Chunks aufgeteilt, und jeder Chunk wird erst geladen wenn er wirklich gebraucht wird.
 
-**Komponenten mit React.lazy laden:**
-\`React.lazy(() => import('./HeavyChart'))\` erstellt eine Komponente die erst beim ersten Render geladen wird. Vite erzeugt dafür automatisch einen eigenen JavaScript-Chunk. Das ist besonders sinnvoll für schwere Komponenten (Charts, Editoren) oder für Seiten hinter einer Login-Schranke — diese braucht kein User der noch gar nicht eingeloggt ist.
+**lazy() — Komponente auf Abruf laden:**
+\`lazy(() => import("./Startseite"))\` sagt React: "Lade diese Komponente erst wenn sie wirklich gerendert werden soll." Vite erzeugt dafür automatisch einen eigenen JavaScript-Chunk. Der häufigste Einsatz ist bei Routen — jede Seite bekommt ihren eigenen Chunk, der erst beim ersten Besuch geladen wird.
 
-**Suspense mit einem Fallback:**
-Während die lazy-Komponente noch heruntergeladen wird, zeigt \`<Suspense fallback={<p>Wird geladen...</p>}>\` den Fallback an. Sobald der Chunk geladen ist, tauscht React den Fallback gegen die echte Komponente aus. Du kannst mehrere lazy-Komponenten unter einem einzigen \`<Suspense>\` bündeln — der Fallback wird so lange angezeigt bis alle bereit sind.`,
+**Suspense — Ladeindikator anzeigen:**
+Während ein lazy-geladener Chunk heruntergeladen wird, zeigt \`<Suspense fallback={<p>Lädt...</p>}>\` den Fallback an. Sobald der Chunk bereit ist, tauscht React ihn gegen die echte Komponente aus. Ein einzelnes \`<Suspense>\` kann dabei mehrere lazy-Routen gleichzeitig abdecken.
+
+**Zusammenspiel mit React Router:**
+\`lazy\` und \`Suspense\` arbeiten nahtlos mit React Router zusammen: Jede Route erhält eine lazy-Komponente, und \`Suspense\` wrapp die \`<Routes>\` — so wird immer der Fallback angezeigt bis die aktive Seite geladen ist.`,
         keyPoints: [
-          'React.lazy(() => import("./Heavy")) — dynamischer Import',
-          '<Suspense fallback={<Loader />}> — während Laden',
-          'Gilt auch für Routen — sehr häufiger Einsatz',
-          'Vite unterstützt Code-Splitting automatisch',
+          'lazy(() => import("./X")) — lädt Komponente erst beim ersten Render',
+          'Vite erzeugt automatisch einen eigenen JS-Chunk pro lazy-Import',
+          '<Suspense fallback={...}> — zeigt Fallback während Chunk lädt',
+          'Typischer Einsatz: jede Route als eigener Chunk',
         ],
         learningGoals: [
-          'Komponenten mit React.lazy lazy laden',
-          'Suspense mit einem Fallback für den Ladevorgang einsetzen',
-          'Verstehen wie Code-Splitting die Ladezeit verbessert',
+          'Routen-Komponenten mit lazy() und dynamischem Import laden',
+          'Suspense mit einem Fallback korrekt einsetzen',
+          'Verstehen wie Code-Splitting die initiale Ladezeit einer App verbessert',
         ],
         files: [
           {
             name: 'App.tsx',
             language: 'tsx',
-            code: `import { lazy, Suspense } from 'react'
+            code: `import { lazy, Suspense } from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import "./App.css";
 
-// lazy: Komponente wird erst beim ersten Render geladen
-// Das erstellt einen eigenen JS-Chunk in Vite
-const HeavyChart  = lazy(() => import('./HeavyChart'))
-const AdminPanel  = lazy(() => import('./AdminPanel'))
+// wird erst geladen wenn die Route aufgerufen wird
+const Startseite = lazy(() => import("./Startseite"));
+const Kontakt    = lazy(() => import("./Kontakt"));
+const UeberUns   = lazy(() => import("./UeberUns"));
 
 function App() {
   return (
-    <div>
-      {/* Suspense zeigt Fallback bis lazy-Komponente geladen ist */}
-      <Suspense fallback={<p>Chart wird geladen...</p>}>
-        <HeavyChart />
-      </Suspense>
+    <div className="app">
+      <nav className="nav">
+        <Link to="/">Startseite</Link>
+        <Link to="/kontakt">Kontakt</Link>
+        <Link to="/ueber-uns">Über uns</Link>
+      </nav>
 
-      {/* Mehrere lazy-Komponenten unter einem Suspense */}
-      <Suspense fallback={<div className="skeleton">Lädt...</div>}>
-        <AdminPanel />
+      {/* Suspense – zeigt Ladeindikator während Komponente lädt */}
+      <Suspense fallback={<p className="loading">Lädt...</p>}>
+        <Routes>
+          <Route path="/"          element={<Startseite />} />
+          <Route path="/kontakt"   element={<Kontakt />} />
+          <Route path="/ueber-uns" element={<UeberUns />} />
+        </Routes>
       </Suspense>
     </div>
-  )
+  );
 }
 
-export default App`,
+export default App;`,
+          },
+          {
+            name: 'Startseite.tsx',
+            language: 'tsx',
+            code: `function Startseite() {
+  return (
+    <div className="page">
+      <h1>🏠 Startseite</h1>
+      <p>Willkommen! Diese Seite wird beim ersten Besuch geladen.</p>
+    </div>
+  );
+}
+
+export default Startseite;`,
+          },
+          {
+            name: 'Kontakt.tsx',
+            language: 'tsx',
+            code: `function Kontakt() {
+  return (
+    <div className="page">
+      <h1>📬 Kontakt</h1>
+      <p>Schreib uns unter <strong>hello@example.com</strong></p>
+    </div>
+  );
+}
+
+export default Kontakt;`,
+          },
+          {
+            name: 'UeberUns.tsx',
+            language: 'tsx',
+            code: `function UeberUns() {
+  return (
+    <div className="page">
+      <h1>👥 Über uns</h1>
+      <p>Wir sind ein kleines Team das React liebt.</p>
+    </div>
+  );
+}
+
+export default UeberUns;`,
+          },
+          {
+            name: 'App.css',
+            language: 'css',
+            code: `body {
+  font-family: sans-serif;
+  margin: 0;
+  background: #f8f7ff;
+}
+
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e6ddf3;
+}
+
+.nav a {
+  color: #7c3aed;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav a:hover {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.page {
+  padding: 8px 0;
+}
+
+.page h1 {
+  font-size: 26px;
+  color: #2d1b4e;
+  margin: 0 0 10px;
+}
+
+.page p {
+  font-size: 15px;
+  color: #6b5b8c;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.loading {
+  color: #9d8bc0;
+  font-size: 14px;
+  font-style: italic;
+}`,
+          },
+          {
+            name: 'main.tsx',
+            language: 'tsx',
+            code: `import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
+
+// BrowserRouter gehört in main.tsx, nicht in App.tsx
+// so bleibt App.tsx testbar und wiederverwendbar
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>
+);`,
           },
         ],
       },
